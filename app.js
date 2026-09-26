@@ -100,8 +100,17 @@ function reportData(){
  const {r,top}=buildReport();
  return {r,top,date:new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"})};
 }
-function drawPdf(){
- if(!window.jspdf){document.getElementById("saveStatus").textContent="PDF library is still loading. Please try again.";return}
+async function drawPdf(){
+ const status=document.getElementById("saveStatus");
+ if(!window.jspdf){
+  status.textContent="Loading PDF engine…";
+  await new Promise(resolve=>{let n=0;const t=setInterval(()=>{if(window.jspdf||window.__pdfUnavailable||++n>30){clearInterval(t);resolve()}},100)});
+ }
+ if(!window.jspdf){
+  status.textContent="Direct PDF engine unavailable. Opening the print-to-PDF version instead…";
+  window.print();
+  return;
+ }
  const {jsPDF}=window.jspdf,{r,top,date}=reportData(),doc=new jsPDF({unit:"pt",format:"a4"}); const T=(txt,x,y,opt)=>doc.text(String(txt==null?"":txt),Number(x),Number(y),opt||{});
  const navy=[20,37,45],teal=[23,107,112],copper=[182,111,77],paper=[247,244,237],muted=[104,119,125],ink=[32,50,58],line=[220,218,211];
  const W=595,H=842,margin=46,contentW=W-margin*2;
