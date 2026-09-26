@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://alwaysinnovative.github.io/AutomationScan/sitemap.xml
+Sitemap: https://automation-scan-neon.vercel.app/sitemap.xml
