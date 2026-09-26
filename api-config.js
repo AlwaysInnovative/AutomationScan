@@ -1,0 +1,1 @@
+window.AUTOMATIONSCAN_API_BASE="https://automation-scan-neon.vercel.app";
