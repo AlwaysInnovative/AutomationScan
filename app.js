@@ -100,7 +100,7 @@ function reportData(){
 }
 function drawPdf(){
  const status=document.getElementById("saveStatus");
- status.textContent="Opening the professional PDF print view…";
+ status.textContent="";
  document.body.classList.add("printing-report");
  window.setTimeout(()=>window.print(),50);
 }
