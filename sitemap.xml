@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://alwaysinnovative.github.io/AutomationScan/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://alwaysinnovative.github.io/AutomationScan/privacy.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://alwaysinnovative.github.io/AutomationScan/</loc><lastmod>2026-09-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://alwaysinnovative.github.io/AutomationScan/guides/invoice-automation.html</loc><lastmod>2026-09-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alwaysinnovative.github.io/AutomationScan/guides/crm-automation.html</loc><lastmod>2026-09-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alwaysinnovative.github.io/AutomationScan/guides/customer-support-automation.html</loc><lastmod>2026-09-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alwaysinnovative.github.io/AutomationScan/guides/reporting-automation.html</loc><lastmod>2026-09-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alwaysinnovative.github.io/AutomationScan/privacy.html</loc><lastmod>2026-09-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://alwaysinnovative.github.io/AutomationScan/terms.html</loc><lastmod>2026-09-26</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>
