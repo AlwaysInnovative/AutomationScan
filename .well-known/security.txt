@@ -1,0 +1,4 @@
+Contact: https://github.com/AlwaysInnovative/AutomationScan/security
+Policy: https://github.com/AlwaysInnovative/AutomationScan/security/policy
+Preferred-Languages: en
+Canonical: https://alwaysinnovative.github.io/AutomationScan/.well-known/security.txt
