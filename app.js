@@ -84,7 +84,17 @@ function renderResult(){
  submitLeadIfConsented(r,top);
 }
 
-form.onsubmit=e=>{e.preventDefault();if(valid())renderResult()};
+form.addEventListener("submit",e=>{
+ e.preventDefault();
+ try{
+  if(!valid())return;
+  renderResult();
+ }catch(err){
+  console.error("AutomationScan report generation failed:",err);
+  const status=document.getElementById("saveStatus");
+  if(status)status.textContent="We couldn't generate the report. Please refresh the page and try again.";
+ }
+});
 
 function reportData(){
  const {r,top}=buildReport();
@@ -120,8 +130,8 @@ function drawPdf(){
  y=510;rows.slice(0,6).forEach((x,i)=>{if(y>750){footer();doc.addPage();header();y=110}const pct=Math.round(x[1]/total*100);doc.setFillColor(250,249,245);doc.roundedRect(margin,y,contentW,43,4,4,"F");doc.setTextColor(...copper);doc.setFont("helvetica","bold");doc.setFontSize(7);T("0"+(i+1),margin+11,y+18);doc.setTextColor(...ink);doc.setFontSize(8);T(x[0],margin+35,y+17);doc.setTextColor(...muted);doc.setFont("helvetica","normal");T(x[1]+" hrs/wk · "+pct+"%",margin+35,y+32);T("Investigate "+ideas[x[0]],margin+190,y+24);y+=50});
  footer();doc.save("AutomationScan-Detailed-Automation-Assessment.pdf");document.getElementById("saveStatus").textContent="Your detailed branded PDF report has been downloaded.";
 };
-document.getElementById("downloadPdf").onclick=drawPdf;
-document.getElementById("print").onclick=()=>window.print();
+const pdfButton=document.getElementById("downloadPdf"); if(pdfButton) pdfButton.addEventListener("click",()=>{try{drawPdf()}catch(err){console.error("PDF generation failed:",err);const s=document.getElementById("saveStatus");if(s)s.textContent="PDF generation failed. Your free report is still available above.";}});
+const printButton=document.getElementById("print"); if(printButton) printButton.addEventListener("click",()=>window.print());
 
 async function submitLeadIfConsented(r,top){
  const email=form.elements.emailAddress?.value?.trim(),consent=form.elements.consent?.checked;
