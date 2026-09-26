@@ -1,4 +1,4 @@
-const ALLOWED_ORIGIN="https://alwaysinnovative.github.io";
+const ALLOWED_ORIGIN="https://automation-scan-neon.vercel.app";
 
 function cors(res){
   res.setHeader("Access-Control-Allow-Origin",ALLOWED_ORIGIN);
@@ -54,7 +54,7 @@ export default async function handler(req,res){
 
     const reportEmail=await resendSend({
       key,from,to:[email],subject:"Your AutomationScan assessment",
-      text:`Your AutomationScan assessment is ready.\n\n${summary}\n\nOpen AutomationScan: https://alwaysinnovative.github.io/AutomationScan/`,
+      text:`Your AutomationScan assessment is ready.\n\n${summary}\n\nOpen AutomationScan: https://automation-scan-neon.vercel.app/`,
       tags:[{name:"source",value:"automationscan"},{name:"score",value:String(Number(r.score||0))}],
       idempotencyKey
     });
