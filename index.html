@@ -25,7 +25,18 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"A free browser-based business automation assessment that helps organizations identify repetitive work and prioritize opportunities for process automation.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/","logo":"https://automation-scan-neon.vercel.app/favicon.svg"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is AutomationScan?","acceptedAnswer":{"@type":"Answer","text":"AutomationScan is a free discovery tool that asks about repetitive work, workload and common business systems, then produces a directional automation opportunity report."}},{"@type":"Question","name":"Who should use AutomationScan?","acceptedAnswer":{"@type":"Answer","text":"Owners, operators, managers, consultants and teams in small and growing businesses can use the scan to identify repetitive administrative work worth investigating."}},{"@type":"Question","name":"Does AutomationScan automatically change business processes?","acceptedAnswer":{"@type":"Answer","text":"No. The assessment identifies and prioritizes opportunities. Implementation decisions remain with the business."}},{"@type":"Question","name":"Is the score a guaranteed savings estimate?","acceptedAnswer":{"@type":"Answer","text":"No. The score and hours estimate are directional and should be validated against the actual process before an investment decision."}}]}</script>
-<script src="marketing-config.js?v=20260926-1"></script>
+<script src="marketing-config.js?v=20260926-2"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=" id="ga4-script"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+if(window.AUTOMATIONSCAN_GA4_ID){
+  document.getElementById("ga4-script").src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(window.AUTOMATIONSCAN_GA4_ID);
+  gtag("js",new Date()); gtag("config",window.AUTOMATIONSCAN_GA4_ID,{anonymize_ip:true});
+}else{document.getElementById("ga4-script").remove();}
+function trackEvent(name,params){try{if(window.AUTOMATIONSCAN_GA4_ID&&typeof gtag==="function")gtag("event",name,params||{});}catch(e){}}
+window.trackEvent=trackEvent;
+</script>
 </head>
 <body>
 <header class="site-header">
@@ -124,6 +135,7 @@
 
 <section class="guide-links" aria-labelledby="guide-links-title"><div class="wrap"><div class="section-head"><div><p class="eyebrow">AUTOMATION RESOURCES</p><h2 id="guide-links-title">Explore automation by business need.</h2></div><p>Practical guides to help you investigate repetitive work before choosing technology.</p></div><div class="guide-grid"><a href="guides/business-automation-assessment.html"><b>Business automation assessment</b><span>Map recurring work and prioritize what to investigate.</span></a><a href="guides/automation-roi-calculator.html"><b>Automation ROI</b><span>Build a directional business case for a workflow.</span></a><a href="guides/accounting-automation.html"><b>Accounting automation</b><span>Invoices, payments, reconciliation and reporting.</span></a><a href="guides/healthcare-automation.html"><b>Healthcare automation</b><span>Administrative workflows with human review.</span></a><a href="guides/real-estate-automation.html"><b>Real estate automation</b><span>Leads, CRM, documents and scheduling.</span></a><a href="guides/ecommerce-automation.html"><b>E-commerce automation</b><span>Orders, support, inventory and reporting.</span></a><a href="guides/logistics-automation.html"><b>Logistics automation</b><span>Updates, documents and operational coordination.</span></a><a href="guides/professional-services-automation.html"><b>Professional services automation</b><span>Projects, reporting, email and CRM administration.</span></a></div></div></section>
 
+<div class="ad-slot ad-top" data-ad-slot="top" aria-label="Advertisement"></div>
 <section class="scanner" id="scanner">
   <div class="wrap scanner-head">
     <div>
@@ -243,6 +255,7 @@
   </div>
 </section>
 
+<div class="ad-slot ad-bottom" data-ad-slot="bottom" aria-label="Advertisement"></div>
 <section class="faq">
   <div class="wrap">
     <div class="section-head"><div><p class="eyebrow">QUESTIONS, ANSWERED</p><h2>Before you start</h2></div><p>A few important things to know about the assessment.</p></div>
@@ -257,13 +270,15 @@
 </main>
 
 <footer>
+  <div class="contact-strip"><div class="wrap contact-inner"><div><p class="eyebrow eyebrow-light">WORK WITH US</p><h2>Have a question, idea or automation project?</h2><p>Send a message. We’ll use the details you provide only to respond and follow up on your request.</p></div><a class="btn btn-copper" href="#contact">Contact AutomationScan →</a></div></div>
   <div class="wrap footer-grid">
     <div><a class="brand" href="./">Automation<span>Scan</span></a><p>Practical visibility for better business processes.</p></div>
     <div><b>Explore</b><a href="#method">How it works</a><a href="#examples">Examples</a><a href="#scanner">Free assessment</a><a href="guides/automation-assessment.html">Automation guide</a></div>
-    <div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="mailto:hello@example.com">Contact</a></div>
+    <div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="#contact">Contact</a></div>
   </div>
   <div class="wrap footer-bottom">© 2026 AutomationScan · Built to help teams see the work behind the work.</div>
 </footer>
+<section class="contact-modal" id="contact" aria-labelledby="contact-title"><div class="wrap"><div class="contact-card"><div><p class="eyebrow">CONTACT</p><h2 id="contact-title">Tell us what you need.</h2><p class="contact-intro">Questions, partnership ideas, feedback or help with an automation opportunity.</p></div><form id="contactForm"><input type="hidden" name="website" tabindex="-1" autocomplete="off"><div class="field-grid two"><label>Your name<input name="name" required maxlength="80" autocomplete="name"></label><label>Work email<input type="email" name="email" required maxlength="160" autocomplete="email"></label></div><label>Subject<input name="subject" required maxlength="140"></label><label>Message<textarea name="message" rows="5" required maxlength="2000"></textarea></label><label class="consent-row"><input type="checkbox" name="consent" required> I agree that AutomationScan may use these details to respond to my request. <a href="privacy.html">Privacy</a></label><div class="actions"><button class="btn btn-copper" type="submit">Send message →</button></div><p id="contactStatus" class="save-status" role="status"></p></form></div></div></section>
 
 <script src="api-config.js?v=20260926-1"></script>
 <script src="app.js?v=20260926-11"></script>
