@@ -213,6 +213,26 @@
     </div>
     <div class="report-meta" id="reportMeta"></div>
     <div id="opportunities" class="opportunities"></div>
+    <section class="analysis-dashboard" id="analysisDashboard" aria-label="Detailed analysis">
+      <div class="analysis-head">
+        <div><p class="eyebrow">DETAILED ANALYSIS</p><h3>Where the opportunity is concentrated</h3><p>Percentages show each category's share of the weekly hours you entered. They are diagnostic signals, not guaranteed savings.</p></div>
+      </div>
+      <div class="analysis-grid">
+        <div class="analysis-card">
+          <div class="analysis-card-head"><strong>Workload distribution</strong><span id="workloadTotal">0 hrs/week</span></div>
+          <div id="workloadChart" class="bar-chart" aria-label="Workload distribution chart"></div>
+        </div>
+        <div class="analysis-card">
+          <div class="analysis-card-head"><strong>Opportunity score breakdown</strong><span id="scoreCoverage">0%</span></div>
+          <div id="scoreBreakdown" class="score-breakdown"></div>
+        </div>
+      </div>
+      <div class="analysis-metrics" id="analysisMetrics"></div>
+      <div class="analysis-table-wrap">
+        <div class="analysis-card-head"><strong>Priority analysis</strong><span>Entered workload · share · investigation focus</span></div>
+        <div id="analysisTable" class="analysis-table"></div>
+      </div>
+    </section>
     <div class="next-card">
       <div><p class="eyebrow">NEXT STEP</p><h3>Take the shortlist into a real process review.</h3><p>Share the PDF with your operations lead, consultant or automation partner. It is designed to be a useful starting brief - not a black-box answer.</p></div>
       <a class="btn btn-teal" href="guides/automation-assessment.html">Explore the automation guide →</a>
