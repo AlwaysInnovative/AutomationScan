@@ -2,10 +2,12 @@ const form=document.getElementById("scanForm");
 const steps=[...document.querySelectorAll(".step")];
 const next=document.getElementById("next"),back=document.getElementById("back"),submit=document.getElementById("submit");
 let current=0;
+function track(name,params){try{if(window.trackEvent)window.trackEvent(name,params)}catch(e){}}
+track("scan_page_view",{page_location:location.pathname});
 
 function show(i){current=i;steps.forEach((s,n)=>s.classList.toggle("active",n===i));document.getElementById("progressText").textContent="Step "+(i+1)+" of "+steps.length;document.getElementById("progressBar").style.width=((i+1)/steps.length*100)+"%";back.hidden=i===0;next.hidden=i===steps.length-1;submit.hidden=i!==steps.length-1}
 function valid(){for(const f of steps[current].querySelectorAll("[required]")){if(!f.checkValidity()){f.reportValidity();return false}}return true}
-next.onclick=()=>valid()&&show(Math.min(current+1,steps.length-1));
+next.onclick=()=>{if(valid()){track("step_"+(current+1)+"_completed");show(Math.min(current+1,steps.length-1));}};
 back.onclick=()=>show(Math.max(current-1,0));
 const n=k=>Number(form.elements[k]?.value||0);
 
@@ -86,7 +88,7 @@ function renderResult(){
 
 form.addEventListener("submit",e=>e.preventDefault());
 submit.onclick=()=>{
- try{ renderResult(); }
+ try{ track("report_generated",{industry:form.elements.industry?.value||"unknown"}); renderResult(); }
  catch(err){
   console.error("AutomationScan report generation failed:",err);
   const status=document.getElementById("saveStatus");
@@ -99,6 +101,7 @@ function reportData(){
  return {r,top,date:new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"})};
 }
 function drawPdf(){
+ track("pdf_downloaded",{format:"print_to_pdf"});
  const status=document.getElementById("saveStatus");
  status.textContent="";
  document.body.classList.add("printing-report");
@@ -132,3 +135,35 @@ function renderDemo(key){
 document.querySelectorAll(".demo-tab").forEach(t=>t.addEventListener("click",()=>{document.querySelectorAll(".demo-tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");renderDemo(t.dataset.demo)}));
 renderDemo("accounting");
 show(0);
+
+
+function setupAds(){
+ const enabled=window.AUTOMATIONSCAN_ADS_ENABLED&&window.AUTOMATIONSCAN_AD_CLIENT;
+ document.querySelectorAll(".ad-slot").forEach(slot=>{
+   if(!enabled){slot.remove();return;}
+   slot.innerHTML='<ins class="adsbygoogle" style="display:block" data-ad-client="'+escapeHtml(window.AUTOMATIONSCAN_AD_CLIENT)+'" data-ad-slot="'+escapeHtml(window.AUTOMATIONSCAN_AD_SLOT||"")+'" data-ad-format="auto" data-full-width-responsive="true"></ins>';
+   slot.style.display="block";
+ });
+ if(enabled&&!document.querySelector('script[data-adsense]')){
+   const s=document.createElement("script");s.async=true;s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client="+encodeURIComponent(window.AUTOMATIONSCAN_AD_CLIENT);s.crossOrigin="anonymous";s.dataset.adsense="true";document.head.appendChild(s);
+   window.setTimeout(()=>document.querySelectorAll(".adsbygoogle").forEach(()=>{try{(window.adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}),500);
+ }
+}
+function setupContact(){
+ const f=document.getElementById("contactForm"); if(!f)return;
+ f.addEventListener("submit",async e=>{
+   e.preventDefault(); const s=document.getElementById("contactStatus"); const btn=f.querySelector("button[type=submit]");
+   if(!f.checkValidity()){f.reportValidity();return;}
+   if(f.elements.website.value)return;
+   btn.disabled=true; s.textContent="Sending…"; track("contact_submitted",{subject:f.elements.subject.value.slice(0,80)});
+   try{
+     const res=await fetch((window.AUTOMATIONSCAN_API_BASE||"")+"/api/contact",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:f.elements.name.value.trim(),email:f.elements.email.value.trim(),subject:f.elements.subject.value.trim(),message:f.elements.message.value.trim(),consent:f.elements.consent.checked,website:""})});
+     const data=await res.json().catch(()=>({}));
+     if(!res.ok)throw new Error(data.error||"send_failed");
+     s.textContent="Thanks — your message has been submitted. We’ll follow up by email.";
+     f.reset(); track("contact_success");
+   }catch(err){s.textContent="We couldn't send the message right now. Please try again shortly."; track("contact_error");}
+   finally{btn.disabled=false;}
+ });
+}
+setupAds(); setupContact();
