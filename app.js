@@ -84,17 +84,15 @@ function renderResult(){
  submitLeadIfConsented(r,top);
 }
 
-form.addEventListener("submit",e=>{
- e.preventDefault();
- try{
-  if(!valid())return;
-  renderResult();
- }catch(err){
+form.addEventListener("submit",e=>e.preventDefault());
+submit.onclick=()=>{
+ try{ renderResult(); }
+ catch(err){
   console.error("AutomationScan report generation failed:",err);
   const status=document.getElementById("saveStatus");
-  if(status)status.textContent="We couldn't generate the report. Please refresh the page and try again.";
+  if(status) status.textContent="We couldn't generate the report. Please refresh the page and try again.";
  }
-});
+};
 
 function reportData(){
  const {r,top}=buildReport();
