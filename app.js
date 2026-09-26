@@ -120,3 +120,30 @@ function drawPdf(){
  y=510;rows.slice(0,6).forEach((x,i)=>{if(y>750){footer();doc.addPage();header();y=110}const pct=Math.round(x[1]/total*100);doc.setFillColor(250,249,245);doc.roundedRect(margin,y,contentW,43,4,4,"F");doc.setTextColor(...copper);doc.setFont("helvetica","bold");doc.setFontSize(7);doc.text("0"+(i+1),margin+11,y+18);doc.setTextColor(...ink);doc.setFontSize(8);doc.text(x[0],margin+35,y+17);doc.setTextColor(...muted);doc.setFont("helvetica","normal");doc.text(x[1]+" hrs/wk · "+pct+"%",margin+35,y+32);doc.text("Investigate "+ideas[x[0]],margin+190,y+24);y+=50});
  footer();doc.save("AutomationScan-Detailed-Automation-Assessment.pdf");document.getElementById("saveStatus").textContent="Your detailed branded PDF report has been downloaded.";
 };
+document.getElementById("downloadPdf").onclick=drawPdf;
+document.getElementById("print").onclick=()=>window.print();
+
+async function submitLeadIfConsented(r,top){
+ const email=form.elements.emailAddress?.value?.trim(),consent=form.elements.consent?.checked;
+ if(!email||!consent)return;
+ try{
+  const res=await fetch((window.AUTOMATIONSCAN_API_BASE||"")+"/api/lead",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,consent:true,report:{score:r.score,label:r.label,low:r.low,high:r.high,industry:r.industry,goal:r.goal,top:top.slice(0,3).map(x=>x[0]),coverage:r.coverage}})});
+  document.getElementById("saveStatus").textContent=res.ok?"Report generated; email request submitted.":"Report generated locally; email delivery is not configured yet.";
+ }catch{document.getElementById("saveStatus").textContent="Report generated locally."}
+}
+
+const demos={
+ accounting:{name:"Accounting firm",meta:"12-person practice · B2B · monthly client reporting",score:84,hours:"64-92",headline:"Invoice processing and client reporting are absorbing the most repeat effort.",areas:[["Invoices / payments","18 hrs/week","Document extraction + approval workflow"],["Reporting","11 hrs/week","Scheduled report generation + delivery"],["Email / follow-ups","8 hrs/week","Reminder sequences + exception handling"]],next:"Start with invoice intake because it touches finance, documents and approvals."},
+ clinic:{name:"Healthcare clinic",meta:"8-person clinic · B2C · appointment-heavy",score:76,hours:"42-61",headline:"Scheduling and reminders are creating avoidable administrative load.",areas:[["Scheduling","14 hrs/week","Self-service booking + reminders"],["Customer support","8 hrs/week","FAQ and message triage"],["Documents / admin","7 hrs/week","Digital forms + document routing"]],next:"Start with scheduling and reminders; keep clinical decisions outside automation."},
+ realestate:{name:"Real estate team",meta:"15-person team · mixed clients · lead-driven",score:81,hours:"49-70",headline:"Lead follow-up and CRM updates are competing with time spent selling.",areas:[["Sales admin / CRM","13 hrs/week","Lead capture + CRM enrichment"],["Email / follow-ups","10 hrs/week","Task-based follow-up sequences"],["Documents / admin","6 hrs/week","Template-driven document preparation"]],next:"Start with lead capture and follow-up consistency before adding more tools."},
+ ecommerce:{name:"E-commerce business",meta:"22-person operation · B2C · multi-channel",score:79,hours:"55-79",headline:"Order support, reporting and data movement are the biggest repeat-work signals.",areas:[["Customer support","15 hrs/week","FAQ automation + ticket routing"],["Data entry","12 hrs/week","Order and inventory data sync"],["Reporting","8 hrs/week","Automated daily/weekly dashboards"]],next:"Start with support triage and repetitive order questions."},
+ logistics:{name:"Logistics company",meta:"35-person operation · B2B · document-heavy",score:88,hours:"71-103",headline:"Documents and status updates create a large coordination burden.",areas:[["Documents / admin","22 hrs/week","Document capture + workflow routing"],["Data entry","16 hrs/week","System-to-system data transfer"],["Email / follow-ups","9 hrs/week","Exception alerts + customer updates"]],next:"Start with document intake and status-event workflows; preserve human review for exceptions."},
+ agency:{name:"Professional services",meta:"10-person agency · project-based · B2B",score:68,hours:"34-49",headline:"Recurring reporting and client communication are taking time away from delivery.",areas:[["Reporting","9 hrs/week","Reusable report generation"],["Email / follow-ups","7 hrs/week","Client update workflows"],["Documents / admin","5 hrs/week","Templates and approval steps"]],next:"Start with recurring reports where inputs and outputs are already structured."}
+};
+function renderDemo(key){
+ const d=demos[key]||demos.accounting;
+ document.getElementById("demoPanel").innerHTML='<div class="demo-top"><div><span class="demo-kicker">ILLUSTRATIVE SCAN</span><h3>'+d.name+'</h3><p>'+d.meta+'</p></div><div class="demo-score"><strong>'+d.score+'</strong><span>/100</span></div></div><div class="demo-headline">'+d.headline+'</div><div class="demo-hours"><span>Estimated work worth investigating</span><strong>'+d.hours+' hrs/month</strong></div><div class="demo-areas">'+d.areas.map((x,i)=>'<div class="demo-area"><small>PRIORITY '+(i+1)+'</small><b>'+x[0]+'</b><span>'+x[1]+'</span><p>'+x[2]+'</p></div>').join("")+'</div><div class="demo-next"><b>What the output suggests</b><span>'+d.next+'</span></div>';
+}
+document.querySelectorAll(".demo-tab").forEach(t=>t.addEventListener("click",()=>{document.querySelectorAll(".demo-tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");renderDemo(t.dataset.demo)}));
+renderDemo("accounting");
+show(0);
