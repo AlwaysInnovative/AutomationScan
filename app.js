@@ -100,46 +100,14 @@ function reportData(){
  const {r,top}=buildReport();
  return {r,top,date:new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"})};
 }
-async function drawPdf(){
+function drawPdf(){
  const status=document.getElementById("saveStatus");
- if(!window.jspdf){
-  status.textContent="Loading PDF engine…";
-  await new Promise(resolve=>{let n=0;const t=setInterval(()=>{if(window.jspdf||window.__pdfUnavailable||++n>30){clearInterval(t);resolve()}},100)});
- }
- if(!window.jspdf){
-  status.textContent="Direct PDF engine unavailable. Opening the print-to-PDF version instead…";
-  window.print();
-  return;
- }
- const {jsPDF}=window.jspdf,{r,top,date}=reportData(),doc=new jsPDF({unit:"pt",format:"a4"}); const T=(txt,x,y,opt)=>doc.text(String(txt==null?"":txt),Number(x),Number(y),opt||{});
- const navy=[20,37,45],teal=[23,107,112],copper=[182,111,77],paper=[247,244,237],muted=[104,119,125],ink=[32,50,58],line=[220,218,211];
- const W=595,H=842,margin=46,contentW=W-margin*2;
- const header=()=>{doc.setFillColor(...navy);doc.rect(0,0,W,82,"F");doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(18);T("Automation",margin,37);doc.setTextColor(184,214,208);T("Scan",margin+88,37);doc.setFontSize(8);doc.setTextColor(190,205,204);T("BUSINESS AUTOMATION ASSESSMENT",margin,55);doc.setDrawColor(...copper);doc.setLineWidth(2);doc.line(margin,68,W-margin,68)};
- const footer=()=>{doc.setDrawColor(...line);doc.setLineWidth(.5);doc.line(margin,H-40,W-margin,H-40);doc.setTextColor(...muted);doc.setFont("helvetica","normal");doc.setFontSize(7);T("AutomationScan · Directional assessment · Validate actual process and economics before investing.",margin,H-24);T(String(doc.getNumberOfPages()),W-margin,H-24,{align:"right"})};
- const title=(k,t)=>{doc.setTextColor(...copper);doc.setFont("helvetica","bold");doc.setFontSize(7);T(k,margin,t);doc.setTextColor(...ink);doc.setFont("times","normal");doc.setFontSize(24);T(t,margin,t+31);};
- const bar=(x,y,w,h,pct,color)=>{doc.setFillColor(232,231,226);doc.roundedRect(x,y,w,h,3,3,"F");doc.setFillColor(...color);doc.roundedRect(x,y,Math.max(3,w*Math.max(0,Math.min(1,pct))),h,3,3,"F")};
- const rows=Object.entries(r.h).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),total=Math.max(r.total,.01),max=Math.max(...rows.map(x=>x[1]),1);
- header();
- doc.setTextColor(...ink);doc.setFont("helvetica","bold");doc.setFontSize(8);T("ASSESSMENT REPORT",margin,110);doc.setTextColor(...muted);doc.setFont("helvetica","normal");T(date,W-margin,110,{align:"right"});
- doc.setFont("times","normal");doc.setFontSize(30);doc.setTextColor(...ink);T("Business Automation",margin,150);T("Visibility Report",margin,184);
- doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...muted);T("Industry: "+r.industry,margin,211);T("Goal: "+r.goal,margin,226);
- doc.setFillColor(...paper);doc.roundedRect(margin,250,contentW,136,5,5,"F");doc.setFillColor(...navy);doc.roundedRect(margin,250,5,136,2,2,"F");
- doc.setTextColor(...muted);doc.setFont("helvetica","bold");doc.setFontSize(7);T("OPPORTUNITY SIGNAL",margin+20,274);doc.setTextColor(...ink);doc.setFontSize(50);T(String(r.score),margin+20,330);doc.setFontSize(10);doc.setTextColor(...muted);T("/ 100",margin+84,330);doc.setTextColor(...teal);T(r.label,margin+20,351);
- doc.setTextColor(...muted);doc.setFontSize(7);T("ESTIMATED WORK WORTH INVESTIGATING",margin+190,274);doc.setTextColor(...ink);doc.setFont("times","normal");doc.setFontSize(21);T(r.low+"–"+r.high+" hours/month",margin+190,306);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(...muted);T("Input coverage: "+r.coverage+"% · "+r.total+" hrs/week entered",margin+190,329);T("Directional estimate, not guaranteed savings.",margin+190,344);
- doc.setTextColor(...ink);doc.setFont("helvetica","bold");doc.setFontSize(11);T("Workload distribution",margin,421);doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...muted);T("Each percentage is the category share of entered weekly hours.",margin,434);
- let y=454; rows.forEach(([name,h],i)=>{if(y>760){footer();doc.addPage();header();y=110}const pct=h/total;doc.setTextColor(...ink);doc.setFont("helvetica","bold");doc.setFontSize(8);T(name,margin,y);doc.setTextColor(...muted);doc.setFont("helvetica","normal");T(h+" hrs/wk · "+Math.round(pct*100)+"%",W-margin,y,{align:"right"});bar(margin,y+7,contentW,7,pct,i<3?teal:[130,151,127]);y+=31});
- footer();doc.addPage();header();title("ANALYSIS","Score & opportunity detail");
- const parts=[["Weekly workload",Math.min(45,Math.round(Math.min(45,r.total*1.6))),45],["Copy / paste friction",r.copy,20],["Repetition level",r.rep,18],["Team-size signal",Math.min(15,Math.round(r.emp/8)),15],["Text signals",Math.min(18,r.textPoints||0),18]];
- y=126;parts.forEach(p=>{doc.setTextColor(...ink);doc.setFont("helvetica","bold");doc.setFontSize(8);T(p[0],margin,y);doc.setTextColor(...muted);doc.setFont("helvetica","normal");T(p[1]+" pts",W-margin,y,{align:"right"});bar(margin,y+8,contentW,p[2]?8:8,p[1]/p[2],copper);y+=34});
- const monthlyMid=(r.low+r.high)/2,annualLow=Math.round(r.low*12),annualHigh=Math.round(r.high*12),concentration=rows.length?Math.round(rows.slice(0,3).reduce((a,x)=>a+x[1],0)/total*100):0;
- doc.setTextColor(...ink);doc.setFont("helvetica","bold");doc.setFontSize(11);T("Key metrics",margin,322);
- const metrics=[["Weekly repeat work",r.total+" hrs"],["Monthly range",r.low+"–"+r.high+" hrs"],["Annualized range",annualLow+"–"+annualHigh+" hrs"],["Top-3 concentration",concentration+"%"]];
- metrics.forEach((m,i)=>{const x=margin+(i%2)*(contentW/2), yy=345+Math.floor(i/2)*66;doc.setFillColor(...paper);doc.roundedRect(x,yy,contentW/2-8,51,4,4,"F");doc.setTextColor(...muted);doc.setFontSize(7);T(m[0].toUpperCase(),x+12,yy+17);doc.setTextColor(...ink);doc.setFont("times","normal");doc.setFontSize(18);T(m[1],x+12,yy+38)});
- doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(...ink);T("Priority analysis",margin,486);
- y=510;rows.slice(0,6).forEach((x,i)=>{if(y>750){footer();doc.addPage();header();y=110}const pct=Math.round(x[1]/total*100);doc.setFillColor(250,249,245);doc.roundedRect(margin,y,contentW,43,4,4,"F");doc.setTextColor(...copper);doc.setFont("helvetica","bold");doc.setFontSize(7);T("0"+(i+1),margin+11,y+18);doc.setTextColor(...ink);doc.setFontSize(8);T(x[0],margin+35,y+17);doc.setTextColor(...muted);doc.setFont("helvetica","normal");T(x[1]+" hrs/wk · "+pct+"%",margin+35,y+32);T("Investigate "+ideas[x[0]],margin+190,y+24);y+=50});
- footer();doc.save("AutomationScan-Detailed-Automation-Assessment.pdf");document.getElementById("saveStatus").textContent="Your detailed branded PDF report has been downloaded.";
-};
-const pdfButton=document.getElementById("downloadPdf"); if(pdfButton) pdfButton.addEventListener("click",()=>{try{drawPdf()}catch(err){console.error("PDF generation failed:",err);const s=document.getElementById("saveStatus");if(s)s.textContent="PDF generation failed. Your free report is still available above.";}});
+ status.textContent="Opening the professional PDF print view…";
+ document.body.classList.add("printing-report");
+ window.setTimeout(()=>window.print(),50);
+}
+
+const pdfButton=document.getElementById("downloadPdf"); if(pdfButton) pdfButton.addEventListener("click",drawPdf);
 const printButton=document.getElementById("print"); if(printButton) printButton.addEventListener("click",()=>window.print());
 
 async function submitLeadIfConsented(r,top){
