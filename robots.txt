@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://alwaysinnovative.github.io/AutomationScan/sitemap.xml
