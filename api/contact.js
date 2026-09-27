@@ -1,4 +1,15 @@
-const ALLOWED_ORIGIN="https://automation-scan-neon.vercel.app";
+const ALLOWED_ORIGINS=new Set([
+ "https://automation-scan-neon.vercel.app",
+ "https://automation-scan-7rg404ewn-alwaysinnovatives-projects.vercel.app"
+]);
+function cors(res,origin){
+ const allowed=ALLOWED_ORIGINS.has(origin)?origin:"https://automation-scan-neon.vercel.app";
+ res.setHeader("Access-Control-Allow-Origin",allowed);
+ res.setHeader("Vary","Origin");
+ res.setHeader("Access-Control-Allow-Methods","POST, OPTIONS");
+ res.setHeader("Access-Control-Allow-Headers","Content-Type");
+ res.setHeader("Cache-Control","no-store");
+}
 function cors(res){res.setHeader("Access-Control-Allow-Origin",ALLOWED_ORIGIN);res.setHeader("Vary","Origin");res.setHeader("Access-Control-Allow-Methods","POST, OPTIONS");res.setHeader("Access-Control-Allow-Headers","Content-Type");res.setHeader("Cache-Control","no-store");}
 function emailOk(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
 async function send({key,from,to,subject,text,idempotencyKey}){return fetch("https://api.resend.com/emails",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`,"Idempotency-Key":idempotencyKey},body:JSON.stringify({from,to,subject,text})});}
@@ -13,7 +24,7 @@ async function hubspotUpsert({email,name,subject,message,source}){
  return {configured:true,error:true};
 }
 export default async function handler(req,res){
- cors(res); if(req.method==="OPTIONS")return res.status(204).end(); if(req.method!=="POST")return res.status(405).json({error:"method_not_allowed"});
+ cors(res,req.headers.origin); if(req.method==="OPTIONS")return res.status(204).end(); if(req.method!=="POST")return res.status(405).json({error:"method_not_allowed"});
  try{
   const body=req.body||{}; if(body.website)return res.status(400).json({error:"invalid_request"});
   const name=String(body.name||"").trim(),email=String(body.email||"").trim().toLowerCase(),subject=String(body.subject||"").trim(),message=String(body.message||"").trim(),source=body.source||{};
