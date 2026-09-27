@@ -109,7 +109,7 @@ function escapeHtml(v) {
 function buildDecisionNarrative(ind, model, platform, scale, migration, candidates, scores, processes, pains) {
   var top = scores.slice(0,3);
   var continuity = platform !== "Not specified" && platform.toLowerCase().indexOf("infor") >= 0;
-  var route = migration === "Replace" ? "replacement" : migration === "Modernise" ? "modernisation" : "structured comparison";
+  var route = migration.indexOf("Transformational") >= 0 ? "transformation" : migration.indexOf("Conservative") >= 0 ? "modernisation / continuity" : "structured comparison";
   var text = "Your assessment points toward a " + route + " decision. ";
   if (continuity) text += "Because the current platform is Infor, test the value of staying on the Infor path before committing to replacement. ";
   text += "The report should treat " + top.map(function(x){return x.name;}).join(", ") + " as the first investigation set, not as an automatic winner. ";
@@ -125,6 +125,10 @@ function renderReport() {
   var pains = checked("pain");
   var scale = value("scale") || "Not specified";
   var custom = value("custom") || "Low";
+  var customProcess = value("customProcess") || value("customProcesses") || "None provided";
+  var revenue = value("revenue") || "Prefer not to say";
+  var employees = value("employees") || "Not specified";
+  var erpSpend = value("erpSpend") || "Unknown";
   var integration = value("integration") || "Low";
   var migration = value("migration") || "Balanced";
   var candidateMeta = {
@@ -151,7 +155,7 @@ var allCandidates = Object.keys(candidateMeta);
   function candidateDecision(app, idx) {
     var m = candidateMeta[app];
     var fit = m.fit.indexOf(ind) >= 0 ? 5 : 2;
-    var scaleFit = scale === "Enterprise" && ["Oracle","SAP","Microsoft Dynamics","IFS"].indexOf(app) >= 0 ? 5 : 3;
+    var scaleFit = /Global|Multi-country/.test(scale) && ["Oracle","SAP","Microsoft Dynamics","IFS"].indexOf(app) >= 0 ? 5 : 3;
     var continuity = platform.toLowerCase().indexOf(app.toLowerCase()) >= 0 ? 5 : 2;
     var complexityPenalty = custom === "Very high" ? (["Oracle","SAP","Microsoft Dynamics","Infor"].indexOf(app) >= 0 ? 1 : 0) : 3;
     var integrationScore = integration === "Very high" ? (["Oracle","SAP","Microsoft Dynamics","Infor"].indexOf(app) >= 0 ? 4 : 2) : 3;
@@ -222,13 +226,21 @@ var allCandidates = Object.keys(candidateMeta);
   if (matrix && customProcessText !== "No custom process supplied") {
     matrix.innerHTML += "<div class='requirement-block custom-process'><h4>Customer custom business process</h4><p>" + escapeHtml(customProcessText) + "</p><table><thead><tr><th>Decision</th><th>What to test</th><th>Preferred treatment</th><th>Evidence</th></tr></thead><tbody><tr><td>Preserve business differentiation</td><td>Why the process exists and measurable value</td><td>Standard capability first; configure where possible</td><td>POC with real exception scenarios</td></tr><tr><td>Replace / simplify</td><td>Whether the process is historical customisation</td><td>Challenge customisation before migration</td><td>Fit-gap and TCO evidence</td></tr></tbody></table></div>";
   }
-  if (opportunities) opportunities.innerHTML = "<ul><li>Standardise high-friction processes before replacing them.</li><li>Map integrations and customisations before committing to migration.</li><li>Separate core ERP needs from specialist industry applications.</li></ul>";
+  if (opportunities) opportunities.innerHTML = "<ul><li>Standardise high-friction processes before replacing them.</li><li>Map integrations and customisations before committing to migration.</li><li>Separate core ERP needs from specialist industry applications.</li></ul>" + (customProcess && customProcess !== "None provided" ? "<article class='custom-process-highlight'><b>Custom process requiring discovery</b><p>" + escapeHtml(customProcess) + "</p><small>Challenge this process before migration: preserve differentiation, standardise it, configure it, extend it, use a specialist product, or retire it.</small></article>" : "");
   if (need) need.innerHTML = "<p>Do not assume ERP replacement is necessary. Compare three scenarios: modernise the current platform, replace the core ERP, or simplify the application landscape with SaaS and specialist products.</p>";
   if (approach) approach.innerHTML = "<p>Use a fit-to-standard first approach. Preserve differentiating industry capabilities and challenge customisations that do not create measurable business value.</p>";
   if (savings) savings.innerHTML = "<ul><li>Retire unused customisations.</li><li>Reduce duplicate applications and interfaces.</li><li>Clean data before migration rather than carrying historical complexity forward.</li></ul>";
   if (future) future.innerHTML = "<ul><li>Lower operational friction</li><li>Improved business visibility</li><li>Scalable SaaS operating model</li><li>Better data and AI readiness</li></ul>";
   if (tradeoffs) tradeoffs.innerHTML = "<p>Current-platform modernisation may reduce change risk; replacement may provide greater process redesign potential but usually creates greater migration and change impact. Best-of-breed can improve specialist capability while increasing integration complexity.</p>";
   if (risks) risks.innerHTML = "<ul><li>Incomplete requirements</li><li>Data quality and migration effort</li><li>Integration dependencies</li><li>Over-customisation</li><li>Change-management capacity</li></ul>";
+  if (val) {
+    var spendBand = erpSpend === "Under $100K" ? [10000,25000] : erpSpend === "$100K–$500K" ? [25000,100000] : erpSpend === "$500K–$2M" ? [100000,400000] : erpSpend === "$2M–$10M" ? [300000,1500000] : erpSpend === "Over $10M" ? [750000,3000000] : [0,0];
+    var efficiencySignal = Math.min(18, processes.length * 2 + pains.length);
+    var low = spendBand[0] ? Math.round(spendBand[0] * (0.05 + efficiencySignal/100)) : 0;
+    var high = spendBand[1] ? Math.round(spendBand[1] * (0.10 + efficiencySignal/100)) : 0;
+    var bandText = spendBand[0] ? "$" + low.toLocaleString() + "–$" + high.toLocaleString() + " annual opportunity signal" : "Baseline required before a monetary range can be calculated";
+    val.innerHTML = "<div><b>" + bandText + "</b><span>illustrative efficiency / simplification signal</span></div><div><b>" + processes.length + "</b><span>process areas in scope</span></div><div><b>" + pains.length + "</b><span>pain signals selected</span></div><div><b>" + escapeHtml(erpSpend) + "</b><span>current core-app spend input</span></div><p>Potential value should be validated against labour effort, application retirement, integration cost, infrastructure/support, working capital, revenue leakage and implementation investment. It is not a vendor quote or guaranteed saving.</p>";
+  }
   if (val) val.innerHTML = "<p>Validate value with a baseline covering operating cost, cycle time, error rate, working capital, revenue leakage and user effort before selecting a platform.</p>";
   if (evidence) evidence.innerHTML = "<ul><li>Require relevant industry customer references.</li><li>Require scripted demonstrations using your processes.</li><li>Require architecture, security and integration evidence.</li><li>Require a transparent implementation and five-year TCO model.</li></ul>";
   if (questions) questions.innerHTML = "<ol><li>Show our highest-value end-to-end process using standard capability.</li><li>Which requirements require configuration, extension or third-party products?</li><li>What happens to our current customisations and integrations?</li><li>Provide comparable industry references and measurable outcomes.</li><li>Demonstrate identity, audit, resilience and required compliance controls.</li></ol>";
