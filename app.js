@@ -137,6 +137,11 @@ function generateReport(){
     if(!valid()) return;
     track("report_generated",{industry:form.elements.industry?.value||"unknown"});
     renderResult();
+    const report=document.getElementById("results");
+    if(!report) throw new Error("Report container was not found.");
+    sessionStorage.setItem("automationScanReportHtml",report.innerHTML);
+    sessionStorage.setItem("automationScanReportGenerated","1");
+    window.location.href="report.html";
   }catch(err){
     console.error("AutomationScan report generation failed:",err);
     const results=document.getElementById("results");
