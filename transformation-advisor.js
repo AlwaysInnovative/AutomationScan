@@ -1,102 +1,27 @@
-const platforms={
-Oracle:{label:"Oracle",caps:{Finance:3,Procurement:3,"Supply Chain":3,Warehouse:3,Merchandising:3,Planning:3,Inventory:3,Commerce:3,CRM:1,Data:3,AI:3,Integration:3},reason:"Broad enterprise ERP plus a deep retail cloud portfolio; especially relevant where retail merchandising, planning and inventory are core."},
-SAP:{label:"SAP",caps:{Finance:3,Procurement:3,"Supply Chain":3,Warehouse:3,Merchandising:2,Planning:3,Inventory:3,Commerce:2,CRM:2,Data:3,AI:3,Integration:3},reason:"Broad enterprise platform for finance and supply chain transformation, with retail capabilities that need to be mapped to the target operating model."},
-Microsoft:{label:"Microsoft",caps:{Finance:3,Procurement:3,"Supply Chain":3,Warehouse:3,Merchandising:2,Planning:3,Inventory:3,Commerce:3,CRM:3,Data:3,AI:3,Integration:3},reason:"Strong fit to investigate where Finance, Supply Chain and Commerce intersect with the Microsoft ecosystem and AI capabilities."},
-Infor:{label:"Infor",caps:{Finance:3,Procurement:3,"Supply Chain":3,Warehouse:3,Merchandising:3,Planning:3,Inventory:3,Commerce:2,CRM:1,Data:2,AI:3,Integration:3},reason:"Industry-focused cloud path worth examining when the current Infor estate already aligns closely to the target business processes."},
-NetSuite:{label:"NetSuite",caps:{Finance:3,Procurement:2,"Supply Chain":2,Warehouse:2,Merchandising:1,Planning:2,Inventory:3,Commerce:2,CRM:2,Data:2,AI:2,Integration:3},reason:"Cloud ERP candidate to investigate where scope, complexity and operating model fit; complex retail requirements may need specialist ecosystem products."},
-IFS:{label:"IFS",caps:{Finance:3,Procurement:3,"Supply Chain":3,Warehouse:3,Merchandising:1,Planning:2,Inventory:3,Commerce:1,CRM:2,Data:2,AI:3,Integration:3},reason:"Relevant to investigate for complex operations, supply chain, asset/service and enterprise workflows; retail-specific scope needs validation."}
-};
-const capabilityLabels={Finance:"Finance & controls",Procurement:"Procurement","Supply Chain":"Supply chain",Warehouse:"Warehouse / WMS",Merchandising:"Merchandising",Planning:"Demand / supply planning",Inventory:"Inventory optimisation",Commerce:"Commerce / POS / omnichannel",CRM:"CRM / customer",Data:"Data / analytics",AI:"AI / intelligent automation",Integration:"Integration / APIs"};
-const form=document.getElementById("transformForm");
-const steps=[...document.querySelectorAll(".t-step")];
-const next=document.getElementById("tNext"),back=document.getElementById("tBack"),generate=document.getElementById("tGenerate");
-let current=0;
-function esc(value){return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]));}
-function show(index){
- current=index;
- steps.forEach((step,i)=>step.classList.toggle("active",i===index));
- document.getElementById("tProgress").textContent="Step "+(index+1)+" of "+steps.length;
- document.getElementById("tProgressBar").style.width=((index+1)/steps.length*100)+"%";
- back.hidden=index===0;
- next.hidden=index===steps.length-1;
- generate.hidden=index!==steps.length-1;
-}
-function valid(){
- const required=steps[current].querySelectorAll("[required]");
- for(const field of required){if(!field.checkValidity()){field.reportValidity();return false;}}
- return true;
-}
-next.addEventListener("click",()=>{if(valid())show(Math.min(current+1,steps.length-1));});
-back.addEventListener("click",()=>show(Math.max(current-1,0)));
-function radioValue(name){return form.querySelector('input[name="'+name+'"]:checked')?.value||"";}
-function read(){
- return {
-  industry:form.elements.industry.value,
-  current:form.elements.current.value,
-  scale:form.elements.scale.value,
-  trigger:form.elements.trigger.value,
-  caps:[...form.querySelectorAll('input[name="cap"]:checked')].map(x=>x.value),
-  custom:form.elements.custom.value,
-  integration:form.elements.integration.value,
-  migration:form.elements.migration.value,
-  ecosystem:form.elements.ecosystem.value,
-  concern:form.elements.concern.value.trim(),
-  output:radioValue("output"),
-  email:form.elements.email.value.trim()
- };
-}
-function scorePlatform(platform,data){
- let score=0;
- data.caps.forEach(cap=>score+=platform.caps[cap]||0);
- const max=data.caps.length*3||1;
- if(data.ecosystem==="Microsoft-heavy"&&platform.label==="Microsoft")score+=3;
- if(data.ecosystem==="SAP-heavy"&&platform.label==="SAP")score+=3;
- if(data.ecosystem==="Oracle-heavy"&&platform.label==="Oracle")score+=3;
- if(data.current===platform.label)score+=data.migration==="Conservative"?3:1;
- if(data.custom==="Very high"&&platform.label===data.current)score-=2;
- return Math.round(Math.max(0,Math.min(100,score/(max+3)*100)));
-}
-function fitLabel(score){return score>=82?"Strong capability alignment":score>=68?"Worth detailed discovery":score>=52?"Selective fit — validate gaps":"Requires significant scope validation";}
-function render(data){
- const entries=Object.values(platforms).map(p=>({...p,score:scorePlatform(p,data)})).sort((a,b)=>b.score-a.score);
- const score=data.caps.length?Math.round(data.caps.reduce((sum,cap)=>sum+Math.max(...Object.values(platforms).map(p=>p.caps[cap]||0)),0)/(data.caps.length*3)*100):0;
- document.getElementById("tScore").textContent=score;
- document.getElementById("tResultSub").textContent=data.industry+" · current platform: "+data.current+" · target trigger: "+data.trigger;
- document.getElementById("tInterpretation").textContent=score>=80?"Your requirements are specific enough to support a structured market comparison.":"Your requirements need more discovery before a defensible shortlist can be made.";
- document.getElementById("tSummary").textContent="This is a decision-support starting point. It identifies ecosystems whose capability areas overlap with your selected needs, then highlights questions requiring workshops, demos and commercial validation.";
- document.getElementById("tCapCount").textContent=data.caps.length+" selected";
- document.getElementById("tCaps").innerHTML=data.caps.length?data.caps.map(cap=>"<span>"+esc(capabilityLabels[cap])+"</span>").join(""):"<span>No capabilities selected — add them on Step 2 for a sharper comparison.</span>";
- const signals=[["Current platform",data.current],["Customisation",data.custom],["Integration complexity",data.integration],["Migration appetite",data.migration],["Existing ecosystem",data.ecosystem]];
- document.getElementById("tSignals").innerHTML=signals.map(item=>"<div class='signal-row'><span>"+esc(item[0])+"</span><b>"+esc(item[1])+"</b></div>").join("");
- document.getElementById("tCandidates").innerHTML=entries.map(p=>"<article class='candidate-card'><div><b>"+esc(p.label)+"</b><span>"+fitLabel(p.score)+"</span></div><strong>"+p.score+"<small>/100</small></strong><p>"+esc(p.reason)+"</p></article>").join("");
- const tbody=document.querySelector("#tMatrix tbody");
- tbody.innerHTML=data.caps.length?data.caps.map(cap=>"<tr><th>"+esc(capabilityLabels[cap])+"</th>"+Object.values(platforms).map(p=>"<td><span class='fit-dot fit-"+p.caps[cap]+"'>"+(p.caps[cap]===3?"Core":p.caps[cap]===2?"Consider":"Validate")+"</span></td>").join("")+"</tr>").join(""):"<tr><td colspan='7'>Select capabilities on Step 2 to populate the matrix.</td></tr>";
- const questions=[
- "Which Infor customisations are genuinely business-critical, and which can be retired rather than reproduced?",
- "Which integrations are system-of-record dependencies versus convenience interfaces?",
- "Which retail capabilities must be native versus acceptable through an ecosystem product or specialist solution?",
- "What historical data must move, what can be archived, and what data-quality remediation is required?",
- "Which reports, controls and localisations are mandatory on day one?",
- "What are the peak transaction volumes, store/warehouse patterns and country requirements?",
- "What is the target operating model for merchandising, planning, finance and supply chain?",
- "Which capabilities require a proof-of-concept before commercial selection?"
- ];
- document.getElementById("tQuestions").innerHTML=questions.map(q=>"<li>"+esc(q)+"</li>").join("");
- const phases=[
- ["Days 1–30","Capability discovery","Process workshops · current-state application inventory · customisation and integration catalogue · data scope"],
- ["Days 31–60","Market validation","Scripted demos · fit/gap workshops · architecture options · migration waves · security/localisation checks"],
- ["Days 61–90","Selection readiness","Shortlist evidence · TCO inputs · implementation partner assessment · risk register · RFP/POC plan"]
- ];
- document.getElementById("tRoadmap").innerHTML=phases.map(p=>"<article><span>"+p[0]+"</span><b>"+p[1]+"</b><p>"+p[2]+"</p></article>").join("");
- const results=document.getElementById("transformResults");
- results.classList.remove("hidden");
- results.scrollIntoView({behavior:"smooth",block:"start"});
- try{sessionStorage.setItem("automationscan_transform",JSON.stringify(data));}catch(e){}
-}
-form.addEventListener("submit",event=>{event.preventDefault();if(!valid())return;render(read());});
-document.getElementById("tPrint").addEventListener("click",()=>{
- document.body.classList.add("printing-transform");
- window.addEventListener("afterprint",()=>document.body.classList.remove("printing-transform"),{once:true});
- setTimeout(()=>window.print(),80);
-});
-show(0);
+const INDUSTRIES={
+Retail:{models:["Department / specialty retail","Grocery / convenience","Fashion / apparel","Wholesale + retail","Omnichannel / marketplace"],processes:["Merchandising & assortment","Buying & supplier management","Pricing / promotions / markdowns","Demand forecasting & replenishment","Allocation & inventory","Store operations / POS","eCommerce / order management","Warehouse / fulfilment","Returns / reverse logistics","Customer / loyalty","Finance / P2P / O2C","Product / SKU / location master data","Retail analytics & planning"],pains:["Stockouts / overstocks","Margin leakage / markdown pressure","Spreadsheet-based planning","Poor inventory visibility","Disconnected POS / eCommerce","Slow assortment decisions","Manual supplier processes","Complex integrations","Store-to-warehouse imbalance"]},
+Manufacturing:{models:["Discrete manufacturing","Process manufacturing","Engineer-to-order","Make-to-stock","Make-to-order"],processes:["Demand planning","S&OP","MRP / production planning","BOM / routing","Shop-floor execution","Quality management","Procurement","Supplier collaboration","Inventory / warehouse","Maintenance / assets","Order management","Costing / finance","Traceability / compliance","Product lifecycle"],pains:["Planning instability","Production downtime","Inventory excess","Manual scheduling","Quality / traceability gaps","Supplier risk","Cost variance","Disconnected shop floor","Legacy customisations"]},
+Distribution:{models:["Wholesale distribution","3PL / logistics","Industrial distribution","Food distribution","Pharma distribution"],processes:["Demand planning","Purchasing","Inventory optimisation","Warehouse / WMS","Order management","Pricing / rebates","Transportation","Supplier management","Customer service","EDI / integration","Finance / P2P / O2C","Analytics"],pains:["Low inventory accuracy","Warehouse inefficiency","Margin leakage","Manual order entry","Poor demand visibility","Transport cost","Customer service delays","EDI complexity"]},
+Healthcare:{models:["Hospital / health system","Clinic network","Diagnostics","Medical devices","Healthcare services"],processes:["Patient / provider operations","Scheduling","Supply chain","Procurement","Inventory","Finance","Compliance","Billing / revenue cycle","Asset / equipment management","Analytics / data","Integration / interoperability"],pains:["Manual administration","Supply shortages","Compliance burden","Fragmented data","Revenue leakage","Scheduling inefficiency","Integration complexity","Asset visibility"]},
+"Professional Services":{models:["Consulting","IT services","Engineering services","Managed services","Legal / advisory"],processes:["Lead-to-project","Resource planning","Time & expense","Project delivery","Utilisation","Billing / revenue recognition","Contracts","Procurement","Finance","Knowledge / collaboration","CRM","Analytics"],pains:["Low billable utilisation","Manual timesheets","Revenue leakage","Poor resource forecasting","Project margin visibility","Fragmented CRM / ERP","Slow billing"]},
+Hospitality:{models:["Hotel group","Restaurant group","Travel / leisure","Resort","Multi-brand hospitality"],processes:["Reservations","Property / venue operations","POS","Procurement","Inventory","Revenue management","Housekeeping / service","Customer loyalty","Workforce","Finance","Analytics","Digital commerce"],pains:["Demand volatility","Labour inefficiency","Food / stock waste","Disconnected POS","Poor guest data","Manual revenue management","Multi-property reporting"]},
+Other:{models:["B2B","B2C","Platform / marketplace","Asset-intensive","Mixed"],processes:["Finance","Procurement","Sales / order management","Inventory / operations","Planning","Workforce","Customer service","Data / analytics","Integration","AI / automation"],pains:["Manual processes","Poor visibility","Legacy systems","Integration complexity","Data quality","High operating cost","Slow decision making"]}};
+const platforms={Oracle:{caps:["Finance","Procurement","Supply chain","Warehouse","Merchandising","Planning","Inventory","Commerce","Data","AI","Integration"]},SAP:{caps:["Finance","Procurement","Supply chain","Warehouse","Planning","Inventory","Data","AI","Integration","Merchandising"]},Microsoft:{caps:["Finance","Procurement","Supply chain","Warehouse","Planning","Inventory","Commerce","CRM","Data","AI","Integration"]},Infor:{caps:["Finance","Procurement","Supply chain","Warehouse","Merchandising","Planning","Inventory","Data","AI","Integration"]},NetSuite:{caps:["Finance","Procurement","Inventory","Order management","Commerce","CRM","Data","Integration"]},IFS:{caps:["Finance","Procurement","Supply chain","Warehouse","Planning","Inventory","Asset / service","Data","AI","Integration"]}};
+const form=document.getElementById("transformForm"),steps=[...document.querySelectorAll(".t-step")],next=document.getElementById("tNext"),back=document.getElementById("tBack"),generate=document.getElementById("tGenerate");let current=0;
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+function show(i){current=i;steps.forEach((s,n)=>s.classList.toggle("active",n===i));tProgress.textContent="Step "+(i+1)+" of "+steps.length;tProgressBar.style.width=((i+1)/steps.length*100)+"%";back.hidden=i===0;next.hidden=i===steps.length-1;generate.hidden=i!==steps.length-1;window.scrollTo({top:document.getElementById("navigator").offsetTop-30,behavior:"smooth"});}
+function valid(){for(const f of steps[current].querySelectorAll("[required]"))if(!f.checkValidity()){f.reportValidity();return false}return true}
+next.onclick=()=>{if(valid())show(Math.min(current+1,steps.length-1))};back.onclick=()=>show(Math.max(current-1,0));
+function loadIndustry(){const d=INDUSTRIES[industry.value]||INDUSTRIES.Other;form.elements.businessModel.innerHTML='<option value="">Choose</option>'+d.models.map(x=>'<option>'+esc(x)+'</option>').join("");industryIntro.innerHTML="<b>"+esc(industry.value||"Your industry")+"</b> — "+d.processes.length+" core process areas will be considered, including: "+d.processes.slice(0,5).map(esc).join(" · ")+"…";industryProcesses.innerHTML=d.processes.map(x=>'<label><input type="checkbox" name="process" value="'+esc(x)+'">'+esc(x)+"</label>").join("");industryPains.innerHTML=d.pains.map(x=>'<label><input type="checkbox" name="pain" value="'+esc(x)+'">'+esc(x)+"</label>").join("");}
+industry.onchange=loadIndustry;loadIndustry();
+function read(){return{industry:industry.value,businessModel:form.elements.businessModel.value,current:form.elements.current.value,scale:form.elements.scale.value,processes:[...form.querySelectorAll('input[name="process"]:checked')].map(x=>x.value),customProcess:form.elements.customProcess.value,pains:[...form.querySelectorAll('input[name="pain"]:checked')].map(x=>x.value),painText:form.elements.painText.value,revenue:form.elements.revenue.value,employees:form.elements.employees.value,erpSpend:form.elements.erpSpend.value,custom:form.elements.custom.value,integration:form.elements.integration.value,migration:form.elements.migration.value,ecosystem:form.elements.ecosystem.value,horizon:form.elements.horizon.value,goals:[...form.querySelectorAll('input[name="goal"]:checked')].map(x=>x.value),email:form.elements.email.value}}
+function moneyBand(d){const rev={"Under $10M":10000000,"$10M–$50M":50000000,"$50M–$250M":250000000,"$250M–$1B":1000000000,"$1B–$5B":5000000000,"Over $5B":10000000000}[d.revenue]||0;if(!rev)return null;const low=Math.round(rev*.002),high=Math.round(rev*.01);return{low,high};}
+function fmt(n){return n>=1000000000?"$"+(n/1e9).toFixed(1)+"B":n>=1000000?"$"+(n/1e6).toFixed(1)+"M":n>=1000?"$"+Math.round(n/1000)+"K":"$"+n}
+function render(d){const ind=INDUSTRIES[d.industry]||INDUSTRIES.Other, selected=d.processes.length?d.processes:ind.processes.slice(0,6), pains=d.pains.length?d.pains:ind.pains.slice(0,4);const score=Math.min(100,Math.round((selected.length/Math.max(ind.processes.length,1))*55+pains.length*5+(d.custom!=="Low"?10:0)+(d.integration!=="Low"?10:0)+(d.migration==="Transformational"?10:0)));tScore.textContent=score;tResultSub.textContent=d.industry+" · "+d.businessModel+" · "+d.current+" · "+d.scale;tInterpretation.textContent=score>=75?"A broad transformation case is visible — discovery should focus on target operating model, value and market fit.":score>=50?"There is enough signal for structured market discovery, but important requirements still need validation.":"Start with process and pain-point discovery before narrowing the technology market.";tSummary.textContent="AutomationScan has adapted this assessment to "+d.industry+". It considers "+selected.length+" selected process areas and "+pains.length+" stated pain points, then maps them to candidate technology ecosystems and value questions.";
+tContext.innerHTML=[["Industry",d.industry],["Business model",d.businessModel],["Current platform",d.current],["Scale",d.scale],["Revenue",d.revenue],["Employees",d.employees],["Customisation",d.custom],["Integration",d.integration],["Horizon",d.horizon]].map(x=>"<div class='signal-row'><span>"+esc(x[0])+"</span><b>"+esc(x[1])+"</b></div>").join("");tContextLabel.textContent="your inputs";tCapCount.textContent=selected.length+" process areas";tCaps.innerHTML=selected.map(x=>"<span>"+esc(x)+"</span>").join("");
+const opp=pains.slice(0,6).map((p,i)=>"<article class='candidate-card'><div><b>"+esc(p)+"</b><span>"+(i<2?"HIGH PRIORITY":"DISCOVERY")+"</span></div><strong>"+(i<2?"1":"2")+"<small>/ priority</small></strong><p>Investigate the process baseline, root cause, measurable business impact and whether the target capability should be native, specialised or automated.</p></article>");tOpportunities.innerHTML=opp.join("");
+const candidates=Object.entries(platforms).map(([name,p])=>{const hit=selected.filter(x=>p.caps.includes(x)).length;const s=Math.round(hit/Math.max(selected.length,1)*100);return{name,s}}).sort((a,b)=>b.s-a.s);tCandidates.innerHTML=candidates.map(x=>"<article class='candidate-card'><div><b>"+x.name+"</b><span>"+(x.s>=75?"BROAD COVERAGE":x.s>=50?"PARTIAL COVERAGE":"VALIDATE SCOPE")+"</span></div><strong>"+x.s+"<small>/100</small></strong><p>Directional capability overlap only. Validate industry depth, localisation, integrations, implementation partners, licensing and target operating model.</p></article>").join("");
+tMatrix.innerHTML="<thead><tr><th>Process / capability</th>"+Object.keys(platforms).map(x=>"<th>"+x+"</th>").join("")+"</tr></thead><tbody>"+selected.map(cap=>"<tr><th>"+esc(cap)+"</th>"+Object.entries(platforms).map(([n,p])=>"<td><span class='fit-dot "+(p.caps.includes(cap)?"fit-3":"fit-1")+"'>"+(p.caps.includes(cap)?"Covered / validate":"Gap / specialist")+"</span></td>").join("")+"</tr>").join("")+"</tbody>";
+const band=moneyBand(d);tValue.innerHTML=(band?[["Opportunity band",fmt(band.low)+" – "+fmt(band.high)],["Value lens","0.2%–1.0% of stated annual turnover"],["Best next input","Baseline hours, cost-to-serve, inventory, leakage and transaction volumes"]]:[["Opportunity band","Add annual turnover for a directional range"],["Value lens","Automation, simplification, working capital and leakage"],["Best next input","Baseline cost, volumes, hours and measurable business outcomes"]]).map(x=>"<article><b>"+esc(x[0])+"</b><strong>"+esc(x[1])+"</strong></article>").join("");
+const qs=["Which selected processes create the highest measurable cost, delay, risk or lost revenue?","Which requirements are genuinely industry-specific versus legacy customisation?","Which capabilities must be native to the core platform and which can come from specialist products?","Which integrations are system-of-record dependencies?","What data must migrate, what can be archived and what data quality remediation is needed?","What localisation, regulatory, tax and country requirements apply?","Which three processes should be demonstrated end-to-end in vendor proof-of-concept sessions?","What is the baseline for cost, effort, inventory, revenue leakage and cycle time before claiming value?"];tQuestions.innerHTML=qs.map(q=>"<li>"+esc(q)+"</li>").join("");tRoadmap.innerHTML=[["Days 1–30","Business & process baseline","Validate process map · quantify pain · catalogue customisation · identify value baselines"],["Days 31–60","Market & architecture discovery","Scripted demos · fit/gap · target architecture · specialist ecosystem · integration/data assessment"],["Days 61–90","Commercial decision readiness","POC · TCO inputs · partner assessment · migration waves · RFP requirements · risk register"]].map(x=>"<article><span>"+x[0]+"</span><b>"+x[1]+"</b><p>"+x[2]+"</p></article>").join("");transformResults.classList.remove("hidden");transformResults.scrollIntoView({behavior:"smooth"});try{sessionStorage.setItem("automationscan_transform",JSON.stringify(d))}catch(e){}}
+form.onsubmit=e=>{e.preventDefault();if(!valid())return;render(read())};tPrint.onclick=()=>{document.body.classList.add("printing-transform");window.addEventListener("afterprint",()=>document.body.classList.remove("printing-transform"),{once:true});setTimeout(()=>window.print(),80)};show(0);
