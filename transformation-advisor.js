@@ -148,6 +148,19 @@ var allCandidates = Object.keys(candidateMeta);
   var candidates = scores.map(function(x){return x.name;});
   var score = Math.min(96, 55 + processes.length * 3 + pains.length * 2 + (platform !== "Not specified" ? 8 : 0));
 
+  function candidateDecision(app, idx) {
+    var m = candidateMeta[app];
+    var fit = m.fit.indexOf(ind) >= 0 ? 5 : 2;
+    var scaleFit = scale === "Enterprise" && ["Oracle","SAP","Microsoft Dynamics","IFS"].indexOf(app) >= 0 ? 5 : 3;
+    var continuity = platform.toLowerCase().indexOf(app.toLowerCase()) >= 0 ? 5 : 2;
+    var complexityPenalty = custom === "Very high" ? (["Oracle","SAP","Microsoft Dynamics","Infor"].indexOf(app) >= 0 ? 1 : 0) : 3;
+    var integrationScore = integration === "Very high" ? (["Oracle","SAP","Microsoft Dynamics","Infor"].indexOf(app) >= 0 ? 4 : 2) : 3;
+    var migrationScore = migration.indexOf("Conservative") >= 0 ? continuity + 2 : migration.indexOf("Transformational") >= 0 ? 4 : 3;
+    var total = fit + scaleFit + continuity + complexityPenalty + integrationScore + migrationScore;
+    var band = total >= 25 ? "Strong fit signal" : total >= 19 ? "Worth validating" : "Conditional fit";
+    return {fit:fit, scale:scaleFit, continuity:continuity, complexity:complexityPenalty, integration:integrationScore, migration:migrationScore, total:total, band:band};
+  }
+  var decisionScores = candidates.map(function(app, idx){ return {name:app, d:candidateDecision(app, idx)}; });
   var title = document.getElementById("tResultTitle");
   var sub = document.getElementById("tResultSub");
   var scoreEl = document.getElementById("tScore");
@@ -215,6 +228,9 @@ var allCandidates = Object.keys(candidateMeta);
   if (evidence) evidence.innerHTML = "<ul><li>Require relevant industry customer references.</li><li>Require scripted demonstrations using your processes.</li><li>Require architecture, security and integration evidence.</li><li>Require a transparent implementation and five-year TCO model.</li></ul>";
   if (questions) questions.innerHTML = "<ol><li>Show our highest-value end-to-end process using standard capability.</li><li>Which requirements require configuration, extension or third-party products?</li><li>What happens to our current customisations and integrations?</li><li>Provide comparable industry references and measurable outcomes.</li><li>Demonstrate identity, audit, resilience and required compliance controls.</li></ol>";
   if (roadmap) roadmap.innerHTML = "<article><span>0-30 days</span><b>Baseline</b><p>Confirm process, data, integrations, customisations and value baseline.</p></article><article><span>31-60 days</span><b>Prove fit</b><p>Run scripted demonstrations and fit-gap assessment.</p></article><article><span>61-90 days</span><b>Compare</b><p>Validate POC, TCO, migration and partner evidence.</p></article>";
+  if (candidatesBox) candidatesBox.innerHTML = decisionScores.map(function(x){
+    return "<article class='decision-card'><div><b>" + x.name + "</b><strong>" + x.d.band + "</strong></div><p>Fit " + x.d.fit + "/5 | Scale " + x.d.scale + "/5 | Continuity " + x.d.continuity + "/5 | Integration " + x.d.integration + "/5 | Migration " + x.d.migration + "/5</p><small>Decision signal: " + x.d.total + "/30. Validate with customer-specific POC and evidence.</small></article>";
+  }).join("");
   if (candidatesBox) candidatesBox.innerHTML = candidates.map(function (x) { return "<article><b>" + x + "</b><p>Candidate ecosystem to investigate against your selected " + escapeHtml(ind) + " requirements.</p></article>"; }).join("");
   if (explore) explore.innerHTML = candidates.map(function (x,i) {
   var m=candidateMeta[x];
