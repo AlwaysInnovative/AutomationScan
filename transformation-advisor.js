@@ -132,39 +132,50 @@ function renderReport() {
   var integration = value("integration") || "Low";
   var migration = value("migration") || "Balanced";
   var candidateMeta = {
-  "Oracle": {url:"https://www.oracle.com/retail/", fit:["Retail","Distribution","Manufacturing"], reason:"Broad cloud applications with ERP, supply chain and industry capabilities.", proof:"Run finance, procurement, inventory, order management and the critical industry flow.", evidence:"Oracle retail portfolio, Fusion applications and current customer references."},
-  "SAP": {url:"https://www.sap.com/industries/retail.html", fit:["Retail","Manufacturing","Distribution"], reason:"Deep enterprise process and industry ecosystem with retail, supply chain and finance capabilities.", proof:"Run merchandising, planning, procurement, inventory, fulfilment and finance scenarios.", evidence:"SAP retail solution portfolio, industry references and fit-to-standard evidence."},
-  "Microsoft Dynamics": {url:"https://www.microsoft.com/en-in/dynamics-365", fit:["Retail","Distribution","Professional Services","Manufacturing"], reason:"Business applications ecosystem spanning ERP, commerce, data, CRM and analytics.", proof:"Demonstrate the priority customer journey across ERP, commerce/data and integrations.", evidence:"Dynamics 365 product scope, architecture and comparable customer references."},
-  "Infor": {url:"https://www.infor.com/solutions/industries/retail", fit:["Retail","Manufacturing","Distribution","Healthcare","Hospitality"], reason:"Industry-focused cloud applications and a continuity option when current Infor capability is valuable.", proof:"Map current customisations and integrations to standard cloud capability.", evidence:"Current Infor roadmap, industry references and migration tooling."},
-  "NetSuite": {url:"https://www.netsuite.com/portal/industries/retail.shtml", fit:["Retail","Distribution","Professional Services"], reason:"Cloud ERP candidate where scope can be standardised without excessive enterprise complexity.", proof:"Demonstrate finance, order, inventory and required industry extensions.", evidence:"Industry references, integration catalogue and five-year TCO."},
-  "IFS": {url:"https://www.ifs.com/solutions/industries", fit:["Manufacturing","Distribution","Hospitality"], reason:"Operational ERP and industry workflows suited to asset, service and complex operational environments.", proof:"Demonstrate the most operationally complex end-to-end process.", evidence:"Industry references, security architecture and implementation evidence."}
-};
-var allCandidates = Object.keys(candidateMeta);
+    "Oracle": {type:"ERP + industry suite", products:"Fusion Cloud ERP + Oracle Retail", fit:["Retail","Distribution","Manufacturing","Healthcare","Hospitality"], caps:["Finance","Procurement","Supply Chain","Order Management","Inventory","Retail Merchandising","Planning","Analytics"], url:"https://www.oracle.com/retail/"},
+    "SAP": {type:"ERP + industry suite", products:"SAP Cloud ERP + SAP Retail", fit:["Retail","Manufacturing","Distribution","Healthcare","Consumer Products"], caps:["Finance","Procurement","Supply Chain","Merchandising","Assortment","Pricing","Planning","Warehouse","Analytics"], url:"https://www.sap.com/industries/retail.html"},
+    "Microsoft Dynamics 365": {type:"ERP + commerce ecosystem", products:"Dynamics 365 Finance / Supply Chain / Commerce", fit:["Retail","Distribution","Manufacturing","Professional Services","Healthcare"], caps:["Finance","Procurement","Supply Chain","Inventory","Commerce","POS","Warehouse","CRM","Analytics"], url:"https://www.microsoft.com/en-in/dynamics-365"},
+    "Infor": {type:"Industry ERP + cloud suite", products:"Infor CloudSuite", fit:["Retail","Manufacturing","Distribution","Healthcare","Hospitality"], caps:["Finance","Procurement","Supply Chain","Retail","Merchandising","Inventory","Warehouse","Analytics","Industry workflows"], url:"https://www.infor.com/industries/retail/"},
+    "NetSuite": {type:"Cloud ERP", products:"Oracle NetSuite", fit:["Retail","Distribution","Professional Services","Manufacturing"], caps:["Financials","Procurement","Inventory","Order Management","Commerce","Planning","Analytics"], url:"https://www.netsuite.com/portal/industries/retail.shtml"},
+    "IFS Cloud": {type:"ERP + operational suite", products:"IFS Cloud", fit:["Manufacturing","Distribution","Aerospace","Energy","Construction","Service"], caps:["Finance","Supply Chain","Manufacturing","Asset Management","Service","Projects","Planning"], url:"https://www.ifs.com/solutions/industries"},
+    "Epicor": {type:"Industry ERP", products:"Epicor Kinetic / industry ERP", fit:["Manufacturing","Distribution","Retail"], caps:["Finance","Procurement","Inventory","Manufacturing","Supply Chain","Distribution","Commerce"], url:"https://www.epicor.com/en-us/industries/"},
+    "Sage X3": {type:"ERP", products:"Sage X3", fit:["Manufacturing","Distribution","Consumer Products","Chemicals","Food & Beverage"], caps:["Finance","Procurement","Inventory","Manufacturing","Supply Chain","Distribution"], url:"https://www.sage.com/en-us/products/sage-business-cloud/sage-x3/"},
+    "Acumatica": {type:"Cloud ERP", products:"Acumatica Cloud ERP", fit:["Retail","Distribution","Manufacturing","Construction"], caps:["Financials","Distribution","Inventory","Order Management","Manufacturing","Commerce"], url:"https://www.acumatica.com/industries/"},
+    "Odoo": {type:"Modular business suite", products:"Odoo", fit:["Retail","Distribution","Manufacturing","Professional Services"], caps:["Finance","Sales","Inventory","Purchase","Manufacturing","POS","eCommerce"], url:"https://www.odoo.com/page/industries"},
+    "Unit4": {type:"ERP", products:"Unit4 ERP", fit:["Professional Services","Public Sector","Education","Nonprofit"], caps:["Finance","Procurement","Projects","Services","Planning","Analytics"], url:"https://www.unit4.com/"},
+    "Workday": {type:"Cloud business suite", products:"Workday Financial Management", fit:["Professional Services","Healthcare","Education","Public Sector"], caps:["Finance","Procurement","Projects","Workforce","Planning","Analytics"], url:"https://www.workday.com/"},
+    "Oracle Retail + Fusion": {type:"Industry application + ERP", products:"Oracle Retail + Fusion Cloud", fit:["Retail"], caps:["Merchandising","Pricing","Assortment","Inventory","Planning","Store Operations","Finance","Procurement"], url:"https://www.oracle.com/retail/"},
+    "SAP Retail + Cloud ERP": {type:"Industry application + ERP", products:"SAP Retail + SAP Cloud ERP", fit:["Retail"], caps:["Merchandising","Assortment","Pricing","Allocation","Replenishment","POS integration","Finance","Supply Chain"], url:"https://www.sap.com/industries/retail.html"},
+    "Manhattan Associates": {type:"Specialist supply-chain platform", products:"Manhattan Active", fit:["Retail","Distribution","Manufacturing"], caps:["Warehouse","Order Management","Inventory","Transportation","Fulfilment"], url:"https://www.manh.com/"},
+    "Blue Yonder": {type:"Specialist supply-chain platform", products:"Blue Yonder", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Planning","Demand","Supply","Warehouse","Order Management","Merchandising"], url:"https://blueyonder.com/"},
+    "S/4HANA + specialist ecosystem": {type:"ERP + best-of-breed", products:"SAP core plus specialist applications", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Finance","Supply Chain","Procurement","Manufacturing","Retail","Integration","Analytics"], url:"https://www.sap.com/"}
+  };
+var allCandidates = Object.keys(candidateMeta);var allCandidates = Object.keys(candidateMeta);
   var scores = allCandidates.map(function (name) {
     var m = candidateMeta[name];
-    var fit = m.fit.indexOf(ind) >= 0 ? 28 : 8;
-    var continuity = platform.toLowerCase().indexOf(name.toLowerCase()) >= 0 ? 18 : 0;
-    var complexity = scale === "Enterprise" ? (name === "Oracle" || name === "SAP" || name === "Microsoft Dynamics" || name === "IFS" ? 16 : 6) : (name === "NetSuite" || name === "Microsoft Dynamics" || name === "Infor" ? 16 : 9);
-    var migrationSignal = migration === "Replace" ? (continuity ? 4 : 10) : (continuity ? 12 : 7);
-    var processSignal = Math.min(18, processes.length * 2);
-    return {name:name, score:fit + continuity + complexity + migrationSignal + processSignal};
+    var industryFit = m.fit.indexOf(ind) >= 0 ? 30 : 4;
+    var continuity = platform.toLowerCase().indexOf(name.toLowerCase().split(" ")[0]) >= 0 ? 18 : 0;
+    var processCoverage = processes.reduce(function(total,p){ return total + (m.caps.some(function(cap){ return p.toLowerCase().indexOf(cap.toLowerCase()) >= 0 || cap.toLowerCase().indexOf(p.toLowerCase()) >= 0; }) ? 5 : 1); },0);
+    var painCoverage = pains.reduce(function(total,p){ return total + (m.caps.some(function(cap){ return p.toLowerCase().indexOf(cap.toLowerCase()) >= 0 || cap.toLowerCase().indexOf(p.toLowerCase()) >= 0; }) ? 3 : 1); },0);
+    var scaleSignal = scale === "Enterprise" && ["Oracle","SAP","Microsoft Dynamics 365","Infor","IFS Cloud","S/4HANA + specialist ecosystem"].indexOf(name)>=0 ? 10 : 5;
+    var customSignal = custom === "Very high" && ["Oracle","SAP","Microsoft Dynamics 365","Infor","IFS Cloud"].indexOf(name)>=0 ? 5 : 2;
+    return {name:name, score:industryFit+Math.min(20,processCoverage)+Math.min(12,painCoverage)+scaleSignal+customSignal+continuity};
   }).sort(function(a,b){return b.score-a.score;});
-  var candidates = scores.map(function(x){return x.name;});
-  var score = Math.min(96, 55 + processes.length * 3 + pains.length * 2 + (platform !== "Not specified" ? 8 : 0));
+  var candidates = scores.mapvar candidates = scores.map(function(x){return x.name;});
+  var score = Math.min(96, 40 + processes.length * 5 + pains.length * 3 + (platform !== "Not specified" ? 12 : 0) + (model !== "Not specified" ? 8 : 0));
+  var route = migration.indexOf("Transformational") >= 0 ? "Transformation" : migration.indexOf("Conservative") >= 0 ? "Modernise / preserve continuity" : "Structured market comparison";
+  var painText = value("painText") || "";
 
   function candidateDecision(app, idx) {
     var m = candidateMeta[app];
-    var fit = m.fit.indexOf(ind) >= 0 ? 5 : 2;
-    var scaleFit = /Global|Multi-country/.test(scale) && ["Oracle","SAP","Microsoft Dynamics","IFS"].indexOf(app) >= 0 ? 5 : 3;
-    var continuity = platform.toLowerCase().indexOf(app.toLowerCase()) >= 0 ? 5 : 2;
-    var complexityPenalty = custom === "Very high" ? (["Oracle","SAP","Microsoft Dynamics","Infor"].indexOf(app) >= 0 ? 1 : 0) : 3;
-    var integrationScore = integration === "Very high" ? (["Oracle","SAP","Microsoft Dynamics","Infor"].indexOf(app) >= 0 ? 4 : 2) : 3;
-    var migrationScore = migration.indexOf("Conservative") >= 0 ? continuity + 2 : migration.indexOf("Transformational") >= 0 ? 4 : 3;
-    var total = fit + scaleFit + continuity + complexityPenalty + integrationScore + migrationScore;
-    var band = total >= 25 ? "Strong fit signal" : total >= 19 ? "Worth validating" : "Conditional fit";
-    return {fit:fit, scale:scaleFit, continuity:continuity, complexity:complexityPenalty, integration:integrationScore, migration:migrationScore, total:total, band:band};
+    var industryFit = m.fit.indexOf(ind) >= 0;
+    var coveredProcesses = processes.filter(function(p){return m.caps.some(function(cap){return p.toLowerCase().indexOf(cap.toLowerCase())>=0 || cap.toLowerCase().indexOf(p.toLowerCase())>=0;});});
+    var uncoveredProcesses = processes.filter(function(p){return coveredProcesses.indexOf(p)<0;});
+    var painAligned = pains.filter(function(p){return m.caps.some(function(cap){return p.toLowerCase().indexOf(cap.toLowerCase())>=0 || cap.toLowerCase().indexOf(p.toLowerCase())>=0;});});
+    var continuity = platform.toLowerCase().indexOf(app.toLowerCase().split(" ")[0])>=0;
+    return {industry:industryFit ? "Aligned" : "Not industry-specific in this assessment",current:continuity ? "Current-platform continuity signal" : "Replacement / complement",covered:coveredProcesses,uncovered:uncoveredProcesses,painAligned:painAligned,total:Math.round((industryFit?35:10)+(coveredProcesses.length*10)+(painAligned.length*5)+(continuity?15:0)),band:industryFit && coveredProcesses.length===processes.length && processes.length ? "Direct requirement alignment" : industryFit ? "Industry fit — validate process coverage" : "Broader option — validate specialist fit"};
   }
-  var decisionScores = candidates.map(function(app, idx){ return {name:app, d:candidateDecision(app, idx)}; });
+  var decisionScores =  var decisionScores = candidates.map(function(app, idx){ return {name:app, d:candidateDecision(app, idx)}; });
   var title = document.getElementById("tResultTitle");
   var sub = document.getElementById("tResultSub");
   var scoreEl = document.getElementById("tScore");
@@ -234,16 +245,17 @@ var allCandidates = Object.keys(candidateMeta);
     return "Specialist or third-party assessment";
   }
   var requirementRows = processes.map(function (p) {
-    return candidates.slice(0,4).map(function (app) {
-      var d = candidateDecision(app, 0);
-      var treatment = treatmentFor(app);
-      var gap = d.fit >= 5 && d.integration >= 4 ? "Low-to-moderate validation gap" : "Requirement evidence required";
-      var value = d.fit >= 5 ? "High potential" : "Needs validation";
-      return {process:p, app:app, fit:d.band, gap:gap, treatment:treatment, value:value, evidence:"Scripted demo + industry reference + architecture/security evidence", poc:"Demonstrate " + p + " with normal flow, exception, approval and integration scenario."};
+    return decisionScores.map(function (x) {
+      var d=x.d;
+      var processPain=pains.filter(function(pa){return p.toLowerCase().indexOf(pa.toLowerCase().split(" ")[0])>=0 || pa.toLowerCase().indexOf(p.toLowerCase().split(" ")[0])>=0;});
+      var currentState=platform + (processPain.length ? " · selected pain: "+processPain.join(", ") : " · current capability not independently verified");
+      var candidateState=d.covered.indexOf(p)>=0 ? "Mapped capability signal: "+candidateMeta[x.name].caps.join(", ") : "No direct mapped capability signal — scripted demo required";
+      var gap=d.covered.indexOf(p)>=0 ? (processPain.length ? "Potential improvement gap driven by selected pain; baseline KPI required." : "No proven gap from supplied inputs; validate exact release/configuration.") : "Requirement-to-capability evidence gap";
+      return {process:p,app:x.name,current:currentState,candidate:candidateState,gap:gap,treatment:d.covered.indexOf(p)>=0 ? "Fit-to-standard / configure first" : "POC / specialist / extension assessment",evidence:"Comparable demo + current-state evidence + industry reference + architecture/security proof"};
     });
   }).flat();
   if (matrix) matrix.innerHTML = requirementRows.map(function (row) {
-    return "<div class='requirement-block'><h4>" + escapeHtml(row.process) + " - " + escapeHtml(row.app) + "</h4><table><tbody><tr><th>Fit</th><td>" + escapeHtml(row.fit) + "</td><th>Gap</th><td>" + escapeHtml(row.gap) + "</td></tr><tr><th>Treatment</th><td>" + escapeHtml(row.treatment) + "</td><th>Value</th><td>" + escapeHtml(row.value) + "</td></tr><tr><th>Evidence</th><td colspan='3'>" + escapeHtml(row.evidence) + "</td></tr><tr><th>POC</th><td colspan='3'>" + escapeHtml(row.poc) + "</td></tr></tbody></table></div>";
+    return "<div class='requirement-block'><h4>"+escapeHtml(row.process)+" · "+escapeHtml(row.app)+"</h4><table><thead><tr><th>Current-state input</th><th>Candidate capability signal</th><th>Why gap?</th><th>Treatment</th><th>Evidence required</th></tr></thead><tbody><tr><td>"+escapeHtml(row.current)+"</td><td>"+escapeHtml(row.candidate)+"</td><td>"+escapeHtml(row.gap)+"</td><td>"+escapeHtml(row.treatment)+"</td><td>"+escapeHtml(row.evidence)+"</td></tr></tbody></table></div>";
   }).join("");
   if (matrix && customProcessText !== "No custom process supplied") {
     matrix.innerHTML += "<div class='requirement-block custom-process'><h4>Customer custom business process</h4><p>" + escapeHtml(customProcessText) + "</p><table><thead><tr><th>Decision</th><th>What to test</th><th>Preferred treatment</th><th>Evidence</th></tr></thead><tbody><tr><td>Preserve business differentiation</td><td>Why the process exists and measurable value</td><td>Standard capability first; configure where possible</td><td>POC with real exception scenarios</td></tr><tr><td>Replace / simplify</td><td>Whether the process is historical customisation</td><td>Challenge customisation before migration</td><td>Fit-gap and TCO evidence</td></tr></tbody></table></div>";
@@ -285,18 +297,18 @@ var allCandidates = Object.keys(candidateMeta);
     var m=candidateMeta[x.name];
     return "<article class='decision-card'><div><b>" + x.name + "</b><strong>" + x.d.band + "</strong></div><p>Industry fit " + x.d.fit + "/5 · Scale " + x.d.scale + "/5 · Continuity " + x.d.continuity + "/5 · Integration " + x.d.integration + "/5 · Migration " + x.d.migration + "/5</p><p><b>Why investigate:</b> " + escapeHtml(m.reason) + "</p><p><b>Evidence gate:</b> " + escapeHtml(m.evidence) + "</p><small>Signal " + x.d.total + "/30 — not a vendor ranking or purchase recommendation.</small></article>";
   }).join(""); if (candidatesBox) candidatesBox.innerHTML = candidates.map(function (x) { return "<article><b>" + x + "</b><p>Candidate ecosystem to investigate against your selected " + escapeHtml(ind) + " requirements.</p></article>"; }).join("");
-  if (explore) explore.innerHTML = candidates.map(function (x,i) {
-  var m=candidateMeta[x];
-  var fit=m.fit.indexOf(ind)>=0 ? "Industry alignment signal" : "Broader ecosystem to validate";
-  return "<article class='explore-card'><div class='explore-head'><span>" + (i < 2 ? "PRIMARY FIT TO EXPLORE" : "COMPARISON OPTION") + "</span><b>" + x + "</b><strong>" + fit + "</strong></div><p><b>Why explore:</b> " + escapeHtml(m.reason) + "</p><p><b>Key proof:</b> " + escapeHtml(m.proof) + "</p><p><b>Security:</b> Validate identity, roles, segregation of duties, audit, resilience, data residency and industry controls.</p><p><b>Migration:</b> Map data, integrations, customisations and coexistence waves before estimating effort.</p><p><b>Evidence:</b> " + escapeHtml(m.evidence) + "</p><p><b>Vendor POC:</b> Script the priority process using the customer's data, exceptions and controls.</p><p><a href='" + m.url + "' target='_blank' rel='noopener'>Official product evidence -&gt;</a></p></article>";
-}).join("");
+  if (explore) explore.innerHTML = decisionScores.map(function (x) {
+    var m=candidateMeta[x.name], d=x.d;
+    var selectedCaps=processes.length ? processes.map(function(p){return "<li><b>"+escapeHtml(p)+"</b> — "+(d.covered.indexOf(p)>=0 ? "mapped capability signal; validate exact release/configuration" : "no direct mapped capability signal; require scripted proof")+"</li>";}).join("") : "<li>No process selected.</li>";
+    return "<article class='explore-card'><div class='explore-head'><span>"+escapeHtml(m.type)+"</span><b>"+escapeHtml(x.name)+"</b><strong>"+escapeHtml(d.band)+"</strong></div><p><b>Products / ecosystem:</b> "+escapeHtml(m.products)+"</p><p><b>Current-state comparison:</b> "+escapeHtml(platform)+" is the baseline. The assessment does not call a gap simply because a different product has a feature; a gap is shown where a selected requirement lacks a mapped capability signal or a selected pain requires proof of improvement.</p><p><b>Requirement signals</b></p><ul>"+selectedCaps+"</ul><p><b>Customer pain narrative:</b> "+escapeHtml(painText || (pains.length ? pains.join(", ") : "No pain narrative entered"))+"</p><p><b>Evidence:</b> Run the same customer scenario, exception, approval, integration and control against this option and the current platform.</p><p><a href='"+m.url+"' target='_blank' rel='noopener'>Official product evidence →</a></p></article>";
+  }).join("");
   if (architecture) architecture.innerHTML = "<p><b>Current:</b> " + escapeHtml(platform) + "</p><p><b>Target hypothesis:</b> SaaS core platform + industry capabilities + governed integrations + common data/identity layer.</p>";
   var results = document.getElementById("transformResults");
   if (results) {
     results.classList.remove("hidden");
     results.scrollIntoView({behavior:"smooth"});
   }
-  try { sessionStorage.setItem("automationscan_transform", JSON.stringify({industry:ind,businessModel:model,current:platform,processes:processes,pains:pains})); } catch (e) {}
+  try { sessionStorage.setItem("automationscan_transform", JSON.stringify({industry:ind,businessModel:model,current:platform,processes:processes,pains:pains,painText:painText,customProcess:customProcess,scale:scale,custom:custom,integration:integration,migration:migration,goals:goals,revenue:revenue,employees:employees,erpSpend:erpSpend})); } catch (e) {}
 }
 
 if (industry) industry.addEventListener("change", populateBusinessModels);
