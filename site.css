@@ -58,3 +58,12 @@ footer{background:var(--navy);color:#b8c7c7;padding:50px 0 22px}.footer-grid{dis
 .contact-footer{margin-top:40px}
 @media(max-width:800px){.contact-hero{grid-template-columns:1fr}.consent-banner{display:block}.consent-actions{margin-top:12px}.nav-link-contact{display:none}}
 @media(max-width:520px){.contact-form-card{padding:20px}.contact-page-main{padding:42px 0 65px}.consent-banner{left:10px;right:10px;bottom:10px}.consent-actions .btn{flex:1}}
+
+.report-letterhead{display:none}
+@media print{
+ .report-letterhead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--teal);padding:0 0 12px;margin:0 0 22px;color:#17343c}
+ .report-letterhead strong{display:block;font:700 22px/1 Arial,sans-serif;letter-spacing:-.03em}
+ .report-letterhead strong span{color:var(--copper)}
+ .report-letterhead small{display:block;font:700 8px/1.4 Arial,sans-serif;letter-spacing:.16em;margin-top:5px;color:#6f7d7c}
+ .report-letterhead>span{font:700 8px/1.4 Arial,sans-serif;letter-spacing:.12em;color:#7b8585}
+}
