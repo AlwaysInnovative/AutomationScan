@@ -144,3 +144,12 @@ footer{background:var(--navy);color:#b8c7c7;padding:50px 0 22px}.footer-grid{dis
 
 /* Example cards: explicit interactive affordance */
 .demo-list{position:relative;z-index:2}.demo-tab{position:relative;z-index:3;display:block;width:100%;cursor:pointer;pointer-events:auto;transition:transform .15s ease,box-shadow .15s ease}.demo-tab:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(20,37,45,.08)}.demo-tab:focus-visible{outline:3px solid var(--copper);outline-offset:2px}.demo-tab.active{cursor:pointer}.demo-panel{position:relative;z-index:1}
+
+/* Dedicated report page header */
+.report-page .site-header{position:relative;background:#fff;border-bottom:1px solid var(--line)}
+.report-page .nav{height:auto;min-height:82px;padding-top:14px;padding-bottom:14px;justify-content:space-between}
+.report-page .brand{color:var(--navy)}
+.report-page .brand span{color:var(--copper)}
+.report-page .nav .btn{white-space:nowrap;flex-shrink:0}
+.report-page #reportMount{padding:42px 0 80px;background:#f5f3ee;min-height:calc(100vh - 82px)}
+@media(max-width:600px){.report-page .nav{gap:14px}.report-page .nav .btn{padding:10px 12px;font-size:12px}.report-page #reportMount{padding-top:24px}}
