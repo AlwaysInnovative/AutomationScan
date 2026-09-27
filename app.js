@@ -167,8 +167,23 @@ function renderDemo(key){
  const demoBars=d.areas.map((x)=>{const hrs=Number(String(x[1]).match(/\d+/)?.[0]||0);const pct=Math.round(hrs/Math.max(demoTotal,1)*100);return '<div class="demo-bar-row"><div class="demo-bar-meta"><span>'+escapeHtml(x[0])+'</span><strong>'+hrs+' hrs <b>'+pct+'%</b></strong></div><div class="demo-bar-track"><i style="width:'+Math.max(10,pct)+'%"></i></div></div>';}).join("");
  document.getElementById("demoPanel").innerHTML='<div class="demo-top"><div><span class="demo-kicker">ILLUSTRATIVE SCAN</span><h3>'+d.name+'</h3><p>'+d.meta+'</p></div><div class="demo-score"><strong>'+d.score+'</strong><span>/100</span></div></div><div class="demo-headline">'+d.headline+'</div><div class="demo-hours"><div><span>Estimated work worth investigating</span><small>Directional monthly range</small></div><strong>'+d.hours+'<small>hrs/month</small></strong></div><div class="demo-mini-chart"><div class="demo-chart-title"><div><b>Where the weekly effort sits</b><span>Illustrative share of the three highlighted areas</span></div><strong>'+demoTotal+'<small> hrs/week</small></strong></div><div class="demo-bars">'+demoBars+'</div></div><div class="demo-areas">'+d.areas.map((x,i)=>'<div class="demo-area"><div class="demo-area-top"><small>PRIORITY '+(i+1)+'</small><span>'+x[1]+'</span></div><b>'+x[0]+'</b><p>'+x[2]+'</p></div>').join("")+'</div><div class="demo-next"><b>What the output suggests</b><span>'+d.next+'</span></div>';
 }
-document.querySelectorAll(".demo-tab").forEach(t=>t.addEventListener("click",()=>{document.querySelectorAll(".demo-tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");renderDemo(t.dataset.demo)}));
-renderDemo("accounting");
+function setupExamples(){
+ const tabs=[...document.querySelectorAll(".demo-tab")];
+ if(!tabs.length)return;
+ tabs.forEach(t=>{
+   t.setAttribute("aria-controls","demoPanel");
+   t.setAttribute("aria-pressed",t.classList.contains("active")?"true":"false");
+   t.addEventListener("click",e=>{
+     e.preventDefault();
+     tabs.forEach(x=>{x.classList.remove("active");x.setAttribute("aria-pressed","false");});
+     t.classList.add("active");t.setAttribute("aria-pressed","true");
+     renderDemo(t.dataset.demo);
+     document.getElementById("demoPanel")?.scrollIntoView({behavior:"smooth",block:"nearest"});
+   });
+ });
+ renderDemo(tabs.find(t=>t.classList.contains("active"))?.dataset.demo||"accounting");
+}
+setupExamples();
 show(0);
 
 
