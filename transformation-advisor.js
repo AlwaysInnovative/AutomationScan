@@ -207,12 +207,17 @@ var allCandidates = Object.keys(candidateMeta);
     if (c.fit.indexOf(ind) >= 0) return "Configure / extend only if justified";
     return "Specialist or third-party assessment";
   }
-  if (matrix) matrix.innerHTML = processes.map(function (p) {
-    var rows = candidates.slice(0,4).map(function (x) {
-      var special = candidateMeta[x].fit.indexOf(ind) >= 0 ? "Industry capability to validate" : "Capability needs validation";
-      return "<tr><td>" + escapeHtml(x) + "</td><td>" + special + "</td><td>" + treatmentFor(x) + "</td><td>Require scripted POC evidence</td></tr>";
-    }).join("");
-    return "<div class='requirement-block'><h4>" + escapeHtml(p) + "</h4><table><thead><tr><th>Application</th><th>Initial fit signal</th><th>Delivery pattern</th><th>Evidence required</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
+  var requirementRows = processes.map(function (p) {
+    return candidates.slice(0,4).map(function (app) {
+      var d = candidateDecision(app, 0);
+      var treatment = treatmentFor(app);
+      var gap = d.fit >= 5 && d.integration >= 4 ? "Low-to-moderate validation gap" : "Requirement evidence required";
+      var value = d.fit >= 5 ? "High potential" : "Needs validation";
+      return {process:p, app:app, fit:d.band, gap:gap, treatment:treatment, value:value, evidence:"Scripted demo + industry reference + architecture/security evidence", poc:"Demonstrate " + p + " with normal flow, exception, approval and integration scenario."};
+    });
+  }).flat();
+  if (matrix) matrix.innerHTML = requirementRows.map(function (row) {
+    return "<div class='requirement-block'><h4>" + escapeHtml(row.process) + " - " + escapeHtml(row.app) + "</h4><table><tbody><tr><th>Fit</th><td>" + escapeHtml(row.fit) + "</td><th>Gap</th><td>" + escapeHtml(row.gap) + "</td></tr><tr><th>Treatment</th><td>" + escapeHtml(row.treatment) + "</td><th>Value</th><td>" + escapeHtml(row.value) + "</td></tr><tr><th>Evidence</th><td colspan='3'>" + escapeHtml(row.evidence) + "</td></tr><tr><th>POC</th><td colspan='3'>" + escapeHtml(row.poc) + "</td></tr></tbody></table></div>";
   }).join("");
   if (matrix && customProcessText !== "No custom process supplied") {
     matrix.innerHTML += "<div class='requirement-block custom-process'><h4>Customer custom business process</h4><p>" + escapeHtml(customProcessText) + "</p><table><thead><tr><th>Decision</th><th>What to test</th><th>Preferred treatment</th><th>Evidence</th></tr></thead><tbody><tr><td>Preserve business differentiation</td><td>Why the process exists and measurable value</td><td>Standard capability first; configure where possible</td><td>POC with real exception scenarios</td></tr><tr><td>Replace / simplify</td><td>Whether the process is historical customisation</td><td>Challenge customisation before migration</td><td>Fit-gap and TCO evidence</td></tr></tbody></table></div>";
