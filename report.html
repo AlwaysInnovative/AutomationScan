@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AutomationScan is a free business automation assessment for owners and operations teams. Find repetitive work, estimate the time worth investigating, and get a professional PDF report.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<link rel="canonical" href="https://automation-scan-neon.vercel.app/report.html">
+<meta name="theme-color" content="#14252d">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AutomationScan | Free Business Automation Assessment">
+<meta property="og:description" content="Find repetitive work, see where time goes, and get a practical automation assessment report in minutes.">
+<meta property="og:url" content="https://automation-scan-neon.vercel.app/">
+<meta property="og:site_name" content="AutomationScan">
+<meta property="og:image" content="https://automation-scan-neon.vercel.app/og-image.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AutomationScan | Free Business Automation Assessment">
+<meta name="twitter:description" content="A practical browser-based assessment for repetitive business work.">
+<meta name="twitter:image" content="https://automation-scan-neon.vercel.app/og-image.svg">
+<title>AutomationScan | Your Business Automation Report</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./site.css?v=20260927-4">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preconnect" href="https://images.unsplash.com">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"A free browser-based business automation assessment that helps organizations identify repetitive work and prioritize opportunities for process automation.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/","logo":"https://automation-scan-neon.vercel.app/favicon.svg"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is AutomationScan?","acceptedAnswer":{"@type":"Answer","text":"AutomationScan is a free discovery tool that asks about repetitive work, workload and common business systems, then produces a directional automation opportunity report."}},{"@type":"Question","name":"Who should use AutomationScan?","acceptedAnswer":{"@type":"Answer","text":"Owners, operators, managers, consultants and teams in small and growing businesses can use the scan to identify repetitive administrative work worth investigating."}},{"@type":"Question","name":"Does AutomationScan automatically change business processes?","acceptedAnswer":{"@type":"Answer","text":"No. The assessment identifies and prioritizes opportunities. Implementation decisions remain with the business."}},{"@type":"Question","name":"Is the score a guaranteed savings estimate?","acceptedAnswer":{"@type":"Answer","text":"No. The score and hours estimate are directional and should be validated against the actual process before an investment decision."}}]}</script>
+<script src="marketing-config.js?v=20260927-3"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+window.trackEvent=function(name,params){
+  try{if(window.AUTOMATIONSCAN_GA4_ID && window.__analyticsConsent==="granted" && typeof gtag==="function")gtag("event",name,params||{});}catch(e){}
+};
+window.enableAnalytics=function(){
+  if(window.__ga4Loaded||!window.AUTOMATIONSCAN_GA4_ID)return;
+  var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(window.AUTOMATIONSCAN_GA4_ID);
+  document.head.appendChild(s);
+  gtag("js",new Date());gtag("config",window.AUTOMATIONSCAN_GA4_ID,{anonymize_ip:true});
+  window.__ga4Loaded=true;
+};
+</script>
+</head><body class="report-page"><header class="site-header"><div class="wrap nav"><a class="brand" href="index.html">Automation<span>Scan</span></a><a class="btn btn-light" href="index.html">← Run another scan</a></div></header><main id="reportMount"><div class="wrap"><section class="panel"><p class="eyebrow">YOUR REPORT</p><h1>Preparing your report…</h1></section></div></main><script>(function(){const m=document.getElementById("reportMount"),s=sessionStorage.getItem("automationScanReportHtml");if(!s){m.innerHTML='<div class="wrap"><section class="panel"><h1>No report found</h1><p>Please run the assessment first.</p><a class="btn btn-copper" href="index.html">Start assessment</a></section></div>';return;}m.innerHTML=s;const p=document.getElementById("downloadPdf"),pr=document.getElementById("print");function pdf(){document.body.classList.add("printing-report");window.addEventListener("afterprint",()=>document.body.classList.remove("printing-report"),{once:true});setTimeout(()=>window.print(),80)}if(p)p.onclick=pdf;if(pr)pr.onclick=pdf;})();</script></body></html>
