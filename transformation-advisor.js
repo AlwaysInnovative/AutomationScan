@@ -140,6 +140,10 @@ function renderReport() {
   var employees = value("employees") || "Not specified";
   var erpSpend = value("erpSpend") || "Unknown";
   var integration = value("integration") || "Low";
+  var revenueModel = value("revenueModel") || "Mixed";
+  var fulfilmentModel = value("fulfilmentModel") || "Not specified";
+  var deliveryModel = value("deliveryModel") || "Hybrid";
+  var regulatoryIntensity = value("regulatoryIntensity") || "Moderate";
   var migration = value("migration") || "Balanced";
   var goals = checked("goal");
   var painText = value("painText") || "";
@@ -276,7 +280,7 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
   if (inputsBox) inputsBox.innerHTML = [
     ["Industry",ind],["Business model",model],["Current platform",platform],["Operating footprint",scale],
     ["Revenue / turnover",revenue],["Employees",employees],["ERP / core-app spend",erpSpend],["Customisation today",custom],
-    ["Integration complexity",integration],["Transformation appetite",migration],["Target horizon",horizon],["Existing ecosystem",ecosystem],
+    ["Integration complexity",integration],["Revenue model",revenueModel],["Fulfilment model",fulfilmentModel],["Delivery model",deliveryModel],["Regulatory intensity",regulatoryIntensity],["Transformation appetite",migration],["Target horizon",horizon],["Existing ecosystem",ecosystem],
     ["Assessment goals",goals.length ? goals.join(", ") : "Not specified"],["Customer pain narrative",painText || "Not provided"],
     ["Custom business process",customProcess !== "None provided" ? customProcess : "Not provided"],["Selected process areas",processes.length ? processes.join(", ") : "Not specified"],
     ["Selected pain signals",pains.length ? pains.join(", ") : "Not specified"]
@@ -369,7 +373,7 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
     results.classList.remove("hidden");
     results.scrollIntoView({behavior:"smooth"});
   }
-  try { sessionStorage.setItem("automationscan_transform", JSON.stringify({industry:ind,businessModel:model,current:platform,processes:processes,pains:pains,painText:painText,customProcess:customProcess,scale:scale,custom:custom,integration:integration,migration:migration,goals:goals,revenue:revenue,employees:employees,erpSpend:erpSpend})); } catch (e) {}
+  try { sessionStorage.setItem("automationscan_transform", JSON.stringify({industry:ind,businessModel:model,current:platform,processes:processes,pains:pains,painText:painText,customProcess:customProcess,scale:scale,custom:custom,integration:integration,revenueModel:revenueModel,fulfilmentModel:fulfilmentModel,deliveryModel:deliveryModel,regulatoryIntensity:regulatoryIntensity,migration:migration,goals:goals,revenue:revenue,employees:employees,erpSpend:erpSpend})); } catch (e) {}
 }
 
 if (industry) industry.addEventListener("change", populateBusinessModels);
