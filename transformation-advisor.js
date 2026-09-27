@@ -106,6 +106,17 @@ function escapeHtml(v) {
   return String(v == null ? "" : v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
+function buildDecisionNarrative(ind, model, platform, scale, migration, candidates, scores, processes, pains) {
+  var top = scores.slice(0,3);
+  var continuity = platform !== "Not specified" && platform.toLowerCase().indexOf("infor") >= 0;
+  var route = migration === "Replace" ? "replacement" : migration === "Modernise" ? "modernisation" : "structured comparison";
+  var text = "Your assessment points toward a " + route + " decision. ";
+  if (continuity) text += "Because the current platform is Infor, test the value of staying on the Infor path before committing to replacement. ";
+  text += "The report should treat " + top.map(function(x){return x.name;}).join(", ") + " as the first investigation set, not as an automatic winner. ";
+  text += "The next decision gate is evidence: scripted process demonstrations, industry references, security architecture, integration proof, migration approach and five-year TCO.";
+  return text;
+}
+
 function renderReport() {
   var ind = value("industry") || "Other";
   var model = value("businessModel") || "Not specified";
@@ -167,7 +178,7 @@ var allCandidates = Object.keys(candidateMeta);
   if (sub) sub.textContent = "Business model: " + model + " | Current platform: " + platform;
   if (scoreEl) scoreEl.textContent = score;
   if (interpretation) interpretation.textContent = "This is a discovery signal, not a procurement recommendation. Validate the shortlisted options against your detailed requirements.";
-  if (summary) summary.innerHTML = "<p>Your assessment describes a " + escapeHtml(ind) + " organisation operating as " + escapeHtml(model) + " with " + escapeHtml(platform) + " as the current platform. The next decision is whether to stay, modernise, replace, or complement the current ecosystem.</p>";
+  if (summary) summary.innerHTML = "<p>" + escapeHtml(buildDecisionNarrative(ind, model, platform, scale, migration, candidates, scores, processes, pains)) + "</p>";
   if (contextLabel) contextLabel.textContent = "Assessment context";
   if (context) context.innerHTML = "<b>" + escapeHtml(ind) + " / " + escapeHtml(model) + "</b><p>Scale: " + escapeHtml(scale) + "</p><p>Customisation: " + escapeHtml(custom) + " | Integration: " + escapeHtml(integration) + "</p><p>Transformation appetite: " + escapeHtml(migration) + "</p>";
   if (capCount) capCount.textContent = processes.length + " selected";
