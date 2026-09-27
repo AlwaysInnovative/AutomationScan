@@ -124,7 +124,17 @@ function renderReport() {
   "NetSuite": {url:"https://www.netsuite.com/portal/industries/retail.shtml", fit:["Retail","Distribution","Professional Services"], reason:"Cloud ERP candidate where scope can be standardised without excessive enterprise complexity.", proof:"Demonstrate finance, order, inventory and required industry extensions.", evidence:"Industry references, integration catalogue and five-year TCO."},
   "IFS": {url:"https://www.ifs.com/solutions/industries", fit:["Manufacturing","Distribution","Hospitality"], reason:"Operational ERP and industry workflows suited to asset, service and complex operational environments.", proof:"Demonstrate the most operationally complex end-to-end process.", evidence:"Industry references, security architecture and implementation evidence."}
 };
-var candidates = Object.keys(candidateMeta);
+var allCandidates = Object.keys(candidateMeta);
+  var scores = allCandidates.map(function (name) {
+    var m = candidateMeta[name];
+    var fit = m.fit.indexOf(ind) >= 0 ? 28 : 8;
+    var continuity = platform.toLowerCase().indexOf(name.toLowerCase()) >= 0 ? 18 : 0;
+    var complexity = scale === "Enterprise" ? (name === "Oracle" || name === "SAP" || name === "Microsoft Dynamics" || name === "IFS" ? 16 : 6) : (name === "NetSuite" || name === "Microsoft Dynamics" || name === "Infor" ? 16 : 9);
+    var migrationSignal = migration === "Replace" ? (continuity ? 4 : 10) : (continuity ? 12 : 7);
+    var processSignal = Math.min(18, processes.length * 2);
+    return {name:name, score:fit + continuity + complexity + migrationSignal + processSignal};
+  }).sort(function(a,b){return b.score-a.score;});
+  var candidates = scores.map(function(x){return x.name;});
   var score = Math.min(96, 55 + processes.length * 3 + pains.length * 2 + (platform !== "Not specified" ? 8 : 0));
 
   var title = document.getElementById("tResultTitle");
@@ -162,7 +172,7 @@ var candidates = Object.keys(candidateMeta);
   if (context) context.innerHTML = "<b>" + escapeHtml(ind) + " / " + escapeHtml(model) + "</b><p>Scale: " + escapeHtml(scale) + "</p><p>Customisation: " + escapeHtml(custom) + " | Integration: " + escapeHtml(integration) + "</p><p>Transformation appetite: " + escapeHtml(migration) + "</p>";
   if (capCount) capCount.textContent = processes.length + " selected";
   if (caps) caps.innerHTML = processes.length ? processes.map(function (x) { return "<li>" + escapeHtml(x) + "</li>"; }).join("") : "<li>No specific processes selected yet.</li>";
-  if (kpis) kpis.innerHTML = "<article><b>" + processes.length + "</b><span>process areas</span></article><article><b>" + pains.length + "</b><span>pain areas</span></article><article><b>" + candidates.length + "</b><span>ecosystems to explore</span></article>";
+  if (kpis) kpis.innerHTML = "<article><b>" + processes.length + "</b><span>process areas</span></article><article><b>" + pains.length + "</b><span>pain areas</span></article><article><b>" + candidates.length + "</b><span>ecosystems assessed</span></article><article><b>" + candidates.slice(0,3).join(" / ") + "</b><span>priority investigation set</span></article>";
   if (opportunities) opportunities.innerHTML = "<ul><li>Standardise high-friction processes before replacing them.</li><li>Map integrations and customisations before committing to migration.</li><li>Separate core ERP needs from specialist industry applications.</li></ul>";
   if (need) need.innerHTML = "<p>Do not assume ERP replacement is necessary. Compare three scenarios: modernise the current platform, replace the core ERP, or simplify the application landscape with SaaS and specialist products.</p>";
   if (approach) approach.innerHTML = "<p>Use a fit-to-standard first approach. Preserve differentiating industry capabilities and challenge customisations that do not create measurable business value.</p>";
