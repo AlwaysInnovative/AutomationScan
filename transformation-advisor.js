@@ -165,7 +165,12 @@ function renderReport() {
     "S/4HANA + specialist ecosystem": {type:"ERP + best-of-breed", products:"SAP core plus specialist applications", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Finance","Supply Chain","Procurement","Manufacturing","Retail","Integration","Analytics"], url:"https://www.sap.com/"}
   };
   Object.keys(candidateLibrary).forEach(function(name){
-    candidateMeta[name]=candidateLibrary[name];
+    var src=candidateLibrary[name] || {};
+    candidateMeta[name]=Object.assign({}, src, {
+      fit: src.fit || src.industries || [],
+      caps: src.caps || [],
+      products: src.products || name
+    });
   });
 var allCandidates = Object.keys(candidateMeta).filter(function(name){
     var meta=candidateMeta[name];
