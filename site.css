@@ -241,3 +241,38 @@ footer{background:var(--navy);color:#b8c7c7;padding:50px 0 22px}.footer-grid{dis
 .transform-results .candidate-card>div span{font-size:9px;text-transform:uppercase;color:var(--muted);font-weight:800}
 .transform-results .explore-card ul{margin:8px 0;padding-left:18px}
 @media print{.transform-results,.transform-results *{font-family:Arial,Helvetica,sans-serif!important}.transform-results .requirement-block{break-inside:avoid-page;page-break-inside:avoid}.transform-results .requirement-block th,.transform-results .requirement-block td{padding:6px;font-size:8px}}
+
+/* Transformation Advisor report system */
+.transform-results{font-family:Inter,"Segoe UI",Arial,sans-serif!important;font-size:14px!important;line-height:1.55!important;color:#25343a!important}
+.transform-results *{font-family:Inter,"Segoe UI",Arial,sans-serif!important;box-sizing:border-box}
+.transform-results h1,.transform-results h2,.transform-results h3,.transform-results h4{letter-spacing:-.018em}
+.transform-results p,.transform-results li,.transform-results td,.transform-results th,.transform-results dd{font-size:13px;line-height:1.55}
+.transform-results .eyebrow{font-size:10px!important;letter-spacing:.12em;text-transform:uppercase;font-weight:800}
+.transform-results .exec-lead{font-size:17px!important;line-height:1.5!important;font-weight:500}
+.transform-results .exec-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.transform-results .exec-facts div{padding:14px;border:1px solid var(--line);border-radius:10px;background:#faf9f5}
+.transform-results .exec-facts small{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin-bottom:5px}
+.transform-results .exec-facts b{font-size:12px}
+.transform-results .exec-disclaimer{font-size:10px!important;color:#66747a}
+.transform-results .candidate-card,.transform-results .explore-card,.transform-results .requirement-block{break-inside:avoid;page-break-inside:avoid}
+.transform-results .candidate-card{padding:18px!important;display:flex;gap:14px}
+.transform-results .candidate-rank{font-size:22px;font-weight:800;min-width:28px}
+.transform-results .candidate-name b,.transform-results .explore-head b{font-size:17px}
+.transform-results .candidate-name span,.transform-results .explore-head span{font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.transform-results .explore-card{padding:18px!important}
+.transform-results .explore-card dl{display:grid;grid-template-columns:170px 1fr;gap:8px 14px}
+.transform-results .explore-card dt{font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:800}
+.transform-results .explore-card dd{margin:0}
+.transform-results .requirement-block h4{font-size:14px}
+.transform-results .requirement-block th{font-size:9px!important;letter-spacing:.06em}
+.transform-results .requirement-block td{font-size:11px!important}
+.transform-results .savings-grid,.transform-results .need-erp-grid,.transform-results .approach-grid,.transform-results .tradeoff-grid,.transform-results .risk-grid,.transform-results .benefit-grid,.transform-results .value-grid{font-size:13px}
+@media(max-width:760px){.transform-results .exec-facts{grid-template-columns:1fr}.transform-results .explore-card dl{grid-template-columns:1fr}}
+@media print{
+ .transform-results{font-size:10pt!important}
+ .transform-results p,.transform-results li,.transform-results td,.transform-results th,.transform-results dd{font-size:9pt}
+ .transform-results .exec-lead{font-size:13pt!important}
+ .transform-results .candidate-name b,.transform-results .explore-head b{font-size:12pt}
+ .transform-results .requirement-block td{font-size:8pt!important}
+ .transform-results .requirement-block th{font-size:7pt!important}
+}
