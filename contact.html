@@ -5,7 +5,7 @@
 <meta name="description" content="Contact AutomationScan for questions, feedback, partnerships and business automation assessment support.">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://automation-scan-neon.vercel.app/contact.html">
-<link rel="stylesheet" href="site.css?v=20260927-1"><link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="site.css?v=20260927-3"><link rel="icon" href="favicon.svg" type="image/svg+xml">
 <title>Contact AutomationScan | Business Automation Assessment</title>
 </head>
 <body class="contact-page">
@@ -26,6 +26,16 @@
 <div class="actions"><button class="btn btn-copper" type="submit">Send message →</button></div><p id="contactStatus" class="contact-status" role="status" aria-live="polite"></p>
 </form></section></div></main>
 <footer class="contact-footer"><div class="wrap footer-grid"><div><a class="brand" href="./">Automation<span>Scan</span></a><p>Practical visibility for better business processes.</p></div><div><b>Explore</b><a href="./#method">How it works</a><a href="./#examples">Examples</a><a href="./#scanner">Free assessment</a><a href="guides/automation-assessment.html">Automation guide</a></div><div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div></div><div class="wrap footer-bottom">© 2026 AutomationScan · Built to help teams see the work behind the work.</div></footer>
-<section class="consent-banner" id="consentBanner" role="dialog" aria-label="Privacy choices" hidden><div><strong>Your privacy choices</strong><p>We use optional analytics to understand site usage. Advertising is off unless enabled and consented to.</p></div><div class="consent-actions"><button type="button" id="consentReject" class="btn btn-light">Reject optional</button><button type="button" id="consentAccept" class="btn btn-copper">Accept optional</button></div></section>
-<script src="api-config.js?v=20260927-1"></script><script src="contact.js?v=20260927-1"></script>
+<section class="consent-banner" id="consentBanner" role="dialog" aria-label="Privacy choices" hidden><div><strong>Your privacy choices</strong><p>Optional analytics is used only after your choice. Advertising is disabled until a compliant Google ad-consent setup is configured and consent is obtained.</p></div><div class="consent-actions"><button type="button" id="consentReject" class="btn btn-light">Reject optional</button><button type="button" id="consentAccept" class="btn btn-copper">Accept optional</button></div></section>
+<script src="marketing-config.js?v=20260927-3"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+window.trackEvent=function(name,params){try{if(typeof gtag==="function")gtag("event",name,params||{});}catch(e){}};
+window.enableAnalytics=function(){
+ if(window.__ga4Loaded||!window.AUTOMATIONSCAN_GA4_ID||window.__analyticsConsent!=="granted")return;
+ window.__ga4Loaded=true; gtag("js",new Date()); gtag("config",window.AUTOMATIONSCAN_GA4_ID);
+ const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(window.AUTOMATIONSCAN_GA4_ID);document.head.appendChild(s);
+};
+</script><script src="api-config.js?v=20260927-3"></script><script src="contact.js?v=20260927-3"></script>
 </body></html>
