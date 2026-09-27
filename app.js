@@ -3,7 +3,16 @@ const steps=[...document.querySelectorAll(".step")];
 const next=document.getElementById("next"),back=document.getElementById("back"),submit=document.getElementById("submit");
 let current=0;
 function track(name,params){try{if(window.trackEvent)window.trackEvent(name,params)}catch(e){}}
-track("scan_page_view",{page_location:location.pathname});
+function captureLeadSource(){
+  const u=new URL(location.href), keys=["utm_source","utm_medium","utm_campaign","utm_term","utm_content","gclid","fbclid"];
+  const source={referrer:document.referrer||"",landing_page:location.pathname};
+  keys.forEach(k=>{if(u.searchParams.get(k))source[k]=u.searchParams.get(k)});
+  try{if(!sessionStorage.getItem("automationscan_source"))sessionStorage.setItem("automationscan_source",JSON.stringify(source));}catch(e){}
+  return source;
+}
+const leadSource=captureLeadSource();
+track("scan_page_view",{page_location:location.pathname,utm_source:leadSource.utm_source||"(direct)",utm_medium:leadSource.utm_medium||"(none)"});
+
 
 function show(i){current=i;steps.forEach((s,n)=>s.classList.toggle("active",n===i));document.getElementById("progressText").textContent="Step "+(i+1)+" of "+steps.length;document.getElementById("progressBar").style.width=((i+1)/steps.length*100)+"%";back.hidden=i===0;next.hidden=i===steps.length-1;submit.hidden=i!==steps.length-1}
 function valid(){for(const f of steps[current].querySelectorAll("[required]")){if(!f.checkValidity()){f.reportValidity();return false}}return true}
@@ -101,13 +110,13 @@ function reportData(){
  return {r,top,date:new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"})};
 }
 function drawPdf(){
- track("pdf_downloaded",{format:"print_to_pdf"});
- const status=document.getElementById("saveStatus");
- status.textContent="";
- document.body.classList.add("printing-report");
- window.setTimeout(()=>window.print(),50);
+  track("pdf_downloaded",{format:"browser_pdf"});
+  const status=document.getElementById("saveStatus"); if(status)status.textContent="";
+  document.body.classList.add("printing-report");
+  const restore=()=>document.body.classList.remove("printing-report");
+  window.addEventListener("afterprint",restore,{once:true});
+  window.setTimeout(()=>window.print(),80);
 }
-
 const pdfButton=document.getElementById("downloadPdf"); if(pdfButton) pdfButton.addEventListener("click",drawPdf);
 const printButton=document.getElementById("print"); if(printButton) printButton.addEventListener("click",()=>window.print());
 
@@ -115,7 +124,7 @@ async function submitLeadIfConsented(r,top){
  const email=form.elements.emailAddress?.value?.trim(),consent=form.elements.consent?.checked;
  if(!email||!consent)return;
  try{
-  const res=await fetch((window.AUTOMATIONSCAN_API_BASE||"")+"/api/lead",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,consent:true,report:{score:r.score,label:r.label,low:r.low,high:r.high,industry:r.industry,goal:r.goal,top:top.slice(0,3).map(x=>x[0]),coverage:r.coverage}})});
+  const res=await fetch((window.AUTOMATIONSCAN_API_BASE||"")+"/api/lead",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,consent:true,source:leadSource,report:{score:r.score,label:r.label,low:r.low,high:r.high,industry:r.industry,goal:r.goal,top:top.slice(0,3).map(x=>x[0]),coverage:r.coverage}})});
   document.getElementById("saveStatus").textContent=res.ok?"Report generated; email request submitted.":"Report generated locally; email delivery is not configured yet.";
  }catch{document.getElementById("saveStatus").textContent="Report generated locally."}
 }
@@ -157,7 +166,7 @@ function setupContact(){
    if(f.elements.website.value)return;
    btn.disabled=true; s.textContent="Sending…"; track("contact_submitted",{subject:f.elements.subject.value.slice(0,80)});
    try{
-     const res=await fetch((window.AUTOMATIONSCAN_API_BASE||"")+"/api/contact",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:f.elements.name.value.trim(),email:f.elements.email.value.trim(),subject:f.elements.subject.value.trim(),message:f.elements.message.value.trim(),consent:f.elements.consent.checked,website:""})});
+     const res=await fetch((window.AUTOMATIONSCAN_API_BASE||"")+"/api/contact",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:f.elements.name.value.trim(),email:f.elements.email.value.trim(),subject:f.elements.subject.value.trim(),message:f.elements.message.value.trim(),consent:f.elements.consent.checked,website:"",source:captureLeadSource()})});
      const data=await res.json().catch(()=>({}));
      if(!res.ok)throw new Error(data.error||"send_failed");
      s.textContent="Thanks — your message has been submitted. We’ll follow up by email.";
@@ -166,4 +175,13 @@ function setupContact(){
    finally{btn.disabled=false;}
  });
 }
-setupAds(); setupContact();
+function setupConsent(){
+ const banner=document.getElementById("consentBanner"); if(!banner)return;
+ let choice=null; try{choice=localStorage.getItem("automationscan_consent")}catch(e){}
+ function apply(v){window.__analyticsConsent=v;if(v==="granted")window.enableAnalytics();banner.hidden=true;try{localStorage.setItem("automationscan_consent",v)}catch(e){}track("consent_choice",{choice:v});}
+ if(choice==="granted"||choice==="denied"){window.__analyticsConsent=choice;if(choice==="granted")window.enableAnalytics();banner.hidden=true}
+ else banner.hidden=false;
+ document.getElementById("consentAccept")?.addEventListener("click",()=>apply("granted"));
+ document.getElementById("consentReject")?.addEventListener("click",()=>apply("denied"));
+}
+setupAds(); setupContact(); setupConsent();
