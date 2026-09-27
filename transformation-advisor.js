@@ -1,46 +1,190 @@
-const INDUSTRIES={
-Retail:{models:["Department / specialty retail","Grocery / convenience","Fashion / apparel","Wholesale + retail","Omnichannel / marketplace"],processes:["Merchandising & assortment","Buying & supplier management","Pricing / promotions / markdowns","Demand forecasting & replenishment","Allocation & inventory","Store operations / POS","eCommerce / order management","Warehouse / fulfilment","Returns / reverse logistics","Customer / loyalty","Finance / P2P / O2C","Product / SKU / location master data","Retail analytics & planning"],pains:["Stockouts / overstocks","Margin leakage / markdown pressure","Spreadsheet-based planning","Poor inventory visibility","Disconnected POS / eCommerce","Slow assortment decisions","Manual supplier processes","Complex integrations","Store-to-warehouse imbalance"]},
-Manufacturing:{models:["Discrete manufacturing","Process manufacturing","Engineer-to-order","Make-to-stock","Make-to-order"],processes:["Demand planning","S&OP","MRP / production planning","BOM / routing","Shop-floor execution","Quality management","Procurement","Supplier collaboration","Inventory / warehouse","Maintenance / assets","Order management","Costing / finance","Traceability / compliance","Product lifecycle"],pains:["Planning instability","Production downtime","Inventory excess","Manual scheduling","Quality / traceability gaps","Supplier risk","Cost variance","Disconnected shop floor","Legacy customisations"]},
-Distribution:{models:["Wholesale distribution","3PL / logistics","Industrial distribution","Food distribution","Pharma distribution"],processes:["Demand planning","Purchasing","Inventory optimisation","Warehouse / WMS","Order management","Pricing / rebates","Transportation","Supplier management","Customer service","EDI / integration","Finance / P2P / O2C","Analytics"],pains:["Low inventory accuracy","Warehouse inefficiency","Margin leakage","Manual order entry","Poor demand visibility","Transport cost","Customer service delays","EDI complexity"]},
-Healthcare:{models:["Hospital / health system","Clinic network","Diagnostics","Medical devices","Healthcare services"],processes:["Patient / provider operations","Scheduling","Supply chain","Procurement","Inventory","Finance","Compliance","Billing / revenue cycle","Asset / equipment management","Analytics / data","Integration / interoperability"],pains:["Manual administration","Supply shortages","Compliance burden","Fragmented data","Revenue leakage","Scheduling inefficiency","Integration complexity","Asset visibility"]},
-"Professional Services":{models:["Consulting","IT services","Engineering services","Managed services","Legal / advisory"],processes:["Lead-to-project","Resource planning","Time & expense","Project delivery","Utilisation","Billing / revenue recognition","Contracts","Procurement","Finance","Knowledge / collaboration","CRM","Analytics"],pains:["Low billable utilisation","Manual timesheets","Revenue leakage","Poor resource forecasting","Project margin visibility","Fragmented CRM / ERP","Slow billing"]},
-Hospitality:{models:["Hotel group","Restaurant group","Travel / leisure","Resort","Multi-brand hospitality"],processes:["Reservations","Property / venue operations","POS","Procurement","Inventory","Revenue management","Housekeeping / service","Customer loyalty","Workforce","Finance","Analytics","Digital commerce"],pains:["Demand volatility","Labour inefficiency","Food / stock waste","Disconnected POS","Poor guest data","Manual revenue management","Multi-property reporting"]},
-Other:{models:["B2B","B2C","Platform / marketplace","Asset-intensive","Mixed"],processes:["Finance","Procurement","Sales / order management","Inventory / operations","Planning","Workforce","Customer service","Data / analytics","Integration","AI / automation"],pains:["Manual processes","Poor visibility","Legacy systems","Integration complexity","Data quality","High operating cost","Slow decision making"]}};
-const platforms={Oracle:{caps:["Finance","Procurement","Supply chain","Warehouse","Merchandising","Planning","Inventory","Commerce","Data","AI","Integration"]},SAP:{caps:["Finance","Procurement","Supply chain","Warehouse","Planning","Inventory","Data","AI","Integration","Merchandising"]},Microsoft:{caps:["Finance","Procurement","Supply chain","Warehouse","Planning","Inventory","Commerce","CRM","Data","AI","Integration"]},Infor:{caps:["Finance","Procurement","Supply chain","Warehouse","Merchandising","Planning","Inventory","Data","AI","Integration"]},NetSuite:{caps:["Finance","Procurement","Inventory","Order management","Commerce","CRM","Data","Integration"]},IFS:{caps:["Finance","Procurement","Supply chain","Warehouse","Planning","Inventory","Asset / service","Data","AI","Integration"]}};
-const form=document.getElementById("transformForm"),businessModel=document.querySelector('[name="businessModel"]'),steps=[...document.querySelectorAll(".t-step")],next=document.getElementById("tNext"),back=document.getElementById("tBack"),generate=document.getElementById("tGenerate");const industry=document.getElementById("industry"),tProgress=document.getElementById("tProgress"),tProgressBar=document.getElementById("tProgressBar"),industryIntro=document.getElementById("industryIntro"),industryProcesses=document.getElementById("industryProcesses"),industryPains=document.getElementById("industryPains"),tScore=document.getElementById("tScore"),tResultSub=document.getElementById("tResultSub"),tInterpretation=document.getElementById("tInterpretation"),tSummary=document.getElementById("tSummary"),tContext=document.getElementById("tContext"),tContextLabel=document.getElementById("tContextLabel"),tKpis=document.getElementById("tKpis"),tCapCount=document.getElementById("tCapCount"),tCaps=document.getElementById("tCaps"),tOpportunities=document.getElementById("tOpportunities"),tExplore=document.getElementById("tExplore"),tMatrix=document.getElementById("tMatrix"),tNeedERP=document.getElementById("tNeedERP"),tSavings=document.getElementById("tSavings"),tFutureBenefits=document.getElementById("tFutureBenefits"),tApproach=document.getElementById("tApproach"),tTradeoffs=document.getElementById("tTradeoffs"),tRisks=document.getElementById("tRisks"),tValue=document.getElementById("tValue"),tEvidence=document.getElementById("tEvidence"),tQuestions=document.getElementById("tQuestions"),tRoadmap=document.getElementById("tRoadmap"),transformResults=document.getElementById("transformResults"),tPrint=document.getElementById("tPrint");let current=0;
-const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-function show(i){current=i;steps.forEach((s,n)=>s.classList.toggle("active",n===i));tProgress.textContent="Step "+(i+1)+" of "+steps.length;tProgressBar.style.width=((i+1)/steps.length*100)+"%";back.hidden=i===0;next.hidden=i===steps.length-1;generate.hidden=i!==steps.length-1;window.scrollTo({top:document.getElementById("navigator").offsetTop-30,behavior:"smooth"});}
-function valid(){for(const f of steps[current].querySelectorAll("[required]"))if(!f.checkValidity()){f.reportValidity();return false}return true}
-next.addEventListener("click",()=>{if(valid())show(Math.min(current+1,steps.length-1))});back.addEventListener("click",()=>show(Math.max(current-1,0)));
-function loadIndustry(){const d=INDUSTRIES[industry.value]||INDUSTRIES.Other;businessModel.innerHTML='<option value="">Choose</option>'+d.models.map(x=>'<option>'+esc(x)+'</option>').join("");industryIntro.innerHTML="<b>"+esc(industry.value||"Your industry")+"</b> - "+d.processes.length+" core process areas will be considered, including: "+d.processes.slice(0,5).map(esc).join(" - ")+" ";industryProcesses.innerHTML=d.processes.map(x=>'<label><input type="checkbox" name="process" value="'+esc(x)+'">'+esc(x)+"</label>").join("");industryPains.innerHTML=d.pains.map(x=>'<label><input type="checkbox" name="pain" value="'+esc(x)+'">'+esc(x)+"</label>").join("");}
-industry.addEventListener("change",loadIndustry);loadIndustry();
-function read(){return{industry:industry.value,businessModel:businessModel.value,current:form.elements.current.value,scale:form.elements.scale.value,processes:[...form.querySelectorAll('input[name="process"]:checked')].map(x=>x.value),customProcess:form.elements.customProcess.value,pains:[...form.querySelectorAll('input[name="pain"]:checked')].map(x=>x.value),painText:form.elements.painText.value,revenue:form.elements.revenue.value,employees:form.elements.employees.value,erpSpend:form.elements.erpSpend.value,custom:form.elements.custom.value,integration:form.elements.integration.value,migration:form.elements.migration.value,ecosystem:form.elements.ecosystem.value,horizon:form.elements.horizon.value,goals:[...form.querySelectorAll('input[name="goal"]:checked')].map(x=>x.value),email:form.elements.email.value}}
-function moneyBand(d){const rev={"Under $10M":10000000,"$10M-$50M":50000000,"$50M-$250M":250000000,"$250M-$1B":1000000000,"$1B-$5B":5000000000,"Over $5B":10000000000}[d.revenue]||0;if(!rev)return null;const low=Math.round(rev*.002),high=Math.round(rev*.01);return{low,high};}
-function fmt(n){return n>=1000000000?"$"+(n/1e9).toFixed(1)+"B":n>=1000000?"$"+(n/1e6).toFixed(1)+"M":n>=1000?"$"+Math.round(n/1000)+"K":"$"+n}
-function render(d){const ind=INDUSTRIES[d.industry]||INDUSTRIES.Other,selected=d.processes.length?d.processes:ind.processes,pains=d.pains.length?d.pains:ind.pains;const depth=Math.min(100,Math.round(selected.length/Math.max(ind.processes.length,1)*45+pains.length/Math.max(ind.pains.length,1)*20+(d.custom!=="Low"?10:0)+(d.integration!=="Low"?10:0)+(d.migration.includes("Transformational")?15:5)));tScore.textContent=depth;tResultSub.textContent=d.industry+" - "+d.businessModel+" - "+d.current+" - "+d.scale;tInterpretation.textContent=depth>=75?"The input set is detailed enough for a structured transformation hypothesis and vendor-market discovery.":depth>=50?"There is a useful transformation signal, but several business and economic assumptions should be validated before a shortlist is treated as final.":"The strongest next step is deeper process and value discovery before narrowing the technology market.";tSummary.textContent="This report converts your inputs into a structured decision brief: business priorities, industry processes, pain points, candidate approaches, architecture boundaries, value pools, risks and the evidence still required before a procurement decision.";
-tContext.innerHTML=[["Industry",d.industry],["Business model",d.businessModel],["Current platform",d.current],["Scale",d.scale],["Revenue",d.revenue],["Employees",d.employees],["ERP/application spend",d.erpSpend],["Customisation",d.custom],["Integration",d.integration],["Transformation appetite",d.migration],["Decision horizon",d.horizon]].map(x=>"<div class='signal-row'><span>"+esc(x[0])+"</span><b>"+esc(x[1])+"</b></div>").join("");tContextLabel.textContent="assessment inputs";const industryKpis={Retail:[["Inventory availability","In-stock %, stockout rate, inventory turns"],["Margin","Gross margin, markdown %, promotion ROI"],["Omnichannel","Order fill rate, fulfilment time, return rate"],["Planning","Forecast accuracy, replenishment exceptions"]],Manufacturing:[["Operations","OEE, schedule adherence, downtime"],["Inventory","Turns, days of supply, excess/obsolete"],["Planning","Forecast accuracy, plan adherence"],["Quality","First-pass yield, defects, cost of quality"]],Distribution:[["Service","OTIF, fill rate, order cycle time"],["Warehouse","Pick accuracy, lines/hour, inventory accuracy"],["Margin","Gross margin, freight leakage, rebates"],["Inventory","Turns, excess, stockout rate"]],Healthcare:[["Access","Wait time, utilisation, appointment adherence"],["Supply","Stockout rate, inventory turns, expiry/waste"],["Revenue","Denial rate, cycle time, leakage"],["Compliance","Exception rate, audit findings, data quality"]],Hospitality:[["Revenue","Occupancy, ADR, RevPAR / revenue per outlet"],["Operations","Labour productivity, service time, waste"],["Guest","NPS/satisfaction, repeat rate, complaints"],["Inventory","Food cost, stock variance, waste"]],"Professional Services":[["Utilisation","Billable utilisation, capacity coverage"],["Delivery","Project margin, schedule variance"],["Revenue","DSO, billing cycle, leakage"],["Client","Pipeline conversion, retention, expansion"]],Other:[["Efficiency","Cost per transaction, cycle time"],["Quality","Error/rework rate, SLA attainment"],["Customer","Retention, response time, satisfaction"],["Data","Report latency, data-quality exceptions"]]};const kpis=industryKpis[d.industry]||industryKpis.Other;tKpis.innerHTML=kpis.map(x=>"<article><b>"+esc(x[0])+"</b><span>"+esc(x[1])+"</span></article>").join("");
-tCapCount.textContent=selected.length+" process areas";tCaps.innerHTML=selected.map(x=>"<span>"+esc(x)+"</span>").join("");
-const opportunityMap={Retail:[["Inventory & replenishment","Reduce stockout/overstock exposure through better demand, allocation and replenishment processes."],["Merchandising & margin","Investigate pricing, promotion, markdown and assortment decisions as a connected value chain."],["Omnichannel execution","Map POS, commerce, order orchestration, fulfilment and returns before selecting the target landscape."]],Manufacturing:[["Planning & production","Connect demand, S&OP, MRP, scheduling and shop-floor execution."],["Inventory & working capital","Test safety-stock, slow-moving inventory and supplier lead-time opportunities."],["Quality & traceability","Assess whether compliance, genealogy and quality capabilities need industry-specialist depth."]],Distribution:[["Inventory & fulfilment","Investigate inventory accuracy, warehouse productivity and order-cycle performance."],["Margin & pricing","Assess rebates, pricing, freight and cost-to-serve leakage."],["Order automation","Map EDI, order capture, allocation and customer-service exceptions."]],Healthcare:[["Patient / operational flow","Assess scheduling, supply, billing and administrative bottlenecks."],["Compliance & data","Map regulatory controls, interoperability and data ownership."],["Cost & capacity","Investigate resource, asset, supply and revenue-cycle economics."]],Hospitality:[["Demand & revenue","Connect reservations, occupancy, pricing and revenue-management processes."],["Property operations","Assess procurement, inventory, labour and service workflows."],["Guest experience","Map POS, loyalty, digital channels and customer data."]],"Professional Services":[["Utilisation & delivery","Investigate resource planning, utilisation, project margin and delivery controls."],["Revenue leakage","Assess time capture, billing, contracts and revenue recognition."],["Client lifecycle","Connect CRM, pipeline, projects, renewals and analytics."]],Other:[["Process simplification","Identify high-volume manual work and duplicated controls."],["Data visibility","Map critical data, reporting and decision bottlenecks."],["Integration reduction","Identify brittle interfaces and duplicated systems."]]};const opps=opportunityMap[d.industry]||opportunityMap.Other;tOpportunities.innerHTML=opps.map((x,i)=>"<article class='candidate-card'><div><b>"+esc(x[0])+"</b><span>"+(i===0?"PRIMARY":"FOCUS")+"</span></div><p>"+esc(x[1])+"</p><strong>"+(i+1)+"<small> priority</small></strong></article>").join("");
-const ecosystemReasons={Oracle:"Investigate where broad cloud ERP, finance/supply chain and industry/retail capabilities can form the core landscape.",SAP:"Investigate where enterprise finance and supply-chain depth, industry capabilities and the wider SAP ecosystem fit the target operating model.",Microsoft:"Investigate where Dynamics 365 plus the Microsoft data, CRM, integration and AI ecosystem can reduce landscape fragmentation.",Infor:"Investigate whether the existing industry alignment and cloud path can meet the target without unnecessary replacement or customisation.",NetSuite:"Investigate where a lighter cloud ERP scope is appropriate and where specialist industry applications would be required.",IFS:"Investigate where complex operational, supply-chain, asset/service or industry workflows make IFS Cloud relevant."};
-const candidates=Object.entries(platforms).map(([name,p])=>{const hit=selected.filter(x=>p.caps.includes(x)).length;const coverage=Math.round(hit/Math.max(selected.length,1)*100);const sizeFit=(d.scale==="Enterprise"&&["Oracle","SAP","Infor"].includes(name))||(d.scale!=="Enterprise"&&["Microsoft","NetSuite","IFS","Infor","Oracle","SAP"].includes(name));const currentFit=d.current===name?12:0;const s=Math.min(100,Math.round(coverage*.65+(sizeFit?20:5)+currentFit));return{name,s,coverage,reason:ecosystemReasons[name]}});
-const exploreMeta={Oracle:{fit:"Broad cloud ERP + retail/enterprise ecosystem candidate",scale:"Mid-market to global enterprise",security:"Validate identity, roles, segregation of duties, data residency and industry controls",evidence:"Require retail/industry references and scripted end-to-end scenarios",poc:"Demonstrate finance -> procurement -> inventory -> planning plus the customer's critical industry flow"},SAP:{fit:"Enterprise ERP + industry ecosystem candidate",scale:"Mid-market to global enterprise",security:"Validate global controls, identity, audit and regulatory requirements",evidence:"Require industry references and fit-to-standard evidence",poc:"Demonstrate the highest-value cross-functional process and exception handling"},Microsoft:{fit:"Business application + data/CRM/AI ecosystem candidate",scale:"SMB through enterprise depending on scope",security:"Validate Entra/identity, role model, data boundaries and compliance",evidence:"Require industry references and integration architecture evidence",poc:"Demonstrate ERP/CRM/data integration across a priority customer journey"},Infor:{fit:"Current-platform continuity / industry-cloud candidate",scale:"Mid-market to enterprise",security:"Validate current cloud controls, identity, audit and regional requirements",evidence:"Require evidence for the customer's industry and current-version roadmap",poc:"Demonstrate target cloud process coverage with existing customisations mapped to retire/configure/replace"},NetSuite:{fit:"Lighter cloud ERP candidate where scope can be standardised",scale:"Small to mid-market and selected subsidiaries",security:"Validate role controls, audit, data residency and required integrations",evidence:"Require references with similar complexity and growth profile",poc:"Demonstrate finance-to-order and required industry extensions without unnecessary customisation"},IFS:{fit:"Operational, supply-chain, asset/service and industry workflow candidate",scale:"Mid-market to enterprise",security:"Validate identity, audit, resilience and industry compliance needs",evidence:"Require relevant operational/industry references",poc:"Demonstrate the customer's most operationally complex end-to-end scenario"}};const explore=candidates.slice().sort((a,b)=>b.s-a.s).slice(0,4);tExplore.innerHTML=explore.map((x,i)=>{const m=exploreMeta[x.name];return "<article class='explore-card'><div class='explore-head'><span>"+(i<2?"SHORTLIST":"ALTERNATIVE")+"</span><b>"+esc(x.name)+"</b><strong>"+x.s+" fit signal</strong></div><p><b>Why explore:</b> "+esc(x.reason)+"</p><p><b>Capability signal:</b> "+x.coverage+"% of selected process areas represented in this assessment.</p><p><b>Scale:</b> "+esc(m.scale)+"</p><p><b>Industry / architecture fit:</b> "+esc(m.fit)+"</p><p><b>Security to validate:</b> "+esc(m.security)+"</p><p><b>Evidence / references:</b> "+esc(m.evidence)+"</p><p><b>Migration implication:</b> "+(d.current===x.name?"Prioritise a stay-vs-modernise comparison and map current customisations.":"Compare coexistence, migration waves, integration dependencies and data conversion effort.")+"</p><p><b>Vendor POC:</b> "+esc(m.poc)+"</p><div class='explore-gap'>Gaps shown elsewhere in this report are hypotheses requiring validation; they are not claims of product deficiency.</div></article>}).join("");
-tMatrix.innerHTML="<thead><tr><th>Process / capability</th>"+Object.keys(platforms).map(x=>"<th>"+x+"</th>").join("")+"</tr></thead><tbody>"+selected.map(cap=>"<tr><th>"+esc(cap)+"</th>"+Object.entries(platforms).map(([n,p])=>"<td><span class='fit-dot "+(p.caps.includes(cap)?"fit-3":"fit-1")+"'>"+(p.caps.includes(cap)?"Covered / validate":"Gap / specialist")+"</span></td>").join("")+"</tr>").join("")+"</tbody>";
-const erpNeed= d.processes.length<=3 && d.scale!=="Enterprise" ? "ERP may not be necessary yet" : d.integration==="Low" && d.custom==="Low" ? "A standard SaaS ERP is worth evaluating" : "Evaluate ERP plus specialist applications";const erpWhy=erpNeed==="ERP may not be necessary yet"?"A focused finance/operations stack or specialist SaaS may meet the need with less cost and change. Test the minimum platform required before funding a full ERP programme.":erpNeed==="A standard SaaS ERP is worth evaluating"?"Your scope suggests a standardised SaaS core could consolidate finance, procurement and operational controls without excessive customisation.":"Your process breadth or complexity suggests an integrated core may help, but specialist industry applications and phased coexistence should be compared.";tNeedERP.innerHTML="<article class='primary-need'><span>INITIAL CONCLUSION</span><b>"+erpNeed+"</b><p>"+esc(erpWhy)+"</p></article><article><span>CHECK BEFORE BUYING</span><b>Process complexity</b><p>Can the business standardise on SaaS processes, or are there genuinely differentiating requirements?</p></article><article><span>CHECK BEFORE BUYING</span><b>Total landscape cost</b><p>Compare ERP license, implementation, integrations, support, change and five-year TCO against a simpler application stack.</p></article>";
-const savings=[["Avoid unnecessary ERP scope","Keep CRM, commerce, WMS, payroll or specialist capabilities outside the ERP where they already work well."],["Retire customisation","Challenge every customisation: retire, configure, extend or replace based on measurable business value."],["Reduce integration debt","Consolidate duplicate interfaces and identify systems of record before rebuilding integrations."],["Phase the migration","Move high-value/high-risk domains in waves rather than forcing a big-bang programme."],["Clean data before migration","Archive obsolete data and fix master-data quality before paying to migrate it."],["Prove value before scale","Use scripted POCs and measurable baselines before committing to broad licences or implementation scope."]];tSavings.innerHTML=savings.map(x=>"<article><b>"+esc(x[0])+"</b><p>"+esc(x[1])+"</p></article>").join("");
-const benefits=[["Faster decisions","Trusted operational data and fewer reconciliations."],["Lower operating cost","Less manual work, duplication and application maintenance."],["Better control","Consistent workflows, roles, auditability and policy enforcement."],["Scalable growth","Standardised processes and a technology foundation that can absorb volume."],["Better customer experience","Fewer handoffs, faster fulfilment/service and connected channels."],["AI readiness","Cleaner data and structured processes create better foundations for automation and AI."]];tFutureBenefits.innerHTML=benefits.map(x=>"<article><b>"+esc(x[0])+"</b><p>"+esc(x[1])+"</p></article>").join("");
-const approach=d.migration.includes("Transformational")?"Target-led transformation":"Phased modernization";const approachText=approach==="Target-led transformation"?"Redesign the operating model around the target SaaS capabilities, then migrate in controlled waves. This fits a higher appetite for process change but requires strong governance, data readiness and end-to-end POCs.":"Use a controlled coexistence path: stabilise the current platform, move high-value capabilities to SaaS in waves, and retire legacy components only after evidence is established.";tApproach.innerHTML="<article><span>PRIMARY APPROACH</span><b>"+approach+"</b><p>"+esc(approachText)+"</p></article><article><span>WHY THIS FITS</span><b>Business-led, evidence-based selection</b><p>Keep the decision anchored to process outcomes, industry requirements, value baselines and migration risk rather than vendor feature counts.</p></article><article><span>WHAT WOULD CHANGE IT</span><b>Evidence before commitment</b><p>Architecture constraints, regulatory requirements, critical customisations, integration dependencies, five-year TCO and POC results can change the approach.</p></article>";
-const tradeoffs=[["Stay / modernise current platform","Lower change and migration disruption","May preserve legacy complexity or limit future-state simplification"],["Phased SaaS transition","Balances risk, value and change","Requires temporary coexistence, integration and dual-running discipline"],["Full transformation","Greater opportunity to redesign processes","Higher change, data, implementation and organisational risk"],["Best-of-breed ecosystem","Potentially deeper industry capability","More interfaces, vendors, contracts and architecture governance"]];tTradeoffs.innerHTML=tradeoffs.map(x=>"<article><b>"+esc(x[0])+"</b><span>"+esc(x[1])+"</span><p>"+esc(x[2])+"</p></article>").join("");
-const risks=[["Customisation replication","High","Classify each customisation as retain, redesign, replace or retire before vendor selection."],["Integration dependency","High","Create a system-of-record and interface inventory; test critical end-to-end journeys."],["Data migration quality","Medium-High","Profile master and transactional data early and define archive/retention rules."],["Value case uncertainty","Medium","Baseline hours, inventory, leakage, cycle time and service metrics before claiming benefits."],["Industry capability gaps","Medium","Require scripted industry scenarios and POCs rather than relying on generic feature demonstrations."]];tRisks.innerHTML=risks.map(x=>"<article><b>"+esc(x[0])+"</b><span>"+esc(x[1])+"</span><p>"+esc(x[2])+"</p></article>").join("");
-const band=moneyBand(d);tValue.innerHTML=(band?[["Directional value pool",fmt(band.low)+" - "+fmt(band.high)],["Illustrative lens","0.2%-1.0% of stated annual turnover"],["How to prove it","Baseline hours, cost-to-serve, inventory, leakage, cycle time and transaction volumes"]]:[["Directional value pool","Insufficient financial baseline"],["How to estimate","Quantify labour, inventory, leakage, cycle time and transaction economics"],["Next evidence","Use actual business baselines before attaching a monetary case"]]).map(x=>"<article><b>"+esc(x[0])+"</b><strong>"+esc(x[1])+"</strong></article>").join("");
-const evidence=[
-["Business outcome","Customer baseline -> target metric","Revenue, cost-to-serve, cycle time, service level, inventory, working capital","Business case evidence"],
-["Process fit","Required capability -> vendor/approach","Process scenario, localisation, controls, exceptions","Scripted demo + fit/gap"],
-["Architecture","Current system -> target component","System of record, interfaces, data ownership, security","Architecture workshop"],
-["Migration","Data/customisation -> migration treatment","Retain / redesign / replace / retire","Migration assessment"],
-["Economics","Current run cost -> target TCO","License, implementation, integration, support, change and five-year cost","Commercial model"],
-["Risk","Risk -> mitigation -> owner","Data, integration, adoption, regulatory and programme risks","Risk workshop"]
-];tEvidence.innerHTML=evidence.map(x=>"<tr><th>"+esc(x[0])+"</th><td>"+esc(x[1])+"</td><td>"+esc(x[2])+"</td><td>"+esc(x[3])+"</td></tr>").join("");
-const questions=["What business outcomes must the transformation improve, and what baseline proves today's position?","Which processes are genuinely industry-specific and which are legacy customisation?","Which capabilities should be core SaaS, specialist applications, automation or retained legacy?","Which integrations and data domains are systems of record?","What country, tax, regulatory, security and data-residency requirements apply?","What is the acceptable business disruption and migration-wave strategy?","Which three end-to-end scenarios must every shortlisted vendor demonstrate?","What commercial model, implementation partner capability and five-year TCO should be compared?"];tQuestions.innerHTML=questions.map(q=>"<li>"+esc(q)+"</li>").join("");
-tRoadmap.innerHTML=[["Days 1-30","Baseline the business","Validate process map - quantify pain - catalogue customisation/integration - establish value baselines"],["Days 31-60","Prove the market","Scripted demos - fit/gap - architecture options - specialist ecosystem - data/integration assessment"],["Days 61-90","Make evidence comparable","POC - TCO - partner assessment - migration waves - risk register - RFP/demo scorecard"]].map(x=>"<article><span>"+x[0]+"</span><b>"+x[1]+"</b><p>"+x[2]+"</p></article>").join("");
-transformResults.classList.remove("hidden");transformResults.scrollIntoView({behavior:"smooth"});try{sessionStorage.setItem("automationscan_transform",JSON.stringify(d))}catch(e){}}
-form.addEventListener("submit",e=>{e.preventDefault();if(!valid())return;try{render(read())}catch(err){console.error("Transformation Advisor error",err);alert("The report could not be generated. Please refresh and try again.")}});tPrint.onclick=()=>{document.body.classList.add("printing-transform");window.addEventListener("afterprint",()=>document.body.classList.remove("printing-transform"),{once:true});setTimeout(()=>window.print(),80)};show(0);
+(function () {
+"use strict";
+
+var form = document.getElementById("transformForm");
+var industry = document.getElementById("industry");
+var businessModel = form ? form.querySelector('[name="businessModel"]') : null;
+var current = form ? form.querySelector('[name="current"]') : null;
+var steps = Array.prototype.slice.call(document.querySelectorAll(".t-step"));
+var next = document.getElementById("tNext");
+var back = document.getElementById("tBack");
+var generate = document.getElementById("tGenerate");
+
+var businessModels = {
+  Retail: ["Department / specialty retail","Grocery / convenience","Fashion / apparel","Wholesale + retail","Omnichannel / marketplace"],
+  Manufacturing: ["Discrete manufacturing","Process manufacturing","Engineer-to-order","Make-to-stock","Contract manufacturing"],
+  Distribution: ["Wholesale distribution","B2B distribution","Consumer distribution","Import / export","3PL / logistics"],
+  Healthcare: ["Provider","Hospital","Clinic network","Healthcare services","Medical distribution"],
+  "Professional Services": ["Consulting","IT services","Engineering services","Managed services","Project-based services"],
+  Hospitality: ["Hotel","Resort","Restaurant group","Travel / leisure","Multi-property hospitality"],
+  Other: ["B2B","B2C","Subscription","Project-based","Mixed / diversified"]
+};
+
+var processMap = {
+  Retail: ["Merchandising","Buying and procurement","Pricing and promotions","Demand planning","Replenishment","POS and store operations","E-commerce","Order fulfilment","Returns","Customer loyalty","Finance"],
+  Manufacturing: ["Product lifecycle","Bill of materials","Planning and scheduling","Procurement","Production","Quality","Warehouse","Maintenance","Costing","Finance"],
+  Distribution: ["Procurement","Demand planning","Inventory","Warehouse","Order management","Pricing","Transportation","Returns","Customer management","Finance"],
+  Healthcare: ["Patient / member administration","Scheduling","Supply chain","Procurement","Billing","Finance","Compliance","Workforce","Reporting","Data management"],
+  "Professional Services": ["Opportunity management","Project delivery","Resource planning","Time and expenses","Billing","Revenue recognition","Procurement","Finance","Customer management"],
+  Hospitality: ["Reservations","Property operations","Procurement","Inventory","Point of sale","Housekeeping","Revenue management","Guest experience","Finance"],
+  Other: ["Sales","Procurement","Operations","Inventory","Customer service","Finance","Reporting","People and workforce"]
+};
+
+var painMap = {
+  Retail: ["Poor inventory visibility","Slow merchandising decisions","Spreadsheet-driven planning","High integration effort","Customer data fragmentation","Margin pressure"],
+  Manufacturing: ["Planning volatility","Manual production processes","Inventory imbalance","Quality issues","Legacy customisation","High operational cost"],
+  Distribution: ["Inventory imbalance","Slow order fulfilment","Manual pricing","Warehouse inefficiency","Integration complexity","Margin leakage"],
+  Healthcare: ["Manual administration","Fragmented data","Compliance burden","Scheduling inefficiency","Supply chain cost","Reporting delays"],
+  "Professional Services": ["Poor resource utilisation","Manual project administration","Billing leakage","Forecasting difficulty","Disconnected systems","Margin pressure"],
+  Hospitality: ["Fragmented property systems","Manual operations","Revenue leakage","Poor guest data","Procurement inefficiency","Reporting delays"],
+  Other: ["Manual work","Disconnected applications","Poor visibility","High operating cost","Legacy technology","Slow decision making"]
+};
+
+function showStep(n) {
+  var i;
+  if (n < 0) n = 0;
+  if (n >= steps.length) n = steps.length - 1;
+  for (i = 0; i < steps.length; i++) steps[i].classList.toggle("active", i === n);
+  if (document.getElementById("tProgress")) document.getElementById("tProgress").textContent = "Step " + (n + 1) + " of " + steps.length;
+  if (document.getElementById("tProgressBar")) document.getElementById("tProgressBar").style.width = ((n + 1) / steps.length * 100) + "%";
+  if (back) back.hidden = n === 0;
+  if (next) next.hidden = n === steps.length - 1;
+  if (generate) generate.hidden = n !== steps.length - 1;
+  window._advisorStep = n;
+}
+
+function populateBusinessModels() {
+  var key = industry ? industry.value : "";
+  var list = businessModels[key] || businessModels.Other;
+  var html = '<option value="">Choose</option>';
+  for (var i = 0; i < list.length; i++) html += '<option value="' + list[i] + '">' + list[i] + "</option>";
+  if (businessModel) {
+    businessModel.innerHTML = html;
+    businessModel.disabled = false;
+  }
+  renderIndustry(key);
+}
+
+function renderIndustry(key) {
+  var processes = processMap[key] || processMap.Other;
+  var pains = painMap[key] || painMap.Other;
+  var intro = document.getElementById("industryIntro");
+  var processBox = document.getElementById("industryProcesses");
+  var painBox = document.getElementById("industryPains");
+  if (intro) intro.textContent = key ? key + " business context loaded. The next questions are tailored to this industry." : "Choose an industry to load the relevant business model and process library.";
+  if (processBox) {
+    processBox.innerHTML = processes.map(function (x) { return '<label><input type="checkbox" name="process" value="' + x + '"><span>' + x + "</span></label>"; }).join("");
+  }
+  if (painBox) {
+    painBox.innerHTML = pains.map(function (x) { return '<label><input type="checkbox" name="pain" value="' + x + '"><span>' + x + "</span></label>"; }).join("");
+  }
+}
+
+function validStep() {
+  var step = steps[window._advisorStep || 0];
+  if (!step) return true;
+  var required = step.querySelectorAll("[required]");
+  for (var i = 0; i < required.length; i++) {
+    if (!required[i].checkValidity()) {
+      required[i].reportValidity();
+      return false;
+    }
+  }
+  return true;
+}
+
+function value(name) {
+  var el = form ? form.querySelector('[name="' + name + '"]') : null;
+  return el ? el.value : "";
+}
+
+function checked(name) {
+  return form ? Array.prototype.slice.call(form.querySelectorAll('[name="' + name + '"]:checked')).map(function (x) { return x.value; }) : [];
+}
+
+function escapeHtml(v) {
+  return String(v == null ? "" : v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function renderReport() {
+  var ind = value("industry") || "Other";
+  var model = value("businessModel") || "Not specified";
+  var platform = value("current") || "Not specified";
+  var processes = checked("process");
+  var pains = checked("pain");
+  var scale = value("scale") || "Not specified";
+  var custom = value("custom") || "Low";
+  var integration = value("integration") || "Low";
+  var migration = value("migration") || "Balanced";
+  var candidates = ["Oracle","SAP","Microsoft Dynamics","Infor","NetSuite","IFS"];
+  var score = Math.min(96, 55 + processes.length * 3 + pains.length * 2 + (platform !== "Not specified" ? 8 : 0));
+
+  var title = document.getElementById("tResultTitle");
+  var sub = document.getElementById("tResultSub");
+  var scoreEl = document.getElementById("tScore");
+  var interpretation = document.getElementById("tInterpretation");
+  var summary = document.getElementById("tSummary");
+  var context = document.getElementById("tContext");
+  var contextLabel = document.getElementById("tContextLabel");
+  var caps = document.getElementById("tCaps");
+  var capCount = document.getElementById("tCapCount");
+  var kpis = document.getElementById("tKpis");
+  var opportunities = document.getElementById("tOpportunities");
+  var matrix = document.getElementById("tMatrix");
+  var need = document.getElementById("tNeedERP");
+  var approach = document.getElementById("tApproach");
+  var savings = document.getElementById("tSavings");
+  var future = document.getElementById("tFutureBenefits");
+  var tradeoffs = document.getElementById("tTradeoffs");
+  var risks = document.getElementById("tRisks");
+  var val = document.getElementById("tValue");
+  var evidence = document.getElementById("tEvidence");
+  var questions = document.getElementById("tQuestions");
+  var roadmap = document.getElementById("tRoadmap");
+  var candidatesBox = document.getElementById("tCandidates");
+  var explore = document.getElementById("tExplore");
+  var architecture = document.getElementById("tArchitecture");
+
+  if (title) title.textContent = ind + " transformation decision brief";
+  if (sub) sub.textContent = "Business model: " + model + " | Current platform: " + platform;
+  if (scoreEl) scoreEl.textContent = score;
+  if (interpretation) interpretation.textContent = "This is a discovery signal, not a procurement recommendation. Validate the shortlisted options against your detailed requirements.";
+  if (summary) summary.innerHTML = "<p>Your assessment describes a " + escapeHtml(ind) + " organisation operating as " + escapeHtml(model) + " with " + escapeHtml(platform) + " as the current platform. The next decision is whether to stay, modernise, replace, or complement the current ecosystem.</p>";
+  if (contextLabel) contextLabel.textContent = "Assessment context";
+  if (context) context.innerHTML = "<b>" + escapeHtml(ind) + " / " + escapeHtml(model) + "</b><p>Scale: " + escapeHtml(scale) + "</p><p>Customisation: " + escapeHtml(custom) + " | Integration: " + escapeHtml(integration) + "</p><p>Transformation appetite: " + escapeHtml(migration) + "</p>";
+  if (capCount) capCount.textContent = processes.length + " selected";
+  if (caps) caps.innerHTML = processes.length ? processes.map(function (x) { return "<li>" + escapeHtml(x) + "</li>"; }).join("") : "<li>No specific processes selected yet.</li>";
+  if (kpis) kpis.innerHTML = "<article><b>" + processes.length + "</b><span>process areas</span></article><article><b>" + pains.length + "</b><span>pain areas</span></article><article><b>" + candidates.length + "</b><span>ecosystems to explore</span></article>";
+  if (opportunities) opportunities.innerHTML = "<ul><li>Standardise high-friction processes before replacing them.</li><li>Map integrations and customisations before committing to migration.</li><li>Separate core ERP needs from specialist industry applications.</li></ul>";
+  if (need) need.innerHTML = "<p>Do not assume ERP replacement is necessary. Compare three scenarios: modernise the current platform, replace the core ERP, or simplify the application landscape with SaaS and specialist products.</p>";
+  if (approach) approach.innerHTML = "<p>Use a fit-to-standard first approach. Preserve differentiating industry capabilities and challenge customisations that do not create measurable business value.</p>";
+  if (savings) savings.innerHTML = "<ul><li>Retire unused customisations.</li><li>Reduce duplicate applications and interfaces.</li><li>Clean data before migration rather than carrying historical complexity forward.</li></ul>";
+  if (future) future.innerHTML = "<ul><li>Lower operational friction</li><li>Improved business visibility</li><li>Scalable SaaS operating model</li><li>Better data and AI readiness</li></ul>";
+  if (tradeoffs) tradeoffs.innerHTML = "<p>Current-platform modernisation may reduce change risk; replacement may provide greater process redesign potential but usually creates greater migration and change impact. Best-of-breed can improve specialist capability while increasing integration complexity.</p>";
+  if (risks) risks.innerHTML = "<ul><li>Incomplete requirements</li><li>Data quality and migration effort</li><li>Integration dependencies</li><li>Over-customisation</li><li>Change-management capacity</li></ul>";
+  if (val) val.innerHTML = "<p>Validate value with a baseline covering operating cost, cycle time, error rate, working capital, revenue leakage and user effort before selecting a platform.</p>";
+  if (evidence) evidence.innerHTML = "<ul><li>Require relevant industry customer references.</li><li>Require scripted demonstrations using your processes.</li><li>Require architecture, security and integration evidence.</li><li>Require a transparent implementation and five-year TCO model.</li></ul>";
+  if (questions) questions.innerHTML = "<ol><li>Show our highest-value end-to-end process using standard capability.</li><li>Which requirements require configuration, extension or third-party products?</li><li>What happens to our current customisations and integrations?</li><li>Provide comparable industry references and measurable outcomes.</li><li>Demonstrate identity, audit, resilience and required compliance controls.</li></ol>";
+  if (roadmap) roadmap.innerHTML = "<article><span>0-30 days</span><b>Baseline</b><p>Confirm process, data, integrations, customisations and value baseline.</p></article><article><span>31-60 days</span><b>Prove fit</b><p>Run scripted demonstrations and fit-gap assessment.</p></article><article><span>61-90 days</span><b>Compare</b><p>Validate POC, TCO, migration and partner evidence.</p></article>";
+  if (candidatesBox) candidatesBox.innerHTML = candidates.map(function (x) { return "<article><b>" + x + "</b><p>Candidate ecosystem to investigate against your selected " + escapeHtml(ind) + " requirements.</p></article>"; }).join("");
+  if (explore) explore.innerHTML = candidates.slice(0,4).map(function (x,i) { return "<article class='explore-card'><div class='explore-head'><span>" + (i < 2 ? "SHORTLIST" : "ALTERNATIVE") + "</span><b>" + x + "</b><strong>Investigate</strong></div><p><b>Industry fit:</b> Validate " + escapeHtml(ind) + " capability coverage.</p><p><b>Security:</b> Validate identity, audit, data residency and regulatory controls.</p><p><b>Migration:</b> Map data, integrations and current customisations.</p><p><b>Evidence:</b> Require comparable customer references and scripted demos.</p><p><b>POC:</b> Demonstrate the most critical end-to-end business process.</p></article>"; }).join("");
+  if (architecture) architecture.innerHTML = "<p><b>Current:</b> " + escapeHtml(platform) + "</p><p><b>Target hypothesis:</b> SaaS core platform + industry capabilities + governed integrations + common data/identity layer.</p>";
+  var results = document.getElementById("transformResults");
+  if (results) {
+    results.classList.remove("hidden");
+    results.scrollIntoView({behavior:"smooth"});
+  }
+  try { sessionStorage.setItem("automationscan_transform", JSON.stringify({industry:ind,businessModel:model,current:platform,processes:processes,pains:pains})); } catch (e) {}
+}
+
+if (industry) industry.addEventListener("change", populateBusinessModels);
+if (next) next.addEventListener("click", function () { if (validStep()) showStep((window._advisorStep || 0) + 1); });
+if (back) back.addEventListener("click", function () { showStep((window._advisorStep || 0) - 1); });
+if (form) form.addEventListener("submit", function (e) { e.preventDefault(); if (!validStep()) return; renderReport(); });
+if (generate) generate.addEventListener("click", function (e) { e.preventDefault(); if (!validStep()) return; renderReport(); });
+var print = document.getElementById("tPrint");
+if (print) print.addEventListener("click", function () { window.print(); });
+
+showStep(0);
+populateBusinessModels();
+})();
