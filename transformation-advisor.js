@@ -164,6 +164,9 @@ function renderReport() {
     "Blue Yonder": {type:"Specialist supply-chain platform", products:"Blue Yonder", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Planning","Demand","Supply","Warehouse","Order Management","Merchandising"], url:"https://blueyonder.com/"},
     "S/4HANA + specialist ecosystem": {type:"ERP + best-of-breed", products:"SAP core plus specialist applications", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Finance","Supply Chain","Procurement","Manufacturing","Retail","Integration","Analytics"], url:"https://www.sap.com/"}
   };
+  Object.keys(candidateLibrary).forEach(function(name){
+    candidateMeta[name]=candidateLibrary[name];
+  });
 var allCandidates = Object.keys(candidateMeta).filter(function(name){
     var meta=candidateMeta[name];
     var currentName=platform.toLowerCase();
