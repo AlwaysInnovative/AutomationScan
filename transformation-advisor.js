@@ -186,10 +186,18 @@ var allCandidates = Object.keys(candidateMeta);
   if (kpis) kpis.innerHTML = "<article><b>" + processes.length + "</b><span>process areas</span></article><article><b>" + pains.length + "</b><span>pain areas</span></article><article><b>" + candidates.length + "</b><span>ecosystems assessed</span></article><article><b>" + candidates.slice(0,3).join(" / ") + "</b><span>priority investigation set</span></article>";
   var customProcesses = value("customProcesses") || value("custom") || "None provided";
   var customProcessText = customProcesses && customProcesses !== "None provided" ? customProcesses : "No custom process supplied";
+  function treatmentFor(app) {
+    if (customProcessText === "No custom process supplied") return "No custom process provided";
+    var c = candidateMeta[app];
+    if (platform.toLowerCase().indexOf(app.toLowerCase()) >= 0) return "Retain / modernise candidate";
+    if (c.fit.indexOf(ind) >= 0 && custom === "Low") return "Standard / configure first";
+    if (c.fit.indexOf(ind) >= 0) return "Configure / extend only if justified";
+    return "Specialist or third-party assessment";
+  }
   if (matrix) matrix.innerHTML = processes.map(function (p) {
     var rows = candidates.slice(0,4).map(function (x) {
       var special = candidateMeta[x].fit.indexOf(ind) >= 0 ? "Industry capability to validate" : "Capability needs validation";
-      return "<tr><td>" + escapeHtml(x) + "</td><td>" + special + "</td><td>Configuration / extension / third-party check</td><td>Require scripted POC evidence</td></tr>";
+      return "<tr><td>" + escapeHtml(x) + "</td><td>" + special + "</td><td>" + treatmentFor(x) + "</td><td>Require scripted POC evidence</td></tr>";
     }).join("");
     return "<div class='requirement-block'><h4>" + escapeHtml(p) + "</h4><table><thead><tr><th>Application</th><th>Initial fit signal</th><th>Delivery pattern</th><th>Evidence required</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
   }).join("");
