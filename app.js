@@ -45,6 +45,7 @@ function industryData(){const p=industryProfiles[form.elements.industry.value]||
 form.elements.industry?.addEventListener("change",()=>{renderIndustryQuestionnaire();show(0);});
 renderIndustryQuestionnaire();
 function calc(){
+ const ind=industryData();
  const h={"Data entry":n("dataEntry"),"Email / follow-ups":n("email"),"Invoices / payments":n("invoices"),"Customer support":n("support"),Scheduling:n("scheduling"),Reporting:n("reporting"),"Documents / admin":n("documents"),"Sales admin / CRM":n("salesAdmin")};
  const total=Object.values(h).reduce((a,b)=>a+b,0);
  const copy={Rarely:0,Sometimes:5,Often:12,Constantly:20}[form.elements.copyPaste.value]||0;
