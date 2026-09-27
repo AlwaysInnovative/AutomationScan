@@ -130,15 +130,25 @@ function renderResult(){
  submitLeadIfConsented(r,top);
 }
 
-form.addEventListener("submit",e=>e.preventDefault());
-submit.onclick=()=>{
- try{ track("report_generated",{industry:form.elements.industry?.value||"unknown"}); renderResult(); }
- catch(err){
-  console.error("AutomationScan report generation failed:",err);
-  const status=document.getElementById("saveStatus");
-  if(status) status.textContent="We couldn't generate the report. Please refresh the page and try again.";
- }
-};
+function generateReport(){
+  try{
+    if(!form){throw new Error("Assessment form was not found.");}
+    if(!valid()) return;
+    track("report_generated",{industry:form.elements.industry?.value||"unknown"});
+    renderResult();
+  }catch(err){
+    console.error("AutomationScan report generation failed:",err);
+    const results=document.getElementById("results");
+    const status=document.getElementById("saveStatus");
+    if(status) status.textContent="Report generation error: "+(err?.message||"Please refresh and try again.");
+    if(results) results.classList.remove("hidden");
+    const sub=document.getElementById("sub");
+    if(sub) sub.textContent="We could not complete the report from the current answers. Please review the assessment fields and try again.";
+  }
+}
+form.addEventListener("submit",e=>{e.preventDefault();generateReport();});
+submit.addEventListener("click",e=>{e.preventDefault();generateReport();});
+
 
 function reportData(){
  const {r,top}=buildReport();
