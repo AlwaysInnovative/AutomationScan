@@ -197,7 +197,7 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
     var customSignal = custom === "Very high" && ["Oracle","SAP","Microsoft Dynamics 365","Infor","IFS Cloud"].indexOf(name)>=0 ? 5 : 2;
     return {name:name, score:industryFit+Math.min(20,processCoverage)+Math.min(12,painCoverage)+scaleSignal+customSignal+continuity};
   }).sort(function(a,b){return b.score-a.score;});
-  var candidates = scores.map(function(x){return x.name;});
+  var candidates = scores.slice(0,5).map(function(x){return x.name;});
   var score = Math.min(96, 40 + processes.length * 5 + pains.length * 3 + (platform !== "Not specified" ? 12 : 0) + (model !== "Not specified" ? 8 : 0));
   var route = migration.indexOf("Transformational") >= 0 ? "Transformation" : migration.indexOf("Conservative") >= 0 ? "Modernise / preserve continuity" : "Structured market comparison";
   var painText = value("painText") || "";
