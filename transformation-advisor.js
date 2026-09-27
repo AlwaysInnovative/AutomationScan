@@ -335,7 +335,10 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
   if (candidatesBox) candidatesBox.innerHTML = decisionScores.map(function(x){
     var m=candidateMeta[x.name];
     return "<article class='decision-card'><div><b>" + x.name + "</b><strong>" + x.d.band + "</strong></div><p>Industry fit " + x.d.fit + "/5 · Scale " + x.d.scale + "/5 · Continuity " + x.d.continuity + "/5 · Integration " + x.d.integration + "/5 · Migration " + x.d.migration + "/5</p><p><b>Why investigate:</b> " + escapeHtml(m.reason) + "</p><p><b>Evidence gate:</b> " + escapeHtml(m.evidence) + "</p><small>Signal " + x.d.total + "/30 — not a vendor ranking or purchase recommendation.</small></article>";
-  }).join(""); if (candidatesBox) candidatesBox.innerHTML = candidates.map(function (x) { return "<article><b>" + x + "</b><p>Candidate ecosystem to investigate against your selected " + escapeHtml(ind) + " requirements.</p></article>"; }).join("");
+  }).join(""); if (candidatesBox) candidatesBox.innerHTML = decisionScores.map(function (x,idx) {
+    var m=candidateMeta[x.name], d=x.d;
+    return "<article class='candidate-card'><div class='candidate-rank'>"+(idx+1)+"</div><div><div class='candidate-name'><b>"+escapeHtml(x.name)+"</b><span>"+escapeHtml(m.type)+"</span></div><p><b>Why it appears:</b> "+escapeHtml(m.why||d.industry)+"</p><p><b>Distinctive capability:</b> "+escapeHtml(m.unique||m.products)+"</p><p><b>Reference evidence:</b> "+escapeHtml(m.refs||"Request a comparable customer reference.")+"</p><a href='"+escapeHtml(m.refUrl||m.url)+"' target='_blank' rel='noopener'>Source evidence →</a></div></article>";
+  }).join("");
   if (explore) explore.innerHTML = decisionScores.map(function (x) {
     var m=candidateMeta[x.name], d=x.d;
     var selectedCaps=processes.length ? processes.map(function(p){return "<li><b>"+escapeHtml(p)+"</b> — "+(d.covered.indexOf(p)>=0 ? "mapped capability signal; validate exact release/configuration" : "no direct mapped capability signal; require scripted proof")+"</li>";}).join("") : "<li>No process selected.</li>";
