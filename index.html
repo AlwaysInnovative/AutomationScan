@@ -169,7 +169,7 @@ window.enableAnalytics=function(){
       <fieldset class="step">
         <legend>Where does your team's time go?</legend>
         <p class="hint">Approximate hours per week. The goal is to see patterns, not produce timesheets.</p>
-        <div class="hours">
+        <div id="industryQuestions" class="industry-questions"></div><div class="hours">
           <label>Data entry<input type="number" name="dataEntry" min="0" max="200" value="0"></label>
           <label>Email / follow-ups<input type="number" name="email" min="0" max="200" value="0"></label>
           <label>Invoices / payments<input type="number" name="invoices" min="0" max="200" value="0"></label>
@@ -202,7 +202,7 @@ window.enableAnalytics=function(){
 
       <fieldset class="step">
         <legend>What would you change first?</legend>
-        <label>What task do you hate repeating?<textarea name="pain" rows="5" maxlength="500" placeholder="Example: We copy order data into Excel every evening, then email the same report to three people."></textarea></label>
+        <div id="industryPainQuestions" class="industry-pain-questions"></div><label>Anything else that causes friction?<textarea name="pain" rows="4" maxlength="800" placeholder="Describe a recurring problem, delay, error or hand-off in your own words."></textarea></label>
         <label>Main goal<select name="goal"><option>Save staff time</option><option>Reduce errors</option><option>Respond faster</option><option>Increase sales capacity</option><option>Reduce admin costs</option></select></label>
         <label>Email for your report <small>(optional)</small><input type="email" name="emailAddress" autocomplete="email" placeholder="you@company.com"></label>
         <label class="consent-row"><input type="checkbox" name="consent" value="yes">I agree to receive my AutomationScan report and occasional product updates. <a href="privacy.html">Privacy</a></label>
