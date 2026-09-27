@@ -184,6 +184,18 @@ var allCandidates = Object.keys(candidateMeta);
   if (capCount) capCount.textContent = processes.length + " selected";
   if (caps) caps.innerHTML = processes.length ? processes.map(function (x) { return "<li>" + escapeHtml(x) + "</li>"; }).join("") : "<li>No specific processes selected yet.</li>";
   if (kpis) kpis.innerHTML = "<article><b>" + processes.length + "</b><span>process areas</span></article><article><b>" + pains.length + "</b><span>pain areas</span></article><article><b>" + candidates.length + "</b><span>ecosystems assessed</span></article><article><b>" + candidates.slice(0,3).join(" / ") + "</b><span>priority investigation set</span></article>";
+  var customProcesses = value("customProcesses") || value("custom") || "None provided";
+  var customProcessText = customProcesses && customProcesses !== "None provided" ? customProcesses : "No custom process supplied";
+  if (matrix) matrix.innerHTML = processes.map(function (p) {
+    var rows = candidates.slice(0,4).map(function (x) {
+      var special = candidateMeta[x].fit.indexOf(ind) >= 0 ? "Industry capability to validate" : "Capability needs validation";
+      return "<tr><td>" + escapeHtml(x) + "</td><td>" + special + "</td><td>Configuration / extension / third-party check</td><td>Require scripted POC evidence</td></tr>";
+    }).join("");
+    return "<div class='requirement-block'><h4>" + escapeHtml(p) + "</h4><table><thead><tr><th>Application</th><th>Initial fit signal</th><th>Delivery pattern</th><th>Evidence required</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
+  }).join("");
+  if (matrix && customProcessText !== "No custom process supplied") {
+    matrix.innerHTML += "<div class='requirement-block custom-process'><h4>Customer custom business process</h4><p>" + escapeHtml(customProcessText) + "</p><table><thead><tr><th>Decision</th><th>What to test</th><th>Preferred treatment</th><th>Evidence</th></tr></thead><tbody><tr><td>Preserve business differentiation</td><td>Why the process exists and measurable value</td><td>Standard capability first; configure where possible</td><td>POC with real exception scenarios</td></tr><tr><td>Replace / simplify</td><td>Whether the process is historical customisation</td><td>Challenge customisation before migration</td><td>Fit-gap and TCO evidence</td></tr></tbody></table></div>";
+  }
   if (opportunities) opportunities.innerHTML = "<ul><li>Standardise high-friction processes before replacing them.</li><li>Map integrations and customisations before committing to migration.</li><li>Separate core ERP needs from specialist industry applications.</li></ul>";
   if (need) need.innerHTML = "<p>Do not assume ERP replacement is necessary. Compare three scenarios: modernise the current platform, replace the core ERP, or simplify the application landscape with SaaS and specialist products.</p>";
   if (approach) approach.innerHTML = "<p>Use a fit-to-standard first approach. Preserve differentiating industry capabilities and challenge customisations that do not create measurable business value.</p>";
