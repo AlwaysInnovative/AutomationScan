@@ -131,6 +131,10 @@ function renderReport() {
   var erpSpend = value("erpSpend") || "Unknown";
   var integration = value("integration") || "Low";
   var migration = value("migration") || "Balanced";
+  var goals = checked("goal");
+  var painText = value("painText") || "";
+  var horizon = value("horizon") || "Not specified";
+  var ecosystem = value("ecosystem") || "Not specified";
   var candidateMeta = {
     "Oracle": {type:"ERP + industry suite", products:"Fusion Cloud ERP + Oracle Retail", fit:["Retail","Distribution","Manufacturing","Healthcare","Hospitality"], caps:["Finance","Procurement","Supply Chain","Order Management","Inventory","Retail Merchandising","Planning","Analytics"], url:"https://www.oracle.com/retail/"},
     "SAP": {type:"ERP + industry suite", products:"SAP Cloud ERP + SAP Retail", fit:["Retail","Manufacturing","Distribution","Healthcare","Consumer Products"], caps:["Finance","Procurement","Supply Chain","Merchandising","Assortment","Pricing","Planning","Warehouse","Analytics"], url:"https://www.sap.com/industries/retail.html"},
@@ -150,13 +154,45 @@ function renderReport() {
     "Blue Yonder": {type:"Specialist supply-chain platform", products:"Blue Yonder", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Planning","Demand","Supply","Warehouse","Order Management","Merchandising"], url:"https://blueyonder.com/"},
     "S/4HANA + specialist ecosystem": {type:"ERP + best-of-breed", products:"SAP core plus specialist applications", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Finance","Supply Chain","Procurement","Manufacturing","Retail","Integration","Analytics"], url:"https://www.sap.com/"}
   };
-var allCandidates = Object.keys(candidateMeta);
+var allCandidates = Object.keys(candidateMeta).filter(function(name){
+    var meta=candidateMeta[name];
+    var currentName=platform.toLowerCase();
+    var platformMatch=currentName.indexOf(name.toLowerCase().split(" ")[0])>=0 || (name==="IFS Cloud" && currentName.indexOf("ifs")>=0) || (name==="Microsoft Dynamics 365" && currentName.indexOf("dynamics")>=0);
+    var industryMatch=meta.fit.indexOf(ind)>=0;
+    var processText=processes.join(" ").toLowerCase();
+    var capabilitySignal=meta.caps.some(function(cap){return processText.indexOf(cap.toLowerCase())>=0;});
+    return industryMatch || platformMatch || capabilitySignal;
+  });
+  function capabilityMatches(processName, cap) {
+    var p=String(processName||"").toLowerCase();
+    var q=String(cap||"").toLowerCase();
+    var aliases={
+      "finance":["financial","accounting","accounts payable","accounts receivable","general ledger","controlling"],
+      "financials":["finance","accounting","accounts payable","accounts receivable","general ledger"],
+      "procurement":["purchasing","source to pay","sourcing"],
+      "supply chain":["logistics","planning","distribution","fulfilment","fulfillment"],
+      "inventory":["stock","warehouse inventory","availability"],
+      "order management":["orders","order fulfilment","order fulfillment","sales order"],
+      "commerce":["ecommerce","e-commerce","online sales","digital commerce"],
+      "pos":["point of sale","store"],
+      "merchandising":["retail merchandising","assortment","pricing","allocation","replenishment"],
+      "planning":["demand planning","supply planning","forecasting"],
+      "warehouse":["wms","warehouse management","distribution centre","distribution center"],
+      "manufacturing":["production","shop floor","mrp"],
+      "projects":["project accounting","project management"],
+      "asset management":["assets","eam","maintenance"],
+      "service":["field service","after sales","after-sales"]
+    };
+    if(p.indexOf(q)>=0 || q.indexOf(p)>=0) return true;
+    var a=aliases[q]||[];
+    return a.some(function(x){return p.indexOf(x)>=0;});
+  }
   var scores = allCandidates.map(function (name) {
     var m = candidateMeta[name];
     var industryFit = m.fit.indexOf(ind) >= 0 ? 30 : 4;
     var continuity = platform.toLowerCase().indexOf(name.toLowerCase().split(" ")[0]) >= 0 ? 18 : 0;
-    var processCoverage = processes.reduce(function(total,p){ return total + (m.caps.some(function(cap){ return p.toLowerCase().indexOf(cap.toLowerCase()) >= 0 || cap.toLowerCase().indexOf(p.toLowerCase()) >= 0; }) ? 5 : 1); },0);
-    var painCoverage = pains.reduce(function(total,p){ return total + (m.caps.some(function(cap){ return p.toLowerCase().indexOf(cap.toLowerCase()) >= 0 || cap.toLowerCase().indexOf(p.toLowerCase()) >= 0; }) ? 3 : 1); },0);
+    var processCoverage = processes.reduce(function(total,p){ return total + (m.caps.some(function(cap){ return capabilityMatches(p,cap); }) ? 5 : 0); },0);
+    var painCoverage = pains.reduce(function(total,p){ return total + (m.caps.some(function(cap){ return capabilityMatches(p,cap); }) ? 3 : 0); },0);
     var scaleSignal = scale === "Enterprise" && ["Oracle","SAP","Microsoft Dynamics 365","Infor","IFS Cloud","S/4HANA + specialist ecosystem"].indexOf(name)>=0 ? 10 : 5;
     var customSignal = custom === "Very high" && ["Oracle","SAP","Microsoft Dynamics 365","Infor","IFS Cloud"].indexOf(name)>=0 ? 5 : 2;
     return {name:name, score:industryFit+Math.min(20,processCoverage)+Math.min(12,painCoverage)+scaleSignal+customSignal+continuity};
@@ -171,7 +207,7 @@ var allCandidates = Object.keys(candidateMeta);
     var industryFit = m.fit.indexOf(ind) >= 0;
     var coveredProcesses = processes.filter(function(p){return m.caps.some(function(cap){return p.toLowerCase().indexOf(cap.toLowerCase())>=0 || cap.toLowerCase().indexOf(p.toLowerCase())>=0;});});
     var uncoveredProcesses = processes.filter(function(p){return coveredProcesses.indexOf(p)<0;});
-    var painAligned = pains.filter(function(p){return m.caps.some(function(cap){return p.toLowerCase().indexOf(cap.toLowerCase())>=0 || cap.toLowerCase().indexOf(p.toLowerCase())>=0;});});
+    var painAligned = pains.filter(function(p){return m.caps.some(function(cap){return capabilityMatches(p,cap);});});
     var continuity = platform.toLowerCase().indexOf(app.toLowerCase().split(" ")[0])>=0;
     return {industry:industryFit ? "Aligned" : "Not industry-specific in this assessment",current:continuity ? "Current-platform continuity signal" : "Replacement / complement",covered:coveredProcesses,uncovered:uncoveredProcesses,painAligned:painAligned,total:Math.round((industryFit?35:10)+(coveredProcesses.length*10)+(painAligned.length*5)+(continuity?15:0)),band:industryFit && coveredProcesses.length===processes.length && processes.length ? "Direct requirement alignment" : industryFit ? "Industry fit — validate process coverage" : "Broader option — validate specialist fit"};
   }
@@ -222,8 +258,11 @@ var allCandidates = Object.keys(candidateMeta);
   if (inputsBox) inputsBox.innerHTML = [
     ["Industry",ind],["Business model",model],["Current platform",platform],["Operating footprint",scale],
     ["Revenue / turnover",revenue],["Employees",employees],["ERP / core-app spend",erpSpend],["Customisation today",custom],
-    ["Integration complexity",integration],["Transformation appetite",migration],["Target horizon",value("horizon") || "Not specified"],["Existing ecosystem",value("ecosystem") || "Not specified"]
-  ].map(function(x){return "<div class=\"input-summary\"><small>"+escapeHtml(x[0])+"</small><b>"+escapeHtml(x[1])+"</b></div>";}).join("");
+    ["Integration complexity",integration],["Transformation appetite",migration],["Target horizon",horizon],["Existing ecosystem",ecosystem],
+    ["Assessment goals",goals.length ? goals.join(", ") : "Not specified"],["Customer pain narrative",painText || "Not provided"],
+    ["Custom business process",customProcess !== "None provided" ? customProcess : "Not provided"],["Selected process areas",processes.length ? processes.join(", ") : "Not specified"],
+    ["Selected pain signals",pains.length ? pains.join(", ") : "Not specified"]
+  ].map(function(x){return "<div class='input-summary'><small>"+escapeHtml(x[0])+"</small><b>"+escapeHtml(x[1])+"</b></div>";}).join("");
   if (processDetail) processDetail.innerHTML = processes.length ? processes.map(function(x){return "<div class=\"detail-item\"><b>"+escapeHtml(x)+"</b><span>In scope</span></div>";}).join("") : "<div class=\"detail-empty\">No process areas selected.</div>";
   if (painDetail) painDetail.innerHTML = pains.length ? pains.map(function(x){return "<div class=\"detail-item\"><b>"+escapeHtml(x)+"</b><span>Priority pain signal</span></div>";}).join("") : "<div class=\"detail-empty\">No pain signals selected.</div>";
   if (scoreBreakdown) scoreBreakdown.innerHTML = [
@@ -247,7 +286,7 @@ var allCandidates = Object.keys(candidateMeta);
   var requirementRows = processes.map(function (p) {
     return decisionScores.map(function (x) {
       var d=x.d;
-      var processPain=pains.filter(function(pa){return p.toLowerCase().indexOf(pa.toLowerCase().split(" ")[0])>=0 || pa.toLowerCase().indexOf(p.toLowerCase().split(" ")[0])>=0;});
+      var processPain=pains.filter(function(pa){return capabilityMatches(p,pa);});
       var currentState=platform + (processPain.length ? " · selected pain: "+processPain.join(", ") : " · current capability not independently verified");
       var candidateState=d.covered.indexOf(p)>=0 ? "Mapped capability signal: "+candidateMeta[x.name].caps.join(", ") : "No direct mapped capability signal — scripted demo required";
       var gap=d.covered.indexOf(p)>=0 ? (processPain.length ? "Potential improvement gap driven by selected pain; baseline KPI required." : "No proven gap from supplied inputs; validate exact release/configuration.") : "Requirement-to-capability evidence gap";
@@ -324,7 +363,7 @@ if (download) download.addEventListener("click", function () {
   if (!win) { alert("Please allow pop-ups for AutomationScan to create the PDF-ready report."); return; }
   var reportHtml = report.outerHTML;
   win.document.open();
-  win.document.write("<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>AutomationScan Transformation Decision Report</title><link rel='stylesheet' href='" + location.origin + "/site.css?v=20260928-2'><style>" +
+  win.document.write("<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>AutomationScan Transformation Decision Report</title><link rel='stylesheet' href='" + location.origin + "/site.css?v=20260928-4'><style>" +
     "@page{size:A4;margin:14mm 12mm 16mm}" +
     "html,body{background:#fff!important;color:#20323a!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10pt;line-height:1.45}" +
     "body{margin:0!important}.transform-results{display:block!important;background:#fff!important;padding:0!important}.transform-results>.wrap{width:100%!important;max-width:none!important}.report-letterhead{margin-bottom:16px!important}.result-actions{display:none!important}.report-panel{box-shadow:none!important}.transform-results .report-panel{break-inside:avoid-page}.transform-results .report-panel,.transform-results .transform-score-grid{page-break-inside:avoid}.fit-table-wrap{overflow:visible!important}.fit-table-wrap table{width:100%!important;table-layout:fixed}.fit-table-wrap th,.fit-table-wrap td{white-space:normal!important;word-break:break-word!important}.evidence-table{font-size:8pt!important}.evidence-table th,.evidence-table td{padding:7px!important}.candidate-grid{grid-template-columns:1fr 1fr!important}.explore-grid{grid-template-columns:1fr 1fr!important}.transform-report-grid{grid-template-columns:1fr 1fr!important}.kpi-grid{grid-template-columns:repeat(4,1fr)!important}.input-summary-grid{grid-template-columns:repeat(3,1fr)!important}.priority-detail-grid{grid-template-columns:1fr 1fr!important}.transform-results a{color:#176b70!important}.print-only-footer{display:block!important;margin-top:18px;padding-top:10px;border-top:1px solid #dedbd2;font-size:8pt;color:#68777d}" +
