@@ -259,6 +259,8 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
   var candidatesBox = document.getElementById("tCandidates");
   var explore = document.getElementById("tExplore");
   var architecture = document.getElementById("tArchitecture");
+  var modernLens = document.getElementById("tModernLens");
+  var regulatoryBox = document.getElementById("tRegulatory");
   var inputsBox = document.getElementById("tInputs");
   var processDetail = document.getElementById("tProcessDetail");
   var painDetail = document.getElementById("tPainDetail");
@@ -368,6 +370,23 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
     return "<article class='explore-card'><div class='explore-head'><span>Top "+(idx+1)+" · "+escapeHtml(m.type)+"</span><b>"+escapeHtml(x.name)+"</b></div><p><b>Why relevant:</b> "+escapeHtml(why)+"</p><dl><dt>Distinctive value</dt><dd>"+escapeHtml(unique)+"</dd><dt>Matched requirements</dt><dd>"+escapeHtml(matched.length ? matched.join(" · ") : "None mapped yet")+"</dd><dt>Unproven requirements</dt><dd>"+escapeHtml(unmatched.length ? unmatched.join(" · ") : "None in the selected process list")+"</dd><dt>Customer reference</dt><dd>"+escapeHtml(refs)+"</dd></dl><p><b>POC focus:</b> "+escapeHtml(matched.length ? "Demonstrate the matched processes with the customer's exception, KPI and integration scenario." : "Build a scripted proof for the highest-priority requirement before treating this option as suitable.")+"</p><a href='"+escapeHtml(m.refUrl||m.url)+"' target='_blank' rel='noopener'>Official evidence →</a></article>";
   }).join("");
   if (architecture) architecture.innerHTML = "<p><b>Current:</b> " + escapeHtml(platform) + "</p><p><b>Target hypothesis:</b> SaaS core platform + industry capabilities + governed integrations + common data/identity layer.</p>";
+  if (modernLens) {
+    var maturity = intel.maturityLevels || [];
+    var level = Math.min(5, Math.max(1, 1 + Math.round((processes.length + pains.length + goals.length) / 5)));
+    var maturityName = maturity[level-1] ? maturity[level-1].name : "Discovery";
+    modernLens.innerHTML =
+      "<article><b>Transformation maturity signal</b><strong>Level "+level+" · "+escapeHtml(maturityName)+"</strong><span>Directional signal from process scope, pain, goals and technology context. Validate through interviews and KPI evidence.</span></article>" +
+      "<article><b>AI / agentic capability</b><strong>Governed augmentation first</strong><span>Identify where AI can assist classification, summarisation, exception handling or decision support while preserving human approvals and auditability.</span></article>" +
+      "<article><b>Composable architecture</b><strong>Core + specialists + integration</strong><span>Keep stable ERP capabilities where they meet requirements; add specialist applications where incremental value is proven; avoid unnecessary duplication.</span></article>" +
+      "<article><b>Data & integration</b><strong>Common data / API / event layer</strong><span>Validate master-data ownership, APIs, integration monitoring, identity, lineage and coexistence requirements before migration.</span></article>" +
+      "<article><b>ESG / sustainability</b><strong>Measure relevant operational impact</strong><span>For supply-chain-heavy scenarios, consider energy, water, emissions, waste and social metrics alongside cost and service outcomes.</span></article>";
+  }
+  if (regulatoryBox) {
+    var regs=(industryIntel[ind]||{}).regulatory||[];
+    regulatoryBox.innerHTML="<article><b>Industry</b><strong>"+escapeHtml(ind)+"</strong><span>"+escapeHtml(regs.length?regs.join(" · "):"Determine applicable jurisdiction and sector controls before making a compliance conclusion.")+"</span></article>" +
+      "<article><b>Regulatory intensity</b><strong>"+escapeHtml(regulatoryIntensity)+"</strong><span>Use this as a scoping signal, not a legal classification.</span></article>" +
+      "<article><b>Control evidence</b><strong>Audit · access · retention · residency</strong><span>Validate segregation of duties, auditability, data retention, security, privacy, data residency and applicable regulatory controls.</span></article>";
+  }
   var results = document.getElementById("transformResults");
   if (results) {
     results.classList.remove("hidden");
