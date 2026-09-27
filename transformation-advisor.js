@@ -194,6 +194,17 @@ if (next) next.addEventListener("click", function () { if (validStep()) showStep
 if (back) back.addEventListener("click", function () { showStep((window._advisorStep || 0) - 1); });
 if (form) form.addEventListener("submit", function (e) { e.preventDefault(); if (!validStep()) return; renderReport(); });
 if (generate) generate.addEventListener("click", function (e) { e.preventDefault(); if (!validStep()) return; renderReport(); });
+var download = document.getElementById("tDownload");
+if (download) download.addEventListener("click", function () {
+  var report = document.getElementById("transformResults");
+  if (!report) return;
+  var win = window.open("", "_blank");
+  if (!win) { window.print(); return; }
+  win.document.write("<!doctype html><html><head><title>AutomationScan Transformation Decision Report</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#17242b}article{break-inside:avoid} @media print{button{display:none}}</style></head><body>" + report.outerHTML + "</body></html>");
+  win.document.close();
+  win.focus();
+  setTimeout(function(){win.print();},300);
+});
 var print = document.getElementById("tPrint");
 if (print) print.addEventListener("click", function () { window.print(); });
 
