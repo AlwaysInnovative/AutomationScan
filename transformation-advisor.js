@@ -10,6 +10,16 @@ var next = document.getElementById("tNext");
 var back = document.getElementById("tBack");
 var generate = document.getElementById("tGenerate");
 
+var intel = window.AutomationScanIntelligence || {industries:{},candidates:{},tools:[]};
+var industryIntel = intel.industries || {};
+var candidateLibrary = intel.candidates || {};
+function mergeIntelIntoAdvisor() {
+  Object.keys(industryIntel).forEach(function(k) {
+    if (!businessModels[k]) businessModels[k] = industryIntel[k].models || [];
+    if (!processMap[k]) processMap[k] = industryIntel[k].processes || processMap.Other;
+    if (!painMap[k]) painMap[k] = industryIntel[k].pains || painMap.Other;
+  });
+}
 var businessModels = {
   Retail: ["Department / specialty retail","Grocery / convenience","Fashion / apparel","Wholesale + retail","Omnichannel / marketplace"],
   Manufacturing: ["Discrete manufacturing","Process manufacturing","Engineer-to-order","Make-to-stock","Contract manufacturing"],
@@ -380,5 +390,6 @@ var print = document.getElementById("tPrint");
 if (print) print.addEventListener("click", function () { document.body.classList.add("printing-transform-report"); window.print(); setTimeout(function(){document.body.classList.remove("printing-transform-report");},1200); });
 
 showStep(0);
+mergeIntelIntoAdvisor();
 populateBusinessModels();
 })();
