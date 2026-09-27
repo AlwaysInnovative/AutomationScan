@@ -150,7 +150,7 @@ function renderReport() {
     "Blue Yonder": {type:"Specialist supply-chain platform", products:"Blue Yonder", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Planning","Demand","Supply","Warehouse","Order Management","Merchandising"], url:"https://blueyonder.com/"},
     "S/4HANA + specialist ecosystem": {type:"ERP + best-of-breed", products:"SAP core plus specialist applications", fit:["Retail","Manufacturing","Distribution","Consumer Products"], caps:["Finance","Supply Chain","Procurement","Manufacturing","Retail","Integration","Analytics"], url:"https://www.sap.com/"}
   };
-var allCandidates = Object.keys(candidateMeta);var allCandidates = Object.keys(candidateMeta);
+var allCandidates = Object.keys(candidateMeta);
   var scores = allCandidates.map(function (name) {
     var m = candidateMeta[name];
     var industryFit = m.fit.indexOf(ind) >= 0 ? 30 : 4;
@@ -161,7 +161,7 @@ var allCandidates = Object.keys(candidateMeta);var allCandidates = Object.keys(c
     var customSignal = custom === "Very high" && ["Oracle","SAP","Microsoft Dynamics 365","Infor","IFS Cloud"].indexOf(name)>=0 ? 5 : 2;
     return {name:name, score:industryFit+Math.min(20,processCoverage)+Math.min(12,painCoverage)+scaleSignal+customSignal+continuity};
   }).sort(function(a,b){return b.score-a.score;});
-  var candidates = scores.mapvar candidates = scores.map(function(x){return x.name;});
+  var candidates = scores.map(function(x){return x.name;});
   var score = Math.min(96, 40 + processes.length * 5 + pains.length * 3 + (platform !== "Not specified" ? 12 : 0) + (model !== "Not specified" ? 8 : 0));
   var route = migration.indexOf("Transformational") >= 0 ? "Transformation" : migration.indexOf("Conservative") >= 0 ? "Modernise / preserve continuity" : "Structured market comparison";
   var painText = value("painText") || "";
@@ -175,7 +175,7 @@ var allCandidates = Object.keys(candidateMeta);var allCandidates = Object.keys(c
     var continuity = platform.toLowerCase().indexOf(app.toLowerCase().split(" ")[0])>=0;
     return {industry:industryFit ? "Aligned" : "Not industry-specific in this assessment",current:continuity ? "Current-platform continuity signal" : "Replacement / complement",covered:coveredProcesses,uncovered:uncoveredProcesses,painAligned:painAligned,total:Math.round((industryFit?35:10)+(coveredProcesses.length*10)+(painAligned.length*5)+(continuity?15:0)),band:industryFit && coveredProcesses.length===processes.length && processes.length ? "Direct requirement alignment" : industryFit ? "Industry fit — validate process coverage" : "Broader option — validate specialist fit"};
   }
-  var decisionScores =  var decisionScores = candidates.map(function(app, idx){ return {name:app, d:candidateDecision(app, idx)}; });
+  var decisionScores = candidates.map(function(app, idx){ return {name:app, d:candidateDecision(app, idx)}; });
   var title = document.getElementById("tResultTitle");
   var sub = document.getElementById("tResultSub");
   var scoreEl = document.getElementById("tScore");
