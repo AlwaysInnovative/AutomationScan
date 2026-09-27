@@ -186,4 +186,4 @@ function setupConsent(){
  document.getElementById("consentAccept")?.addEventListener("click",()=>apply("granted"));
  document.getElementById("consentReject")?.addEventListener("click",()=>apply("denied"));
 }
-setupAds(); setupContact(); setupConsent();
+setupConsent(); setupAds(); setupContact();
