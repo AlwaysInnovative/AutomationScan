@@ -190,6 +190,11 @@ var allCandidates = Object.keys(candidateMeta);
   var candidatesBox = document.getElementById("tCandidates");
   var explore = document.getElementById("tExplore");
   var architecture = document.getElementById("tArchitecture");
+  var inputsBox = document.getElementById("tInputs");
+  var processDetail = document.getElementById("tProcessDetail");
+  var painDetail = document.getElementById("tPainDetail");
+  var scoreBreakdown = document.getElementById("tScoreBreakdown");
+  var goalsBox = document.getElementById("tGoals");
 
   if (title) title.textContent = ind + " transformation decision brief";
   if (sub) sub.textContent = "Business model: " + model + " | Current platform: " + platform;
@@ -202,12 +207,24 @@ var allCandidates = Object.keys(candidateMeta);
   }
   if (summary) summary.innerHTML = "<section class='executive-decision'><div class='eyebrow'>EXECUTIVE DECISION SUMMARY</div><h3>What should this customer decide next?</h3><p>" + escapeHtml(buildDecisionNarrative(ind, model, platform, scale, migration, candidates, decisionScores, processes, pains)) + "</p><div class='decision-path'><span>1. Confirm business requirements</span><span>2. Challenge custom processes</span><span>3. Compare candidate ecosystems</span><span>4. Validate with evidence and POC</span><span>5. Build the business case</span></div><div class='decision-questions'><b>Before selecting an application, answer:</b><ul><li>Do we actually need to replace the ERP?</li><li>Which processes should become standard SaaS processes?</li><li>Which custom processes genuinely differentiate the business?</li><li>Which capabilities belong in ERP versus specialist applications?</li><li>What evidence and POC results are required before committing?</li></ul></div></section>";
   if (contextLabel) contextLabel.textContent = "Assessment context";
-  if (context) context.innerHTML = "<b>" + escapeHtml(ind) + " / " + escapeHtml(model) + "</b><p>Scale: " + escapeHtml(scale) + "</p><p>Customisation: " + escapeHtml(custom) + " | Integration: " + escapeHtml(integration) + "</p><p>Transformation appetite: " + escapeHtml(migration) + "</p>";
+  if (context) context.innerHTML = "<b>" + escapeHtml(ind) + " / " + escapeHtml(model) + "</b><p>Current platform: " + escapeHtml(platform) + "</p><p>Scale: " + escapeHtml(scale) + "</p><p>Customisation: " + escapeHtml(custom) + " | Integration: " + escapeHtml(integration) + "</p><p>Transformation appetite: " + escapeHtml(migration) + "</p>";
+  if (inputsBox) inputsBox.innerHTML = [
+    ["Industry",ind],["Business model",model],["Current platform",platform],["Operating footprint",scale],
+    ["Revenue / turnover",revenue],["Employees",employees],["ERP / core-app spend",erpSpend],["Customisation today",custom],
+    ["Integration complexity",integration],["Transformation appetite",migration],["Target horizon",value("horizon") || "Not specified"],["Existing ecosystem",value("ecosystem") || "Not specified"]
+  ].map(function(x){return "<div class=\"input-summary\"><small>"+escapeHtml(x[0])+"</small><b>"+escapeHtml(x[1])+"</b></div>";}).join("");
+  if (processDetail) processDetail.innerHTML = processes.length ? processes.map(function(x){return "<div class=\"detail-item\"><b>"+escapeHtml(x)+"</b><span>In scope</span></div>";}).join("") : "<div class=\"detail-empty\">No process areas selected.</div>";
+  if (painDetail) painDetail.innerHTML = pains.length ? pains.map(function(x){return "<div class=\"detail-item\"><b>"+escapeHtml(x)+"</b><span>Priority pain signal</span></div>";}).join("") : "<div class=\"detail-empty\">No pain signals selected.</div>";
+  if (scoreBreakdown) scoreBreakdown.innerHTML = [
+    ["Process coverage",Math.min(100,processes.length*10)],["Pain intensity",Math.min(100,pains.length*14)],["Technology context",platform !== "Not specified" ? 100 : 0],["Decision readiness",Math.min(100,40 + goals.length*10)]
+  ].map(function(x){return "<div class=\"score-break-row\"><div><b>"+escapeHtml(x[0])+"</b><strong>"+x[1]+"%</strong></div><div class=\"score-break-track\"><i style=\"width:"+x[1]+"%\"></i></div></div>";}).join("");
+  if (goalsBox) goalsBox.innerHTML = goals.length ? goals.map(function(x){return "<span>"+escapeHtml(x)+"</span>";}).join("") : "<span>No specific outcome selected</span>";
   if (capCount) capCount.textContent = processes.length + " selected";
   if (caps) caps.innerHTML = processes.length ? processes.map(function (x) { return "<li>" + escapeHtml(x) + "</li>"; }).join("") : "<li>No specific processes selected yet.</li>";
   if (kpis) kpis.innerHTML = "<article><b>" + processes.length + "</b><span>process areas</span></article><article><b>" + pains.length + "</b><span>pain areas</span></article><article><b>" + candidates.length + "</b><span>ecosystems assessed</span></article><article><b>" + candidates.slice(0,3).join(" / ") + "</b><span>priority investigation set</span></article>";
-  var customProcesses = value("customProcesses") || value("custom") || "None provided";
-  var customProcessText = customProcesses && customProcesses !== "None provided" ? customProcesses : "No custom process supplied";
+  var customProcesses = value("customProcesses");
+  var customProcessText = customProcess || "No custom process supplied";
+  var goals = checked("goal");
   function treatmentFor(app) {
     if (customProcessText === "No custom process supplied") return "No custom process provided";
     var c = candidateMeta[app];
@@ -246,10 +263,24 @@ var allCandidates = Object.keys(candidateMeta);
     var bandText = spendBand[0] ? "$" + low.toLocaleString() + "–$" + high.toLocaleString() + " annual opportunity signal" : "Baseline required before a monetary range can be calculated";
     val.innerHTML = "<div><b>" + bandText + "</b><span>illustrative efficiency / simplification signal</span></div><div><b>" + processes.length + "</b><span>process areas in scope</span></div><div><b>" + pains.length + "</b><span>pain signals selected</span></div><div><b>" + escapeHtml(erpSpend) + "</b><span>current core-app spend input</span></div><p>Validate this signal against labour effort, application retirement, integration/support, working capital, revenue leakage and implementation investment. It is not a vendor quote or guaranteed saving.</p>";
   }
-  if (val) val.innerHTML = "<p>Validate value with a baseline covering operating cost, cycle time, error rate, working capital, revenue leakage and user effort before selecting a platform.</p>";
-  if (evidence) evidence.innerHTML = "<ul><li>Require relevant industry customer references.</li><li>Require scripted demonstrations using your processes.</li><li>Require architecture, security and integration evidence.</li><li>Require a transparent implementation and five-year TCO model.</li></ul>";
-  if (questions) questions.innerHTML = "<ol><li>Show our highest-value end-to-end process using standard capability.</li><li>Which requirements require configuration, extension or third-party products?</li><li>What happens to our current customisations and integrations?</li><li>Provide comparable industry references and measurable outcomes.</li><li>Demonstrate identity, audit, resilience and required compliance controls.</li></ol>";
-  if (roadmap) roadmap.innerHTML = "<article><span>0-30 days</span><b>Baseline</b><p>Confirm process, data, integrations, customisations and value baseline.</p></article><article><span>31-60 days</span><b>Prove fit</b><p>Run scripted demonstrations and fit-gap assessment.</p></article><article><span>61-90 days</span><b>Compare</b><p>Validate POC, TCO, migration and partner evidence.</p></article>";
+
+  if (evidence) evidence.innerHTML = [
+    ["Business requirements", processes.length ? processes.join("; ") : "Process scope not selected", "Trace each requirement to measurable business outcome", "Requirements workshop + signed baseline"],
+    ["Pain points", pains.length ? pains.join("; ") : "Pain scope not selected", "Compare current-state metrics with target-state outcomes", "Baseline KPI evidence"],
+    ["Custom process", customProcessText === "No custom process supplied" ? "None supplied" : customProcessText, "Standardise / configure / extend / specialist / retire", "POC using the real exception"],
+    ["Applications", candidates.slice(0,4).join("; "), "Capability coverage, integration and industry fit", "Scripted comparable demos"],
+    ["Economics", erpSpend + " / " + revenue, "Five-year TCO, retirement, implementation and operating cost", "Transparent business case"],
+    ["Migration", migration, "Data, integrations, customisations and coexistence waves", "Migration assessment + rehearsal evidence"]
+  ].map(function(r){return "<tr><td><b>"+escapeHtml(r[0])+"</b></td><td>"+escapeHtml(r[1])+"</td><td>"+escapeHtml(r[2])+"</td><td>"+escapeHtml(r[3])+"</td></tr>";}).join("");
+  if (questions) questions.innerHTML = [
+    "Demonstrate " + (processes[0] || "the highest-value process") + " end-to-end using standard capability, including an exception and approval.",
+    "Show how the selected pain areas are reduced and what KPI proves the improvement.",
+    "Explain which requirements need configuration, extension, specialist applications or integration.",
+    "Show how the current " + platform + " customisations and integrations are migrated, replaced or retired.",
+    "Provide comparable " + ind + " references and a transparent five-year TCO including implementation and operating costs.",
+    "Demonstrate identity, segregation of duties, audit, resilience, data residency and required compliance controls."
+  ].map(function(x){return "<li>"+escapeHtml(x)+"</li>";}).join("");
+  if (roadmap) roadmap.innerHTML = "<article><span>0-30 days</span><b>Baseline this customer</b><p>Confirm " + escapeHtml(ind) + " processes, selected pain points, data, integrations, customisations and value baseline.</p></article><article><span>31-60 days</span><b>Prove process fit</b><p>Run comparable scripted demonstrations for " + escapeHtml(processes.slice(0,3).join(", ") || "priority processes") + (customProcessText === "No custom process supplied" ? "." : " and the custom process.") + "</p></article><article><span>61-90 days</span><b>Compare & business-case</b><p>Validate POC results, five-year TCO, migration effort, partner evidence and the chosen transformation route.</p></article>";
   if (candidatesBox) candidatesBox.innerHTML = decisionScores.map(function(x){
     var m=candidateMeta[x.name];
     return "<article class='decision-card'><div><b>" + x.name + "</b><strong>" + x.d.band + "</strong></div><p>Industry fit " + x.d.fit + "/5 · Scale " + x.d.scale + "/5 · Continuity " + x.d.continuity + "/5 · Integration " + x.d.integration + "/5 · Migration " + x.d.migration + "/5</p><p><b>Why investigate:</b> " + escapeHtml(m.reason) + "</p><p><b>Evidence gate:</b> " + escapeHtml(m.evidence) + "</p><small>Signal " + x.d.total + "/30 — not a vendor ranking or purchase recommendation.</small></article>";
@@ -278,14 +309,20 @@ if (download) download.addEventListener("click", function () {
   var report = document.getElementById("transformResults");
   if (!report) return;
   var win = window.open("", "_blank");
-  if (!win) { window.print(); return; }
-  win.document.write("<!doctype html><html><head><title>AutomationScan Transformation Decision Report</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#17242b}article{break-inside:avoid} @media print{button{display:none}}</style></head><body>" + report.outerHTML + "</body></html>");
+  if (!win) { alert("Please allow pop-ups for AutomationScan to create the PDF-ready report."); return; }
+  var reportHtml = report.outerHTML;
+  win.document.open();
+  win.document.write("<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>AutomationScan Transformation Decision Report</title><link rel='stylesheet' href='" + location.origin + "/site.css?v=20260928-2'><style>" +
+    "@page{size:A4;margin:14mm 12mm 16mm}" +
+    "html,body{background:#fff!important;color:#20323a!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10pt;line-height:1.45}" +
+    "body{margin:0!important}.transform-results{display:block!important;background:#fff!important;padding:0!important}.transform-results>.wrap{width:100%!important;max-width:none!important}.report-letterhead{margin-bottom:16px!important}.result-actions{display:none!important}.report-panel{box-shadow:none!important}.transform-results .report-panel{break-inside:avoid-page}.transform-results .report-panel,.transform-results .transform-score-grid{page-break-inside:avoid}.fit-table-wrap{overflow:visible!important}.fit-table-wrap table{width:100%!important;table-layout:fixed}.fit-table-wrap th,.fit-table-wrap td{white-space:normal!important;word-break:break-word!important}.evidence-table{font-size:8pt!important}.evidence-table th,.evidence-table td{padding:7px!important}.candidate-grid{grid-template-columns:1fr 1fr!important}.explore-grid{grid-template-columns:1fr 1fr!important}.transform-report-grid{grid-template-columns:1fr 1fr!important}.kpi-grid{grid-template-columns:repeat(4,1fr)!important}.input-summary-grid{grid-template-columns:repeat(3,1fr)!important}.priority-detail-grid{grid-template-columns:1fr 1fr!important}.transform-results a{color:#176b70!important}.print-only-footer{display:block!important;margin-top:18px;padding-top:10px;border-top:1px solid #dedbd2;font-size:8pt;color:#68777d}" +
+    "</style></head><body class='print-report-shell'>" + reportHtml + "<div class='print-only-footer'>AutomationScan · Market Fit & Transformation Assessment · Directional decision support — validate current vendor scope, commercial terms, security, localisation, integrations and TCO before investment.</div></body></html>");
   win.document.close();
   win.focus();
-  setTimeout(function(){win.print();},300);
+  setTimeout(function(){win.print();},700);
 });
 var print = document.getElementById("tPrint");
-if (print) print.addEventListener("click", function () { window.print(); });
+if (print) print.addEventListener("click", function () { document.body.classList.add("printing-transform-report"); window.print(); setTimeout(function(){document.body.classList.remove("printing-transform-report");},1200); });
 
 showStep(0);
 populateBusinessModels();
