@@ -23,7 +23,7 @@ async function hubspotUpsert(email,context={}){
     const data=await search.json();
     if(data.results?.[0])return {configured:true,created:false,id:data.results[0].id};
   }
-  const create=await fetch("https://api.hubapi.com/crm/v3/objects/contacts",{method:"POST",headers,body:JSON.stringify({properties:{email,automationscan_lead_source:String(context.source?.utm_source||"direct"),automationscan_lead_medium:String(context.source?.utm_medium||"(none)"),automationscan_lead_campaign:String(context.source?.utm_campaign||"")}})});
+  const create=await fetch("https://api.hubapi.com/crm/v3/objects/contacts",{method:"POST",headers,body:JSON.stringify({properties:{email}})});
   if(create.ok){const data=await create.json();return {configured:true,created:true,id:data.id};}
   return {configured:true,error:true};
 }
