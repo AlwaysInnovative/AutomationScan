@@ -205,7 +205,7 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
   function candidateDecision(app, idx) {
     var m = candidateMeta[app];
     var industryFit = m.fit.indexOf(ind) >= 0;
-    var coveredProcesses = processes.filter(function(p){return m.caps.some(function(cap){return p.toLowerCase().indexOf(cap.toLowerCase())>=0 || cap.toLowerCase().indexOf(p.toLowerCase())>=0;});});
+    var coveredProcesses = processes.filter(function(p){return m.caps.some(function(cap){return capabilityMatches(p,cap);});});
     var uncoveredProcesses = processes.filter(function(p){return coveredProcesses.indexOf(p)<0;});
     var painAligned = pains.filter(function(p){return m.caps.some(function(cap){return capabilityMatches(p,cap);});});
     var continuity = platform.toLowerCase().indexOf(app.toLowerCase().split(" ")[0])>=0;
@@ -288,7 +288,7 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
       var d=x.d;
       var processPain=pains.filter(function(pa){return capabilityMatches(p,pa);});
       var currentState=platform + (processPain.length ? " · selected pain: "+processPain.join(", ") : " · current capability not independently verified");
-      var candidateState=d.covered.indexOf(p)>=0 ? "Mapped capability signal: "+candidateMeta[x.name].caps.join(", ") : "No direct mapped capability signal — scripted demo required";
+      var candidateState=d.covered.indexOf(p)>=0 ? (candidateMeta[x.name].unique||candidateMeta[x.name].products)+" Relevant to "+p+"; validate exact release/configuration." : "No direct catalogue match for "+p+"; this is an evidence gap, not proof of product weakness.";
       var gap=d.covered.indexOf(p)>=0 ? (processPain.length ? "Potential improvement gap driven by selected pain; baseline KPI required." : "No proven gap from supplied inputs; validate exact release/configuration.") : "Requirement-to-capability evidence gap";
       return {process:p,app:x.name,current:currentState,candidate:candidateState,gap:gap,treatment:d.covered.indexOf(p)>=0 ? "Fit-to-standard / configure first" : "POC / specialist / extension assessment",evidence:"Comparable demo + current-state evidence + industry reference + architecture/security proof"};
     });
@@ -332,10 +332,7 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
     "Demonstrate identity, segregation of duties, audit, resilience, data residency and required compliance controls."
   ].map(function(x){return "<li>"+escapeHtml(x)+"</li>";}).join("");
   if (roadmap) roadmap.innerHTML = "<article><span>0-30 days</span><b>Baseline this customer</b><p>Confirm " + escapeHtml(ind) + " processes, selected pain points, data, integrations, customisations and value baseline.</p></article><article><span>31-60 days</span><b>Prove process fit</b><p>Run comparable scripted demonstrations for " + escapeHtml(processes.slice(0,3).join(", ") || "priority processes") + (customProcessText === "No custom process supplied" ? "." : " and the custom process.") + "</p></article><article><span>61-90 days</span><b>Compare & business-case</b><p>Validate POC results, five-year TCO, migration effort, partner evidence and the chosen transformation route.</p></article>";
-  if (candidatesBox) candidatesBox.innerHTML = decisionScores.map(function(x){
-    var m=candidateMeta[x.name];
-    return "<article class='decision-card'><div><b>" + x.name + "</b><strong>" + x.d.band + "</strong></div><p>Industry fit " + x.d.fit + "/5 · Scale " + x.d.scale + "/5 · Continuity " + x.d.continuity + "/5 · Integration " + x.d.integration + "/5 · Migration " + x.d.migration + "/5</p><p><b>Why investigate:</b> " + escapeHtml(m.reason) + "</p><p><b>Evidence gate:</b> " + escapeHtml(m.evidence) + "</p><small>Signal " + x.d.total + "/30 — not a vendor ranking or purchase recommendation.</small></article>";
-  }).join(""); if (candidatesBox) candidatesBox.innerHTML = decisionScores.map(function (x,idx) {
+  if (candidatesBox) candidatesBox.innerHTML = decisionScores.map(function (x,idx) {
     var m=candidateMeta[x.name], d=x.d;
     return "<article class='candidate-card'><div class='candidate-rank'>"+(idx+1)+"</div><div><div class='candidate-name'><b>"+escapeHtml(x.name)+"</b><span>"+escapeHtml(m.type)+"</span></div><p><b>Why it appears:</b> "+escapeHtml(m.why||d.industry)+"</p><p><b>Distinctive capability:</b> "+escapeHtml(m.unique||m.products)+"</p><p><b>Reference evidence:</b> "+escapeHtml(m.refs||"Request a comparable customer reference.")+"</p><a href='"+escapeHtml(m.refUrl||m.url)+"' target='_blank' rel='noopener'>Source evidence →</a></div></article>";
   }).join("");
