@@ -14,7 +14,7 @@ async function resendSend({key,from,to,subject,text,tags,idempotencyKey}){
   return fetch("https://api.resend.com/emails",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`,"Idempotency-Key":idempotencyKey},body:JSON.stringify({from,to,subject,text,tags})});
 }
 
-async function hubspotUpsert(email){
+async function hubspotUpsert(email,context={}){
   const token=process.env.HUBSPOT_ACCESS_TOKEN;
   if(!token)return {configured:false};
   const headers={"Content-Type":"application/json","Authorization":`Bearer ${token}`};
@@ -23,7 +23,7 @@ async function hubspotUpsert(email){
     const data=await search.json();
     if(data.results?.[0])return {configured:true,created:false,id:data.results[0].id};
   }
-  const create=await fetch("https://api.hubapi.com/crm/v3/objects/contacts",{method:"POST",headers,body:JSON.stringify({properties:{email}})});
+  const create=await fetch("https://api.hubapi.com/crm/v3/objects/contacts",{method:"POST",headers,body:JSON.stringify({properties:{email,automationscan_lead_source:String(context.source?.utm_source||"direct"),automationscan_lead_medium:String(context.source?.utm_medium||"(none)"),automationscan_lead_campaign:String(context.source?.utm_campaign||"")}})});
   if(create.ok){const data=await create.json();return {configured:true,created:true,id:data.id};}
   return {configured:true,error:true};
 }
@@ -39,14 +39,14 @@ export default async function handler(req,res){
     if(!emailOk(email)||body.consent!==true)return res.status(400).json({error:"consent_required"});
 
     const r=body.report||{};
-    const summary=`Industry: ${String(r.industry||"Unknown")} | Signal: ${Number(r.score||0)}/100 | Estimated: ${String(r.low||0)}-${String(r.high||0)} hrs/month | Goal: ${String(r.goal||"Not specified")}`;
+    const source=body.source||{}; const summary=`Industry: ${String(r.industry||"Unknown")} | Signal: ${Number(r.score||0)}/100 | Estimated: ${String(r.low||0)}-${String(r.high||0)} hrs/month | Goal: ${String(r.goal||"Not specified")} | Source: ${String(source.utm_source||"direct")}/${String(source.utm_medium||"(none)")}`;
     const key=process.env.RESEND_API_KEY;
     const from=process.env.RESEND_FROM;
     const owner=process.env.LEAD_NOTIFICATION_TO;
     const idempotencyKey=`automationscan:${email}:${Number(r.score||0)}:${String(r.industry||"unknown")}`;
 
     let hubspot={configured:false};
-    try{hubspot=await hubspotUpsert(email);}catch{hubspot={configured:true,error:true};}
+    try{hubspot=await hubspotUpsert(email,{source:body.source,report:r});}catch{hubspot={configured:true,error:true};}
 
     if(!key||!from){
       return res.status(202).json({ok:true,emailQueued:false,crmSynced:!!hubspot.id,configurationPending:true});
