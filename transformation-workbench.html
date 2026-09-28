@@ -31,7 +31,7 @@
 <article class="wb-panel active" id="tab-profile">
 <p class="eyebrow">FOUNDATION</p><h2>Transformation profile</h2><p>Use the same context model across every downstream decision instead of repeating isolated questionnaires.</p>
 <div class="wb-form">
-<label>Industry<select id="wbIndustry"></select></label>
+<label>Industry / sector<input id="wbIndustry" placeholder="e.g. Retail, Manufacturing, Healthcare, Banking"></label>
 <label>Current platform<input id="wbCurrent" placeholder="Current ERP / core platform"></label>
 <label>Business model<input id="wbBusiness" placeholder="e.g. B2B distribution"></label>
 <label>Scale<select id="wbScale"><option>SMB</option><option>Mid-market</option><option>Enterprise</option></select></label>
@@ -93,8 +93,14 @@
 </div><div class="wb-actions"><button class="wb-btn wb-primary" id="addCapability">Add capability</button></div><div id="capabilityOut"></div>
 </article>
 <article class="wb-panel" id="tab-select">
-<p class="eyebrow">DECISION ENGINE</p><h2>Explainable investigation set</h2><p>Scores remain directional. Each candidate is accompanied by the factors that moved its score and the evidence still required.</p>
-<div class="wb-actions"><button class="wb-btn wb-primary" id="runSelection">Run investigation set</button><button class="wb-btn wb-secondary" id="runTraceability">Trace requirements</button></div><div id="selectOut"></div><div id="traceOut" class="wb-output"></div>
+<p class="eyebrow">DECISION ENGINE</p><h2>Dynamic investigation set</h2><p>Nothing is pre-ranked or hard-coded. Add the applications, platforms, vendors or specialists you want assessed and score them against your own requirements, processes, capabilities and evidence.</p>
+<div class="wb-form">
+<label>Candidate name<input id="candName" placeholder="ERP, specialist application, platform, vendor or internal option"></label>
+<label>Capabilities / scope<textarea id="candCapabilities" placeholder="Finance, planning, warehouse, workflow, analytics, integration..."></textarea></label>
+<label>Candidate notes<textarea id="candNotes" placeholder="Your source-backed description, constraints, geography, deployment model, etc."></textarea></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addCandidate">Add candidate</button><button class="wb-btn wb-light" id="clearCandidates">Clear candidates</button><button class="wb-btn wb-primary" id="runSelection">Run investigation set</button><button class="wb-btn wb-secondary" id="runTraceability">Trace requirements</button></div>
+<div id="candidateOut"></div><div id="selectOut"></div><div id="traceOut" class="wb-output"></div>
 </article>
 
 <article class="wb-panel" id="tab-economics">
@@ -208,5 +214,5 @@
 </article>
 </section></div></main>
 <footer><div class="wrap footer-grid"><div><a class="brand" href="./">Automation<span>Scan</span></a><p>Evidence-led transformation discovery.</p></div><div><b>Explore</b><a href="transformation-advisor.html">Navigator</a><a href="transformation-tools.html">Free tools</a><a href="methodology.html">Methodology</a></div><div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div></div><div class="wrap footer-bottom">© 2026 AutomationScan · Directional decision support.</div></footer>
-<script src="intelligence-data.js?v=20260928-1"></script><script src="decision-engine.js?v=20260928-1"></script><script src="workbench.js?v=20260928-1"></script>
+<script src="decision-engine.js?v=20260928-2"></script><script src="workbench.js?v=20260928-1"></script>
 </body></html>
