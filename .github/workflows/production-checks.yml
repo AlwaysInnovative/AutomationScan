@@ -1,0 +1,37 @@
+name: AutomationScan production checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -e
+          find . -type f -name '*.js' -not -path './.git/*' -print0 | xargs -0 -n1 node --check
+      - name: Check for exposed service-role secrets
+        shell: bash
+        run: |
+          set -e
+          if grep -RIn --exclude-dir=.git --exclude='*.md' 'SUPABASE_SERVICE_ROLE_KEY' . | grep -v '^./api/'; then
+            echo "Service-role key reference found outside server API code."
+            exit 1
+          fi
+      - name: Check required production routes
+        shell: bash
+        run: |
+          set -e
+          test -f index.html
+          test -f transformation-advisor.html
+          test -f transformation-workbench.html
+          test -f report.html
+          test -f contact.html
+          test -f api/lead.js
+          test -f api/contact.js
+          test -f api/workbench.js
