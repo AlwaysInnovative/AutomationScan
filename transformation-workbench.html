@@ -19,13 +19,13 @@
 <aside class="wb-nav" aria-label="Workbench sections">
 <button class="active" data-tab="profile">1. Profile</button>
 <button data-tab="process">2. Processes</button>
-<button data-tab="apps">3. Applications</button>
-<button data-tab="select">4. Selection</button>
-<button data-tab="economics">5. Economics</button>
-<button data-tab="execute">6. RFP / POC</button>
-<button data-tab="requirements">9. Requirements</button>
-<button data-tab="compare">10. Vendor Compare</button>
-<button data-tab="portfolio">11. Portfolio Health</button><button data-tab="poc">12. POC & Readiness</button><button data-tab="govern">13. Governance</button><button data-tab="roadmap">14. Roadmap</button><button data-tab="evidence">15. Evidence</button><button data-tab="report">16. Dossier</button>
+<button data-tab="apps">3. Applications</button><button data-tab="capabilities">4. Capabilities</button>
+<button data-tab="select">5. Selection</button>
+<button data-tab="economics">6. Economics</button>
+<button data-tab="execute">7. RFP / POC</button>
+<button data-tab="requirements">10. Requirements</button>
+<button data-tab="compare">11. Vendor Compare</button>
+<button data-tab="portfolio">12. Portfolio Health</button><button data-tab="poc">13. POC & Readiness</button><button data-tab="govern">14. Governance</button><button data-tab="roadmap">15. Roadmap</button><button data-tab="evidence">16. Evidence</button><button data-tab="report">17. Dossier</button>
 </aside>
 <section class="wb-main">
 <article class="wb-panel active" id="tab-profile">
@@ -79,6 +79,19 @@
 <div id="appsOut"></div>
 </article>
 
+<article class="wb-panel" id="tab-capabilities">
+<p class="eyebrow">CAPABILITY MODEL</p><h2>Capability map & gap analysis</h2><p>Connect business capabilities to requirements, applications and evidence. Keep the model editable so it can reflect the organisation rather than a generic template.</p>
+<div class="wb-form">
+<label>Capability<input id="cName" placeholder="e.g. Demand planning"></label>
+<label>Business criticality<select id="cCriticality"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></label>
+<label>Current maturity %<input id="cCurrent" type="number" min="0" max="100" value="50"></label>
+<label>Target maturity %<input id="cTarget" type="number" min="0" max="100" value="80"></label>
+<label>Current application<input id="cApp" placeholder="Linked application"></label>
+<label>Requirement ID<input id="cReq" placeholder="REQ-001"></label>
+<label>Evidence status<select id="cEvidence"><option>Not verified</option><option>Documented</option><option>Demonstrated</option><option>POC validated</option></select></label>
+<label>Gap / action<textarea id="cGap" placeholder="Configuration, extension, specialist application, integration, process redesign..."></textarea></label>
+</div><div class="wb-actions"><button class="wb-btn wb-primary" id="addCapability">Add capability</button></div><div id="capabilityOut"></div>
+</article>
 <article class="wb-panel" id="tab-select">
 <p class="eyebrow">DECISION ENGINE</p><h2>Explainable investigation set</h2><p>Scores remain directional. Each candidate is accompanied by the factors that moved its score and the evidence still required.</p>
 <div class="wb-actions"><button class="wb-btn wb-primary" id="runSelection">Run investigation set</button><button class="wb-btn wb-secondary" id="runTraceability">Trace requirements</button></div><div id="selectOut"></div><div id="traceOut" class="wb-output"></div>
