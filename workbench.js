@@ -79,13 +79,17 @@ function scenarioEconomics(){
  $("economicsOut").innerHTML+=html;
 }
 function calcEconomics(){
- var n=function(id){return Number(val(id))||0}, years=Math.max(1,n("tYears"));
- var input={licence:n("tCurrentLicence"),support:n("tCurrentSupport"),infrastructure:n("tCurrentInfra"),internal:n("tCurrentInternal"),futureSubscription:n("tFutureSub"),futureServices:n("tFutureServices"),futureInfrastructure:n("tFutureInfra"),implementation:n("tImplementation"),migration:n("tMigration"),change:n("tChange"),years:years};
- var cur=(input.licence+input.support+input.infrastructure+input.internal)*years;
- var fut=(input.futureSubscription+input.futureServices+input.futureInfrastructure)*years+input.implementation+input.migration+input.change;
- var annualValue=n("tValue")*(n("tRealisation")/100),value=annualValue*years,delta=fut-cur,net=value-delta,payback=delta>0&&annualValue>0?delta/annualValue:null;
- state.economics={years:years,currentTotal:cur,futureTotal:fut,realisedValue:value,netValue:net,paybackYears:payback};
- $("economicsOut").innerHTML='<div class="wb-kpis"><div class="wb-kpi"><small>Current '+years+'Y cost</small><strong>'+cur.toLocaleString()+'</strong></div><div class="wb-kpi"><small>Future '+years+'Y cost</small><strong>'+fut.toLocaleString()+'</strong></div><div class="wb-kpi"><small>Realised value</small><strong>'+value.toLocaleString()+'</strong></div><div class="wb-kpi"><small>Net value</small><strong>'+net.toLocaleString()+'</strong></div></div><div class="wb-note">These are calculations from your assumptions, not a market benchmark or guarantee. Add tax, inflation, contract terms and unquantified benefits before using the result as a business case.</div>';save()
+ var n=function(id){return Math.max(0,Number(val(id))||0)}, years=Math.max(1,n("tYears")), inflation=n("tInflation")/100, discount=n("tDiscount")/100, contingency=n("tContingency")/100;
+ var currentAnnual=n("tCurrentLicence")+n("tCurrentSupport")+n("tCurrentInfra")+n("tCurrentInternal")+n("tCurrentExternal")+n("tCurrentUpgrade");
+ var futureAnnual=n("tFutureSub")+n("tFutureServices")+n("tFutureInfra")+n("tFutureInternal")+n("tFutureExternal")+n("tFutureUpgrade");
+ var oneTime=n("tImplementation")+n("tMigration")+n("tIntegration")+n("tTesting")+n("tChange")+n("tCoexistence")+n("tDecommissioning");
+ var currentTotal=0,futureTotal=oneTime*(1+contingency),pvCurrent=0,pvFuture=oneTime*(1+contingency);
+ for(var y=1;y<=years;y++){var factor=Math.pow(1+inflation,y-1),df=Math.pow(1+discount,y);currentTotal+=currentAnnual*factor;futureTotal+=futureAnnual*factor;pvCurrent+=currentAnnual*factor/df;pvFuture+=futureAnnual*factor/df}
+ var annualValue=n("tValue")*(n("tRealisation")/100),realisedValue=0,pvValue=0;
+ for(var vy=1;vy<=years;vy++){var vv=annualValue*Math.pow(1+inflation,vy-1);realisedValue+=vv;pvValue+=vv/Math.pow(1+discount,vy)}
+ var delta=currentTotal-futureTotal,netValue=realisedValue-delta,payback=delta>0&&annualValue>0?delta/annualValue:null;
+ state.economics={years:years,inflation:inflation*100,discountRate:discount*100,contingency:contingency*100,currentAnnual:currentAnnual,futureAnnual:futureAnnual,oneTime:oneTime,currentTotal:currentTotal,futureTotal:futureTotal,pvCurrent:pvCurrent,pvFuture:pvFuture,realisedValue:realisedValue,pvValue:pvValue,netValue:netValue,paybackYears:payback};
+ $("economicsOut").innerHTML='<div class="wb-kpis"><div class="wb-kpi"><small>Current '+years+'Y cost</small><strong>'+Math.round(currentTotal).toLocaleString()+'</strong></div><div class="wb-kpi"><small>Future '+years+'Y cost</small><strong>'+Math.round(futureTotal).toLocaleString()+'</strong></div><div class="wb-kpi"><small>PV future cost</small><strong>'+Math.round(pvFuture).toLocaleString()+'</strong></div><div class="wb-kpi"><small>Realised value</small><strong>'+Math.round(realisedValue).toLocaleString()+'</strong></div><div class="wb-kpi"><small>Net value</small><strong>'+Math.round(netValue).toLocaleString()+'</strong></div><div class="wb-kpi"><small>Payback</small><strong>'+(payback==null?"Not calculable":payback.toFixed(1)+" yrs")+'</strong></div></div><div class="wb-note">Calculated only from customer-entered assumptions, including inflation, discount rate and contingency. No market benchmark or savings multiplier is embedded.</div>';save()
 }
 function renderExecute(kind){
  var p=state.profile, names=state.selection.map(function(x){return x.name}), processes=state.processes.map(function(x){return x.name});
