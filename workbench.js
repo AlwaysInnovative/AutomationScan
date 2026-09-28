@@ -8,7 +8,7 @@ function norm(v){return String(v||"").toLowerCase().trim()}
 function val(id){return $(id)?$(id).value:""}
 function set(id,v){if($(id))$(id).value=v==null?"":v}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));return true}catch(e){return false}}
-function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||"null");if(x){state=Object.assign(state,x);state.profile=state.profile||{};["processes","applications","selection","candidates","governance","roadmap","requirements","capabilities","vendorResponses","pocResults","evidence"].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[]});state.economics=state.economics||{}}}catch(e){state={profile:{},processes:[],applications:[],selection:[],economics:{},governance:[],roadmap:[],requirements:[],capabilities:[],vendorResponses:[],pocResults:[],evidence:[]}}}
+function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||"null");if(x){state=Object.assign(state,x);state.profile=state.profile||{};["processes","applications","selection","candidates","governance","roadmap","requirements","capabilities","vendorResponses","pocResults","evidence"].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[]});state.economics=state.economics||{}}}catch(e){state={profile:{},processes:[],applications:[],selection:[],candidates:[],economics:{},governance:[],roadmap:[],requirements:[],capabilities:[],vendorResponses:[],pocResults:[],evidence:[]}}}
 function track(n,p){try{if(window.trackEvent)window.trackEvent(n,p)}catch(e){}}
 function renderList(id,items,headers,rows){
  var el=$(id); if(!el)return;
