@@ -46,29 +46,25 @@ function traceRequirements(){
  var out=$("traceOut");
  if(!state.requirements.length){out.innerHTML="<div class='wb-note'>Add requirements first.</div>";return}
  if(!state.selection.length){renderSelection()}
- var candidates=state.selection;
- out.innerHTML=state.requirements.map(function(q){
-   var linked=state.vendorResponses.filter(function(v){return v.req===q.id});
-   var byCandidate=candidates.map(function(c){
-     var resp=linked.filter(function(v){return v.candidate===c.name})[0];
-     return "<div class='wb-card'><strong>"+esc(c.name)+"</strong><small>"+(resp?esc(resp.status)+" · "+esc(resp.evidence):"No response recorded · POC/evidence required")+"</small></div>"
-   }).join("");
-   return "<div class='wb-card'><strong>"+esc(q.id)+" · "+esc(q.text)+"</strong><small>"+esc(q.type)+" · "+esc(q.priority)+" · Gate: "+esc(q.gate||"Not defined")+"</small><div class='wb-list' style='margin-top:9px'>"+byCandidate+"</div></div>";
- }).join("");
+ var html="";
+ state.requirements.forEach(function(q){
+   html+="<div class='wb-card'><strong>"+esc(q.id)+" - "+esc(q.text)+"</strong><small>"+esc(q.type)+" / "+esc(q.priority)+" / Gate: "+esc(q.gate||"Not defined")+"</small>";
+   state.selection.forEach(function(candidate){
+     var found=state.vendorResponses.filter(function(v){return v.req===q.id&&v.candidate===candidate.name})[0];
+     html+="<div class='wb-card'><strong>"+esc(candidate.name)+"</strong><small>"+(found?esc(found.status)+" / "+esc(found.evidence):"No response recorded - evidence or POC required")+"</small></div>";
+   });
+   html+="</div>";
+ });
+ out.innerHTML=html;
 }
 function scenarioEconomics(){
  var base=state.economics;
- if(!base.currentTotal){$("economicsOut").innerHTML+="<div class='wb-note'>Calculate the base economics first, then add scenario assumptions.</div>";return}
- var years=base.years||5;
- var scenarios=[
-  {n:"Stay / Optimise",mult:1,up:0},
-  {n:"Modernise / Extend",mult:.98,up:.15},
-  {n:"Complement",mult:.96,up:.25},
-  {n:"Replace",mult:.92,up:.45}
- ];
- var html="<h3>Scenario lens</h3><table class='wb-table'><tr><th>Scenario</th><th>Illustrative future cost</th><th>Difference vs current</th><th>Interpretation</th></tr>";
- scenarios.forEach(function(s){var future=base.futureTotal*s.mult+base.futureTotal*s.up;var diff=base.currentTotal-future;html+="<tr><td>"+esc(s.n)+"</td><td>"+future.toLocaleString()+"</td><td>"+diff.toLocaleString()+"</td><td>User-adjustable directional scenario; not a benchmark.</td></tr>"});
- $("economicsOut").innerHTML+='<div class="wb-note">Scenario multipliers are transparent modelling controls, not market facts. Replace them with customer assumptions before using the output.</div>'+html+"</table>";
+ if(!base.currentTotal){return}
+ var scenarios=[["Stay / Optimise",1,0],["Modernise / Extend",.98,.15],["Complement",.96,.25],["Replace",.92,.45]];
+ var html="<h3>Scenario lens</h3><table class='wb-table'><tr><th>Scenario</th><th>Illustrative future cost</th><th>Difference vs current</th></tr>";
+ scenarios.forEach(function(s){var future=base.futureTotal*s[1]+base.futureTotal*s[2];var diff=base.currentTotal-future;html+="<tr><td>"+esc(s[0])+"</td><td>"+future.toLocaleString()+"</td><td>"+diff.toLocaleString()+"</td></tr>"});
+ html+="</table><div class='wb-note'>Scenario factors are transparent modelling controls, not market benchmarks. Replace them with customer assumptions before using the output as a business case.</div>";
+ $("economicsOut").innerHTML+=html;
 }
 function calcEconomics(){
  var n=function(id){return Number(val(id))||0}, years=Math.max(1,n("tYears"));
