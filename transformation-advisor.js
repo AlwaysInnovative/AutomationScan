@@ -423,6 +423,20 @@ if (next) next.addEventListener("click", function () { if (validStep()) showStep
 if (back) back.addEventListener("click", function () { showStep((window._advisorStep || 0) - 1); });
 if (form) form.addEventListener("submit", function (e) { e.preventDefault(); if (!validStep()) return; try { renderReport(); if(window.trackEvent) window.trackEvent("transformation_report_generated",{industry:value("industry"),business_model:value("businessModel"),current_platform:value("current")}); } catch(err) { console.error(err); alert("AutomationScan could not generate the report. Please refresh and try again."); } });
 if (generate) generate.addEventListener("click", function (e) { e.preventDefault(); if (!validStep()) return; renderReport(); });
+var saveAssessment = document.getElementById("tSave");
+if (saveAssessment) saveAssessment.addEventListener("click", function () {
+  try {
+    var raw=sessionStorage.getItem("automationscan_transform")||"{}";
+    var data=JSON.parse(raw);
+    data.savedAt=new Date().toISOString();
+    localStorage.setItem("automationscan_saved_assessment",JSON.stringify(data));
+    if(window.trackEvent)window.trackEvent("assessment_saved",{industry:data.industry||"unknown"});
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    var url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="automationscan-assessment-"+(String(data.industry||"business").toLowerCase().replace(/[^a-z0-9]+/g,"-"))+".json";
+    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  } catch(e) { alert("The assessment could not be saved in this browser."); }
+});
 var download = document.getElementById("tDownload");
 if (download) download.addEventListener("click", function () {
   var report = document.getElementById("transformResults");
