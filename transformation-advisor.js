@@ -262,6 +262,9 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
   var candidatesBox = document.getElementById("tCandidates");
   var explore = document.getElementById("tExplore");
   var architecture = document.getElementById("tArchitecture");
+  var engineOutputs = document.getElementById("tEngineOutputs");
+  var pocBox = document.getElementById("tPoc");
+  var rfpBox = document.getElementById("tRfp");
   var modernLens = document.getElementById("tModernLens");
   var regulatoryBox = document.getElementById("tRegulatory");
   var inputsBox = document.getElementById("tInputs");
@@ -373,6 +376,23 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
     return "<article class='explore-card'><div class='explore-head'><span>Top "+(idx+1)+" · "+escapeHtml(m.type)+"</span><b>"+escapeHtml(x.name)+"</b></div><p><b>Why relevant:</b> "+escapeHtml(why)+"</p><dl><dt>Distinctive value</dt><dd>"+escapeHtml(unique)+"</dd><dt>Matched requirements</dt><dd>"+escapeHtml(matched.length ? matched.join(" · ") : "None mapped yet")+"</dd><dt>Unproven requirements</dt><dd>"+escapeHtml(unmatched.length ? unmatched.join(" · ") : "None in the selected process list")+"</dd><dt>Customer reference</dt><dd>"+escapeHtml(refs)+"</dd></dl><p><b>POC focus:</b> "+escapeHtml(matched.length ? "Demonstrate the matched processes with the customer's exception, KPI and integration scenario." : "Build a scripted proof for the highest-priority requirement before treating this option as suitable.")+"</p><a href='"+escapeHtml(m.refUrl||m.url)+"' target='_blank' rel='noopener'>Official evidence →</a></article>";
   }).join("");
   if (architecture) architecture.innerHTML = "<p><b>Current:</b> " + escapeHtml(platform) + "</p><p><b>Target hypothesis:</b> SaaS core platform + industry capabilities + governed integrations + common data/identity layer.</p>";
+  if (engineOutputs && window.AutomationScanDecisionEngine) {
+    var engEvidence=window.AutomationScanDecisionEngine.evidence(decisionCtx,engineShortlist);
+    engineOutputs.innerHTML =
+      "<article><b>Market investigation set</b><strong>"+engineShortlist.slice(0,5).map(function(x){return escapeHtml(x.name)}).join(" · ")+"</strong><span>Signals only; not a procurement ranking.</span></article>" +
+      "<article><b>Transformation maturity</b><strong>Level "+engineMaturity.level+" · "+escapeHtml(engineMaturity.name)+"</strong><span>"+engineMaturity.points+"/100 discovery signal based on the supplied context.</span></article>" +
+      "<article><b>Evidence readiness</b><strong>"+engEvidence.filter(function(x){return x.status==="Defined"||x.status==="Strong"||x.status==="Baseline supplied"}).length+"/"+engEvidence.length+" gates have positive supplied signals</strong><span>Remaining gates need validation before a commitment.</span></article>" +
+      "<article><b>Decision principle</b><strong>Evidence before replacement</strong><span>Compare current-platform modernisation, complement and replacement against measurable requirements.</span></article>";
+  }
+  if (pocBox && window.AutomationScanDecisionEngine) {
+    pocBox.innerHTML=window.AutomationScanDecisionEngine.poc(decisionCtx,engineShortlist).map(function(x){
+      return "<article><b>"+escapeHtml(x.candidate)+"</b><ol>"+x.tests.map(function(t){return "<li>"+escapeHtml(t)+"</li>"}).join("")+"</ol></article>";
+    }).join("");
+  }
+  if (rfpBox && window.AutomationScanDecisionEngine) {
+    var rfp=window.AutomationScanDecisionEngine.rfp(decisionCtx,engineShortlist);
+    rfpBox.innerHTML=rfp.sections.map(function(x){return "<li>"+escapeHtml(x)+"</li>"}).join("");
+  }
   if (modernLens) {
     var maturity = intel.maturityLevels || [];
     var level = Math.min(5, Math.max(1, 1 + Math.round((processes.length + pains.length + goals.length) / 5)));
