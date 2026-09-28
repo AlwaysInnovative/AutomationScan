@@ -25,8 +25,10 @@
 <button data-tab="execute">6. RFP / POC</button>
 <button data-tab="govern">7. Governance</button>
 <button data-tab="roadmap">8. Roadmap</button>
-<button data-tab="evidence">9. Evidence</button>
-<button data-tab="report">10. Report</button>
+<button data-tab="requirements">9. Requirements</button>
+<button data-tab="compare">10. Vendor Compare</button>
+<button data-tab="evidence">11. Evidence</button>
+<button data-tab="report">12. Report</button>
 </aside>
 <section class="wb-main">
 <article class="wb-panel active" id="tab-profile">
@@ -134,6 +136,32 @@
 <label>Value<textarea id="rValue" placeholder="What outcome should this work create?"></textarea></label>
 </div>
 <div class="wb-actions"><button class="wb-btn wb-primary" id="addRoadmap">Add roadmap item</button></div><div id="roadmapOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-requirements">
+<p class="eyebrow">REQUIREMENTS</p><h2>Requirements library & traceability</h2><p>Create reusable requirements and trace them to processes, candidates, evidence and validation gates.</p>
+<div class="wb-form">
+<label>Requirement<input id="qText" placeholder="e.g. Support lot traceability across inbound and production"></label>
+<label>Type<select id="qType"><option>Business</option><option>Functional</option><option>Non-functional</option><option>Integration</option><option>Security</option><option>Data</option><option>AI</option><option>Compliance</option><option>Migration</option><option>Commercial</option></select></label>
+<label>Priority<select id="qPriority"><option>Must</option><option>Should</option><option>Could</option><option>Informational</option></select></label>
+<label>Process<input id="qProcess" placeholder="Linked process"></label>
+<label>Acceptance criterion<textarea id="qAcceptance" placeholder="How will the requirement be demonstrated or tested?"></textarea></label>
+<label>Evidence gate<input id="qGate" placeholder="POC / reference / document / security review"></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addRequirement">Add requirement</button><button class="wb-btn wb-light" id="exportRequirements">Export requirements CSV</button></div><div id="requirementsOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-compare">
+<p class="eyebrow">VENDOR RESPONSE</p><h2>Vendor response comparison</h2><p>Paste or import structured response text. AutomationScan extracts requirement IDs, response status and evidence notes for side-by-side review. This is a comparison aid, not an autonomous procurement decision.</p>
+<div class="wb-form">
+<label>Candidate<select id="vCandidate"><option>Candidate A</option><option>Candidate B</option><option>Candidate C</option><option>Other</option></select></label>
+<label>Requirement ID<input id="vReq" placeholder="REQ-001"></label>
+<label>Response status<select id="vStatus"><option>Supported</option><option>Configuration</option><option>Extension</option><option>Custom development</option><option>Partner / specialist</option><option>Not supported</option><option>Unclear</option></select></label>
+<label>Evidence status<select id="vEvidence"><option>Documented</option><option>Demonstrated</option><option>Customer reference</option><option>POC required</option><option>Not verified</option></select></label>
+<label>Vendor response<textarea id="vResponse" placeholder="Paste the relevant vendor response or analyst note"></textarea></label>
+<label>Dependencies / exceptions<textarea id="vDependency" placeholder="Dependencies, assumptions, exclusions, licensing or integration concerns"></textarea></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addVendorResponse">Add response</button><button class="wb-btn wb-light" id="clearVendorResponses">Clear responses</button></div><div id="compareOut"></div>
 </article>
 
 <article class="wb-panel" id="tab-evidence">
