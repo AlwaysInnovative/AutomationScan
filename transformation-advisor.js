@@ -220,6 +220,9 @@ var allCandidates = Object.keys(candidateMeta).filter(function(name){
     return {name:name, score:industryFit+Math.min(20,processCoverage)+Math.min(12,painCoverage)+scaleSignal+customSignal+continuity};
   }).sort(function(a,b){return b.score-a.score;});
   var candidates = scores.slice(0,5).map(function(x){return x.name;});
+  var decisionCtx = {industry:ind,businessModel:model,current:platform,processes:processes,pains:pains,scale:scale,custom:custom,integration:integration,revenueModel:revenueModel,fulfilmentModel:fulfilmentModel,deliveryModel:deliveryModel,regulatoryIntensity:regulatoryIntensity,migration:migration,goals:goals,erpSpend:erpSpend};
+  var engineShortlist = window.AutomationScanDecisionEngine ? window.AutomationScanDecisionEngine.shortlist(decisionCtx) : [];
+  var engineMaturity = window.AutomationScanDecisionEngine ? window.AutomationScanDecisionEngine.maturity(decisionCtx) : null;
   var score = Math.min(96, 40 + processes.length * 5 + pains.length * 3 + (platform !== "Not specified" ? 12 : 0) + (model !== "Not specified" ? 8 : 0));
   var route = migration.indexOf("Transformational") >= 0 ? "Transformation" : migration.indexOf("Conservative") >= 0 ? "Modernise / preserve continuity" : "Structured market comparison";
   var painText = value("painText") || "";
