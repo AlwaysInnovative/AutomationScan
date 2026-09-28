@@ -27,8 +27,7 @@
 <button data-tab="roadmap">8. Roadmap</button>
 <button data-tab="requirements">9. Requirements</button>
 <button data-tab="compare">10. Vendor Compare</button>
-<button data-tab="evidence">11. Evidence</button>
-<button data-tab="report">12. Report</button>
+<button data-tab="portfolio">11. Portfolio Health</button><button data-tab="poc">12. POC & Readiness</button><button data-tab="govern">13. Governance</button><button data-tab="roadmap">14. Roadmap</button><button data-tab="evidence">15. Evidence</button><button data-tab="report">16. Dossier</button>
 </aside>
 <section class="wb-main">
 <article class="wb-panel active" id="tab-profile">
@@ -112,6 +111,20 @@
 <div class="wb-actions"><button class="wb-btn wb-primary" id="generateRfp">Generate RFP/RFI structure</button><button class="wb-btn wb-secondary" id="generatePoc">Generate POC tests</button></div><div id="executeOut"></div>
 </article>
 
+<article class="wb-panel" id="tab-portfolio">
+<p class="eyebrow">APPLICATION PORTFOLIO</p><h2>Portfolio health & rationalisation</h2><p>Turn the application inventory into a transparent disposition lens using value, technical health, usage, redundancy, lifecycle and integration complexity.</p>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="scorePortfolio">Score portfolio</button></div><div id="portfolioOut"></div>
+</article>
+<article class="wb-panel" id="tab-poc">
+<p class="eyebrow">EXECUTE</p><h2>POC, migration & transformation readiness</h2><p>Capture evidence-led readiness rather than assuming implementation feasibility.</p>
+<div class="wb-form">
+<label>POC candidate<input id="pocCandidate" placeholder="Candidate name"></label><label>Scenario<input id="pocScenario" placeholder="Critical business scenario"></label>
+<label>Expected result<textarea id="pocExpected"></textarea></label><label>Observed result<textarea id="pocObserved"></textarea></label>
+<label>Evidence status<select id="pocEvidence"><option>Not started</option><option>Scripted</option><option>Demonstrated</option><option>Validated</option><option>Failed / gap</option></select></label>
+<label>Decision note<textarea id="pocDecision"></textarea></label>
+</div><div class="wb-actions"><button class="wb-btn wb-primary" id="addPoc">Add POC result</button></div><div id="pocOut"></div>
+<h3>Migration readiness</h3><div class="wb-form"><label>Data readiness %<input id="mData" type="number" min="0" max="100" value="50"></label><label>Integration readiness %<input id="mIntegration" type="number" min="0" max="100" value="50"></label><label>Customisation readiness %<input id="mCustom" type="number" min="0" max="100" value="50"></label><label>People/change readiness %<input id="mPeople" type="number" min="0" max="100" value="50"></label><label>Security/control readiness %<input id="mSecurity" type="number" min="0" max="100" value="50"></label><label>Testing/cutover readiness %<input id="mTesting" type="number" min="0" max="100" value="50"></label></div><button class="wb-btn wb-secondary" id="scoreMigration">Calculate readiness</button><div id="migrationOut"></div>
+</article>
 <article class="wb-panel" id="tab-govern">
 <p class="eyebrow">GOVERN</p><h2>Compliance, AI controls & risk</h2><p>Connect a consideration to a requirement, capability, evidence and validation gate. Add risks that must be owned before a decision.</p>
 <div class="wb-form">
