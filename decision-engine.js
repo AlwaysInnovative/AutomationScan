@@ -27,9 +27,14 @@ function candidateScore(c,ctx){
  var painHits=(ctx.pains||[]).filter(function(p){return (c.caps||[]).some(function(cap){return match(p,cap);});});
  var current=norm(ctx.current), continuity=current&&((c.name||"").toLowerCase().indexOf(current.split(" ")[0])>=0);
  var score=(fit?35:5)+Math.min(25,processHits.length*5)+Math.min(15,painHits.length*3)+(continuity?15:0);
+ var explain=[];
+ if(fit)explain.push("industry fit signal");
+ if(processHits.length)explain.push(processHits.length+" process/capability matches");
+ if(painHits.length)explain.push(painHits.length+" pain/capability matches");
+ if(continuity)explain.push("current-platform continuity signal");
  if(ctx.scale==="Enterprise"&&/oracle|sap|dynamics|infor|ifs/.test(norm(c.name)))score+=5;
  if(ctx.custom==="Very high"&&/oracle|sap|dynamics|infor|ifs/.test(norm(c.name)))score+=5;
- return {score:Math.min(100,score),processHits:processHits,painHits:painHits,industryFit:fit,continuity:continuity};
+ return {score:Math.min(100,score),processHits:processHits,painHits:painHits,industryFit:fit,continuity:continuity,explanation:explain};
 }
 function shortlist(ctx){
  var lib=I.candidates||{};
