@@ -123,7 +123,7 @@ function renderAnalysis(r,top){
 }
 function renderResult(){
  const {r,top}=buildReport();
- const profile=r.industryProfile||industryProfiles.Other; const suggestionMap=profile.suggestions||{}; const detailed=top.map(([name,h])=>{const key={"Data entry":"dataEntry","Email / follow-ups":"email","Invoices / payments":"invoices","Customer support":"support","Scheduling":"scheduling","Reporting":"reporting","Documents / admin":"documents","Sales admin / CRM":"salesAdmin"}[name];return {name,h,suggestion:suggestionMap[key]||"Map the current workflow, automate the repeatable steps and retain human review for exceptions."};});
+ const profile=r.industryProfile||dynamicIndustryProfile(r.industry); const suggestionMap=profile.suggestions||{}; const detailed=top.map(([name,h])=>{const key={"Data entry":"dataEntry","Email / follow-ups":"email","Transactions":"transactions","Customer support":"support","Scheduling":"scheduling","Reporting":"reporting","Documents / admin":"documents","Sales admin / CRM":"salesAdmin"}[name];return {name,h,suggestion:suggestionMap[key]||"Map the current workflow, automate the repeatable steps and retain human review for exceptions."};});
  renderAnalysis(r,top);
  document.getElementById("score").textContent=r.score;
  document.getElementById("label").textContent=r.label;
