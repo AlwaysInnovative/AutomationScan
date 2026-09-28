@@ -17,10 +17,21 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           set -e
-          for file in *.js; do
+          for file in *.js api/*.js; do
             echo "Checking $file"
             node --check "$file"
           done
+      - name: Fail if retired static intelligence is referenced
+        run: |
+          set -e
+          if grep -RIn --exclude-dir=.git "intelligence-data.js\|AutomationScanIntelligence" .; then
+            echo "Retired static intelligence reference found."
+            exit 1
+          fi
+      - name: Check required dynamic API files
+        run: |
+          test -f api/workbench.js
+          test -f supabase/workbench.sql
       - name: Validate sitemap XML
         run: python - <<'PY'
           import xml.etree.ElementTree as ET
