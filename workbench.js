@@ -102,7 +102,7 @@ function bind(){
  $("addApp").onclick=function(){var x={name:val("aName").trim(),cost:Number(val("aCost"))||0,value:val("aValue"),tech:val("aTech"),usage:val("aUsage"),redundancy:val("aRedundancy"),lifecycle:val("aLifecycle"),integration:val("aIntegration")};if(!x.name)return alert("Enter an application name.");x.disposition=x.redundancy==="Duplicate"?"Consolidate":(x.lifecycle==="End of life"||x.tech==="Legacy"?"Modernise / replace":"Keep / assess");state.applications.push(x);save();renderApps()};
  $("importApps").onclick=function(){$("appFile").click()};$("appFile").onchange=function(){if(this.files[0])importApps(this.files[0])};
  $("runSelection").onclick=function(){renderSelection();save();track("workbench_selection_run")};$("runTraceability").onclick=function(){traceRequirements()};
- $("calcEconomics").onclick=calcEconomics;
+ $("calcEconomics").onclick=function(){calcEconomics();scenarioEconomics()};
  $("generateRfp").onclick=function(){renderExecute("rfp")};$("generatePoc").onclick=function(){renderExecute("poc")};
  $("addRequirement").onclick=function(){var n=state.requirements.length+1;state.requirements.push({id:"REQ-"+String(n).padStart(3,"0"),text:val("qText"),type:val("qType"),priority:val("qPriority"),process:val("qProcess"),acceptance:val("qAcceptance"),gate:val("qGate")});save();renderRequirements()};$("exportRequirements").onclick=exportRequirements;
  $("addVendorResponse").onclick=function(){state.vendorResponses.push({candidate:val("vCandidate"),req:val("vReq"),status:val("vStatus"),evidence:val("vEvidence"),response:val("vResponse"),dependency:val("vDependency")});save();renderCompare()};$("clearVendorResponses").onclick=function(){state.vendorResponses=[];save();renderCompare()};
