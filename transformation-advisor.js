@@ -422,7 +422,7 @@ if (industry) industry.addEventListener("change", populateBusinessModels);
 if (next) next.addEventListener("click", function () { if (validStep()) showStep((window._advisorStep || 0) + 1); });
 if (back) back.addEventListener("click", function () { showStep((window._advisorStep || 0) - 1); });
 if (form) form.addEventListener("submit", function (e) { e.preventDefault(); if (!validStep()) return; try { renderReport(); if(window.trackEvent) window.trackEvent("transformation_report_generated",{industry:value("industry"),business_model:value("businessModel"),current_platform:value("current")}); } catch(err) { console.error(err); alert("AutomationScan could not generate the report. Please refresh and try again."); } });
-if (generate) generate.addEventListener("click", function (e) { e.preventDefault(); if (!validStep()) return; renderReport(); });
+
 var saveAssessment = document.getElementById("tSave");
 if (saveAssessment) saveAssessment.addEventListener("click", function () {
   try {
