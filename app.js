@@ -155,7 +155,7 @@ function generateReport(){
     renderResult();
     const report=document.getElementById("results");
     if(!report) throw new Error("Report container was not found.");
-    sessionStorage.setItem("automationScanReportHtml",report.innerHTML);
+    sessionStorage.setItem("automationScanReportHtml",report.innerHTML);\n    try{sessionStorage.setItem("automationScanAssessment",JSON.stringify({industry:r.industry,goal:r.goal,score:r.score,coverage:r.coverage,workload:r.h,selectedPainPoints:r.selectedPainPoints,topOpportunities:top.map(x=>({name:x[0],hours:x[1]})),tools:r.tools,source:"automation-assessment",savedAt:new Date().toISOString()}));}catch(e){}
     sessionStorage.setItem("automationScanReportGenerated","1");
     window.location.href="report.html";
   }catch(err){
