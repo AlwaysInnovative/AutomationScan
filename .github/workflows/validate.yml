@@ -1,0 +1,29 @@
+name: Validate AutomationScan
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: |
+          set -e
+          for file in *.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+      - name: Validate sitemap XML
+        run: python - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse("sitemap.xml")
+          print("sitemap.xml OK")
+        PY
