@@ -40,7 +40,7 @@ export default async function handler(req,res){
 
     const r=body.report||{};
     const source=body.source||{}; const summary=`Industry: ${String(r.industry||"Unknown")} | Signal: ${Number(r.score||0)}/100 | Estimated: ${String(r.low||0)}-${String(r.high||0)} hrs/month | Goal: ${String(r.goal||"Not specified")} | Source: ${String(source.utm_source||"direct")}/${String(source.utm_medium||"(none)")}`;
-    const key=process.env.RESEND_API_KEY;
+    const supabaseUrl=process.env.SUPABASE_URL, supabaseKey=process.env.SUPABASE_SERVICE_ROLE_KEY;\n    if(supabaseUrl&&supabaseKey){\n      const ip=String(req.headers["x-forwarded-for"]||req.socket?.remoteAddress||"unknown").split(",")[0].slice(0,100);\n      const rr=await fetch(supabaseUrl+"/rest/v1/rpc/consume_api_rate_limit",{method:"POST",headers:{apikey:supabaseKey,Authorization:"Bearer "+supabaseKey,"Content-Type":"application/json"},body:JSON.stringify({p_rate_key:"lead:"+ip,p_limit:10,p_window_seconds:300})});\n      if(rr.ok && (await rr.json())!==true)return res.status(429).json({error:"Too many requests. Please try again later."});\n    }\n\n    const key=process.env.RESEND_API_KEY;
     const from=process.env.RESEND_FROM;
     const owner=process.env.LEAD_NOTIFICATION_TO;
     const idempotencyKey=`automationscan:${email}:${Number(r.score||0)}:${String(r.industry||"unknown")}`;
