@@ -133,7 +133,28 @@ function bind(){
  $("addRoadmap").onclick=function(){state.roadmap.push({horizon:val("rHorizon"),workstream:val("rWorkstream"),owner:val("rOwner"),gate:val("rGate"),dependency:val("rDependency"),value:val("rValue")});save();renderRoadmap()};
  $("addEvidence").onclick=function(){var claim=val("eClaim").trim(),source=val("eSource").trim();if(!claim||!source)return alert("Enter the claim and its source.");state.evidence.push({claim:claim,source:source,date:val("eDate"),reviewer:val("eReviewer").trim(),status:val("eStatus"),next:val("eNext").trim()});save();renderEvidence()};
  $("exportJson").onclick=exportJson;$("printReport").onclick=function(){report();window.print()};$("resetAll").onclick=function(){if(confirm("Reset the local workbench?")){localStorage.removeItem(KEY);location.reload()}};
- load();renderProfileOut();renderProcesses();renderApps();renderCandidates();renderCapabilities();renderGov();renderRoadmap();renderRequirements();renderCompare();renderPortfolio();renderPoc();renderEvidence();report();
+ load();
+  try{
+    if(!state._upstreamImported){
+      var raw=sessionStorage.getItem("automationscan_transform");
+      if(raw){
+        var a=JSON.parse(raw);
+        state.profile=Object.assign({},state.profile,{industry:a.industry||"",current:a.current||"",businessModel:a.businessModel||"",scale:a.scale||"",revenueModel:a.revenueModel||"",goals:(a.goals||[]).join(", "),pain:(a.pains||[]).join("; "),integration:a.integration||"",custom:a.custom||"",horizon:a.horizon||"",erpSpend:a.erpSpend||""});
+        (a.processes||[]).forEach(function(x){if(x&&!state.processes.some(function(p){return p.name===x}))state.processes.push({name:x,volume:0,minutes:0,exceptions:0,errors:0,human:"Medium",notes:"Imported from Transformation Navigator",treatment:"Assess"});});
+        (a.candidates||[]).forEach(function(x){var n=typeof x==="string"?x:x.name;if(n&&!state.candidates.some(function(c){return c.name===n}))state.candidates.push({name:n,capabilities:"",notes:"Imported from Transformation Navigator; validate source evidence."});});
+        state._upstreamImported=true; save();
+      }
+      var scan=sessionStorage.getItem("automationScanAssessment");
+      if(scan){
+        var s=JSON.parse(scan);
+        state.profile=Object.assign({},state.profile,{industry:s.industry||state.profile.industry||"",goals:s.goal||state.profile.goals||"",pain:(s.selectedPainPoints||[]).join("; ")||state.profile.pain||""});
+        Object.keys(s.workload||{}).forEach(function(k){var hours=Number(s.workload[k])||0;if(hours>0&&!state.processes.some(function(p){return p.name===k}))state.processes.push({name:k,volume:0,minutes:hours*60/4.33,exceptions:0,errors:0,human:"Medium",notes:"Imported from Automation Assessment; weekly hours: "+hours,treatment:"Assess"});});
+        (s.topOpportunities||[]).forEach(function(x){var n=x&&x.name;if(n&&!state.processes.some(function(p){return p.name===n}))state.processes.push({name:n,volume:0,minutes:0,exceptions:0,errors:0,human:"Medium",notes:"Top opportunity imported from automation assessment",treatment:"Assess"});});
+        state._upstreamAutomationImported=true; save();
+      }
+    }
+  }catch(e){console.warn("Upstream assessment import skipped",e)}
+  renderProfileOut();renderProcesses();renderApps();renderCandidates();renderCapabilities();renderGov();renderRoadmap();renderRequirements();renderCompare();renderPortfolio();renderPoc();renderEvidence();report();
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind);else bind();
 })();
