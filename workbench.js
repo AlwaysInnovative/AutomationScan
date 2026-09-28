@@ -42,6 +42,34 @@ function renderSelection(){
  renderList("selectOut",state.selection,["Investigation candidate","Signal","Why it surfaced","Evidence still needed"],function(x){
  return[esc(x.name),esc(x.score)+"/100",esc((x.industryFit?"Industry fit; ":"")+(x.processHits.length?"Process match; ":"")+(x.continuity?"Continuity signal":"Contextual investigation")), '<span class="wb-tag">Scripted demo + reference + integration proof + TCO</span>']})
 }
+function traceRequirements(){
+ var out=$("traceOut");
+ if(!state.requirements.length){out.innerHTML="<div class='wb-note'>Add requirements first.</div>";return}
+ if(!state.selection.length){renderSelection()}
+ var candidates=state.selection;
+ out.innerHTML=state.requirements.map(function(q){
+   var linked=state.vendorResponses.filter(function(v){return v.req===q.id});
+   var byCandidate=candidates.map(function(c){
+     var resp=linked.filter(function(v){return v.candidate===c.name})[0];
+     return "<div class='wb-card'><strong>"+esc(c.name)+"</strong><small>"+(resp?esc(resp.status)+" · "+esc(resp.evidence):"No response recorded · POC/evidence required")+"</small></div>"
+   }).join("");
+   return "<div class='wb-card'><strong>"+esc(q.id)+" · "+esc(q.text)+"</strong><small>"+esc(q.type)+" · "+esc(q.priority)+" · Gate: "+esc(q.gate||"Not defined")+"</small><div class='wb-list' style='margin-top:9px'>"+byCandidate+"</div></div>";
+ }).join("");
+}
+function scenarioEconomics(){
+ var base=state.economics;
+ if(!base.currentTotal){$("economicsOut").innerHTML+="<div class='wb-note'>Calculate the base economics first, then add scenario assumptions.</div>";return}
+ var years=base.years||5;
+ var scenarios=[
+  {n:"Stay / Optimise",mult:1,up:0},
+  {n:"Modernise / Extend",mult:.98,up:.15},
+  {n:"Complement",mult:.96,up:.25},
+  {n:"Replace",mult:.92,up:.45}
+ ];
+ var html="<h3>Scenario lens</h3><table class='wb-table'><tr><th>Scenario</th><th>Illustrative future cost</th><th>Difference vs current</th><th>Interpretation</th></tr>";
+ scenarios.forEach(function(s){var future=base.futureTotal*s.mult+base.futureTotal*s.up;var diff=base.currentTotal-future;html+="<tr><td>"+esc(s.n)+"</td><td>"+future.toLocaleString()+"</td><td>"+diff.toLocaleString()+"</td><td>User-adjustable directional scenario; not a benchmark.</td></tr>"});
+ $("economicsOut").innerHTML+='<div class="wb-note">Scenario multipliers are transparent modelling controls, not market facts. Replace them with customer assumptions before using the output.</div>'+html+"</table>";
+}
 function calcEconomics(){
  var n=function(id){return Number(val(id))||0}, years=Math.max(1,n("tYears"));
  var input={licence:n("tCurrentLicence"),support:n("tCurrentSupport"),infrastructure:n("tCurrentInfra"),internal:n("tCurrentInternal"),futureSubscription:n("tFutureSub"),futureServices:n("tFutureServices"),futureInfrastructure:n("tFutureInfra"),implementation:n("tImplementation"),migration:n("tMigration"),change:n("tChange"),years:years};
@@ -73,7 +101,7 @@ function bind(){
  $("clearProcesses").onclick=function(){state.processes=[];save();renderProcesses()};
  $("addApp").onclick=function(){var x={name:val("aName").trim(),cost:Number(val("aCost"))||0,value:val("aValue"),tech:val("aTech"),usage:val("aUsage"),redundancy:val("aRedundancy"),lifecycle:val("aLifecycle"),integration:val("aIntegration")};if(!x.name)return alert("Enter an application name.");x.disposition=x.redundancy==="Duplicate"?"Consolidate":(x.lifecycle==="End of life"||x.tech==="Legacy"?"Modernise / replace":"Keep / assess");state.applications.push(x);save();renderApps()};
  $("importApps").onclick=function(){$("appFile").click()};$("appFile").onchange=function(){if(this.files[0])importApps(this.files[0])};
- $("runSelection").onclick=function(){renderSelection();save();track("workbench_selection_run")};
+ $("runSelection").onclick=function(){renderSelection();save();track("workbench_selection_run")};$("runTraceability").onclick=function(){traceRequirements()};
  $("calcEconomics").onclick=calcEconomics;
  $("generateRfp").onclick=function(){renderExecute("rfp")};$("generatePoc").onclick=function(){renderExecute("poc")};
  $("addRequirement").onclick=function(){var n=state.requirements.length+1;state.requirements.push({id:"REQ-"+String(n).padStart(3,"0"),text:val("qText"),type:val("qType"),priority:val("qPriority"),process:val("qProcess"),acceptance:val("qAcceptance"),gate:val("qGate")});save();renderRequirements()};$("exportRequirements").onclick=exportRequirements;
