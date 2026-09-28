@@ -1,7 +1,7 @@
 (function(){
 "use strict";
 var KEY="automationScanWorkbenchV1", I=window.AutomationScanIntelligence||{}, E=window.AutomationScanDecisionEngine||{};
-var state={profile:{},processes:[],applications:[],selection:[],economics:{},governance:[],roadmap:[],evidence:[]};
+var state={profile:{},processes:[],applications:[],selection:[],economics:{},governance:[],roadmap:[],requirements:[],vendorResponses:[],evidence:[]};
 function $(id){return document.getElementById(id)}
 function esc(v){return String(v==null?"":v).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function val(id){return $(id)?$(id).value:""}
@@ -29,6 +29,9 @@ function renderGov(){
 function renderRoadmap(){
  renderList("roadmapOut",state.roadmap,["Horizon","Workstream","Owner","Gate","Dependency","Value"],function(x){return[esc(x.horizon),esc(x.workstream),esc(x.owner),esc(x.gate),esc(x.dependency),esc(x.value)]})
 }
+function renderRequirements(){renderList("requirementsOut",state.requirements,["ID","Requirement","Type","Priority","Process","Acceptance","Gate"],function(x){return[esc(x.id),esc(x.text),esc(x.type),esc(x.priority),esc(x.process),esc(x.acceptance),esc(x.gate)]})}
+function renderCompare(){renderList("compareOut",state.vendorResponses,["Candidate","Requirement","Status","Evidence","Response","Dependencies"],function(x){return[esc(x.candidate),esc(x.req),'<span class="wb-tag">'+esc(x.status)+'</span>','<span class="wb-tag">'+esc(x.evidence)+'</span>',esc(x.response),esc(x.dependency)]})}
+function exportRequirements(){var rows=[["ID","Requirement","Type","Priority","Process","Acceptance","Gate"]].concat(state.requirements.map(function(x){return[x.id,x.text,x.type,x.priority,x.process,x.acceptance,x.gate]}));var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||"").replace(/"/g,'""')+'"'}).join(",")}).join("\n");var b=new Blob([csv],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="automationscan-requirements.csv";a.click();URL.revokeObjectURL(a.href)}
 function renderEvidence(){
  renderList("evidenceOut",state.evidence,["Claim","Source","Date","Reviewer","Status","Next validation"],function(x){return[esc(x.claim),esc(x.source),esc(x.date),esc(x.reviewer),'<span class="wb-tag">'+esc(x.status)+'</span>',esc(x.next)]})
 }
@@ -57,7 +60,7 @@ function renderExecute(kind){
 }
 function report(){
  var p=state.profile,e=state.economics;
- $("wbReport").innerHTML='<div class="wb-kpis"><div class="wb-kpi"><small>Processes</small><strong>'+state.processes.length+'</strong></div><div class="wb-kpi"><small>Applications</small><strong>'+state.applications.length+'</strong></div><div class="wb-kpi"><small>Evidence items</small><strong>'+state.evidence.length+'</strong></div><div class="wb-kpi"><small>Investigation set</small><strong>'+state.selection.length+'</strong></div></div><h3>Transformation context</h3><p>'+esc(p.industry||"Not set")+" · "+esc(p.current||"Current platform not set")+" · "+esc(p.scale||"Scale not set")+'</p><h3>Investigation set</h3><p>'+esc(state.selection.map(function(x){return x.name}).join(", ")||"Run Selection first")+'</p><h3>Economics</h3><p>'+((e.currentTotal!=null)?"Current: "+e.currentTotal.toLocaleString()+" · Future: "+e.futureTotal.toLocaleString()+" · Realised value: "+e.realisedValue.toLocaleString():"Not calculated")+'</p><h3>Evidence posture</h3><p>'+esc(state.evidence.filter(function(x){return x.status==="POC validated"||x.status==="Demonstrated"}).length)+" validated/demonstrated items; "+esc(state.evidence.filter(function(x){return x.status==="NOT VERIFIED"}).length)+" marked NOT VERIFIED.</p><div class="wb-note">This dossier is decision support. Vendor claims, compliance conclusions and savings require independent validation.</div>"
+ $("wbReport").innerHTML='<div class="wb-kpis"><div class="wb-kpi"><small>Processes</small><strong>'+state.processes.length+'</strong></div><div class="wb-kpi"><small>Applications</small><strong>'+state.applications.length+'</strong></div><div class="wb-kpi"><small>Requirements</small><strong>'+state.requirements.length+'</strong></div><div class="wb-kpi"><small>Evidence items</small><strong>'+state.evidence.length+'</strong></div><div class="wb-kpi"><small>Investigation set</small><strong>'+state.selection.length+'</strong></div></div><h3>Transformation context</h3><p>'+esc(p.industry||"Not set")+" · "+esc(p.current||"Current platform not set")+" · "+esc(p.scale||"Scale not set")+'</p><h3>Investigation set</h3><p>'+esc(state.selection.map(function(x){return x.name}).join(", ")||"Run Selection first")+'</p><h3>Economics</h3><p>'+((e.currentTotal!=null)?"Current: "+e.currentTotal.toLocaleString()+" · Future: "+e.futureTotal.toLocaleString()+" · Realised value: "+e.realisedValue.toLocaleString():"Not calculated")+'</p><h3>Evidence posture</h3><p>'+esc(state.evidence.filter(function(x){return x.status==="POC validated"||x.status==="Demonstrated"}).length)+" validated/demonstrated items; "+esc(state.evidence.filter(function(x){return x.status==="NOT VERIFIED"}).length)+" marked NOT VERIFIED.</p><div class="wb-note">This dossier is decision support. Vendor claims, compliance conclusions and savings require independent validation.</div>"
 }
 function exportJson(){var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="automationscan-transformation-workbench.json";a.click();URL.revokeObjectURL(a.href);track("workbench_export",{format:"json"})}
 function importApps(file){var reader=new FileReader();reader.onload=function(){var lines=reader.result.split(/\r?\n/).filter(Boolean);if(!lines.length)return;var head=lines.shift().split(",").map(function(x){return x.trim().toLowerCase()});lines.forEach(function(line){var c=line.split(",");var o={};head.forEach(function(h,i){o[h]=c[i]||""});if(o.application)state.applications.push({name:o.application,cost:Number(o.cost||0),value:o.value||"Unknown",tech:o.technical_health||o.tech||"Unknown",usage:o.usage||"Unknown",redundancy:o.redundancy||"None known",lifecycle:o.lifecycle||"Stable",integration:o.integration||"Medium",disposition:"Assess"})});save();renderApps()};reader.readAsText(file)}
@@ -73,11 +76,13 @@ function bind(){
  $("runSelection").onclick=function(){renderSelection();save();track("workbench_selection_run")};
  $("calcEconomics").onclick=calcEconomics;
  $("generateRfp").onclick=function(){renderExecute("rfp")};$("generatePoc").onclick=function(){renderExecute("poc")};
+ $("addRequirement").onclick=function(){var n=state.requirements.length+1;state.requirements.push({id:"REQ-"+String(n).padStart(3,"0"),text:val("qText"),type:val("qType"),priority:val("qPriority"),process:val("qProcess"),acceptance:val("qAcceptance"),gate:val("qGate")});save();renderRequirements()};$("exportRequirements").onclick=exportRequirements;
+ $("addVendorResponse").onclick=function(){state.vendorResponses.push({candidate:val("vCandidate"),req:val("vReq"),status:val("vStatus"),evidence:val("vEvidence"),response:val("vResponse"),dependency:val("vDependency")});save();renderCompare()};$("clearVendorResponses").onclick=function(){state.vendorResponses=[];save();renderCompare()};
  $("addGovern").onclick=function(){state.governance.push({req:val("gReq"),cap:val("gCap"),evidence:val("gEvidence"),gate:val("gGate"),ai:val("gAi"),risk:val("gRisk")});save();renderGov()};
  $("addRoadmap").onclick=function(){state.roadmap.push({horizon:val("rHorizon"),workstream:val("rWorkstream"),owner:val("rOwner"),gate:val("rGate"),dependency:val("rDependency"),value:val("rValue")});save();renderRoadmap()};
  $("addEvidence").onclick=function(){state.evidence.push({claim:val("eClaim"),source:val("eSource"),date:val("eDate"),reviewer:val("eReviewer"),status:val("eStatus"),next:val("eNext")});save();renderEvidence()};
  $("exportJson").onclick=exportJson;$("printReport").onclick=function(){report();window.print()};$("resetAll").onclick=function(){if(confirm("Reset the local workbench?")){localStorage.removeItem(KEY);location.reload()}};
- load();renderProfileOut();renderProcesses();renderApps();renderGov();renderRoadmap();renderEvidence();report();
+ load();renderProfileOut();renderProcesses();renderApps();renderGov();renderRoadmap();renderRequirements();renderCompare();renderEvidence();report();
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind);else bind();
 })();
