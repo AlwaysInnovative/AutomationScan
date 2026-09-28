@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AutomationScan Transformation Workbench: evidence, process, application portfolio, vendor investigation, TCO, RFP, POC, governance and roadmap.">
+<link rel="stylesheet" href="./site.css?v=20260928-8">
+<title>AutomationScan | Transformation Workbench</title>
+<style>
+.workbench{background:#f5f3ed;padding:55px 0 90px}.wb-grid{display:grid;grid-template-columns:230px 1fr;gap:20px}.wb-nav{position:sticky;top:18px;align-self:start;background:#102a32;color:#fff;padding:14px;border-radius:6px}.wb-nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#dce7e5;padding:11px 12px;border-radius:5px;cursor:pointer;font-weight:750}.wb-nav button.active,.wb-nav button:hover{background:#1d4b54}.wb-main{min-width:0}.wb-panel{display:none;background:#fff;border:1px solid #ddd9cf;padding:28px;border-radius:6px;box-shadow:0 8px 28px #102a320d}.wb-panel.active{display:block}.wb-panel h2{font-family:Georgia,serif;font-size:31px;font-weight:500;margin:0 0 8px}.wb-panel>p{color:#667277}.wb-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:22px 0}.wb-form label{font-size:12px;font-weight:800;color:#33434a}.wb-form input,.wb-form select,.wb-form textarea{display:block;width:100%;margin-top:6px;padding:11px;border:1px solid #d5d8d4;border-radius:5px;background:#fff;font:inherit}.wb-form textarea{min-height:95px}.wb-actions{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.wb-btn{border:0;border-radius:5px;padding:11px 15px;font-weight:850;cursor:pointer}.wb-primary{background:#bd6b42;color:#fff}.wb-secondary{background:#176b70;color:#fff}.wb-light{background:#f2f0e9;color:#26363d}.wb-output{margin-top:20px}.wb-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.wb-kpi{border:1px solid #ddd9cf;padding:15px;background:#faf9f5}.wb-kpi small{display:block;color:#7a8588;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.wb-kpi strong{display:block;font-size:26px;margin-top:5px}.wb-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:12px}.wb-table th,.wb-table td{padding:10px;border-bottom:1px solid #e2dfd7;text-align:left;vertical-align:top}.wb-table th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#667277}.wb-tag{display:inline-block;padding:4px 7px;border-radius:12px;background:#e7efec;font-size:10px;font-weight:800}.wb-note{background:#f4f0e7;border-left:3px solid #bd6b42;padding:12px;margin-top:15px;font-size:12px}.wb-drop{border:2px dashed #c9c5bb;padding:20px;text-align:center;margin-top:12px;border-radius:5px}.wb-checks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.wb-checks label{border:1px solid #ddd9cf;padding:10px;font-size:12px}.wb-checks input{margin-right:7px}.wb-list{display:grid;gap:9px}.wb-card{border:1px solid #ddd9cf;padding:14px;background:#fcfbf8}.wb-card strong{display:block}.wb-card small{color:#6c777b}.hero-small{padding:95px 0 45px;background:#102a32;color:#fff}.hero-small h1{font-family:Georgia,serif;font-size:clamp(40px,5vw,65px);font-weight:500;margin:8px 0}.hero-small p{max-width:800px;color:#c8d7d5}
+@media(max-width:850px){.wb-grid{grid-template-columns:1fr}.wb-nav{position:static;display:grid;grid-template-columns:repeat(2,1fr)}.wb-kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.wb-form,.wb-checks{grid-template-columns:1fr}.wb-kpis{grid-template-columns:1fr 1fr}.wb-nav{grid-template-columns:1fr}.wb-table{font-size:11px}}
+@media print{.site-header,footer,.hero-small,.wb-nav,.wb-actions{display:none!important}.workbench{padding:0;background:#fff}.wb-panel{display:block!important;box-shadow:none;border:0;break-inside:avoid}.wb-panel:not(#wb-report){display:none!important}}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="wrap nav"><a class="brand" href="./">Automation<span>Scan</span></a><nav aria-label="Primary"><a href="./">Automation assessment</a><a href="transformation-advisor.html">Navigator</a><a href="transformation-tools.html">Free tools</a></nav><a class="btn btn-light" href="contact.html">Contact</a></div></header>
+<section class="hero-small"><div class="wrap"><p class="eyebrow eyebrow-light">TRANSFORMATION WORKBENCH</p><h1>From assessment to <em>evidence-backed action.</em></h1><p>Build a reusable transformation dossier across processes, applications, vendor investigation, economics, RFP/POC, governance and roadmap. Data is stored in this browser unless you export it.</p></div></section>
+<main class="workbench"><div class="wrap wb-grid">
+<aside class="wb-nav" aria-label="Workbench sections">
+<button class="active" data-tab="profile">1. Profile</button>
+<button data-tab="process">2. Processes</button>
+<button data-tab="apps">3. Applications</button>
+<button data-tab="select">4. Selection</button>
+<button data-tab="economics">5. Economics</button>
+<button data-tab="execute">6. RFP / POC</button>
+<button data-tab="govern">7. Governance</button>
+<button data-tab="roadmap">8. Roadmap</button>
+<button data-tab="evidence">9. Evidence</button>
+<button data-tab="report">10. Report</button>
+</aside>
+<section class="wb-main">
+<article class="wb-panel active" id="tab-profile">
+<p class="eyebrow">FOUNDATION</p><h2>Transformation profile</h2><p>Use the same context model across every downstream decision instead of repeating isolated questionnaires.</p>
+<div class="wb-form">
+<label>Industry<select id="wbIndustry"></select></label>
+<label>Current platform<input id="wbCurrent" placeholder="Current ERP / core platform"></label>
+<label>Business model<input id="wbBusiness" placeholder="e.g. B2B distribution"></label>
+<label>Scale<select id="wbScale"><option>SMB</option><option>Mid-market</option><option>Enterprise</option></select></label>
+<label>Revenue model<select id="wbRevenue"><option>Recurring / subscription</option><option>Transactional</option><option>Project</option><option>Usage</option><option>Mixed</option></select></label>
+<label>Fulfilment model<input id="wbFulfilment" placeholder="MTS, ETO, DTC, wholesale..."></label>
+<label>Delivery model<select id="wbDelivery"><option>Continuous</option><option>Project-based</option><option>Hybrid</option></select></label>
+<label>Regulatory intensity<select id="wbRegulatory"><option>Low</option><option>Moderate</option><option>High</option><option>Critical / highly regulated</option></select></label>
+<label>Transformation appetite<select id="wbAppetite"><option>Conservative</option><option>Balanced</option><option>Transformational</option></select></label>
+<label>Target horizon<select id="wbHorizon"><option>0–12 months</option><option>12–24 months</option><option>24–36 months</option><option>Exploratory</option></select></label>
+<label>Goals<textarea id="wbGoals" placeholder="Revenue growth, margin, control, speed, customer experience..."></textarea></label>
+<label>Business pain<textarea id="wbPain" placeholder="Describe the most important pain or constraint"></textarea></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="saveProfile">Save profile</button><button class="wb-btn wb-light" id="loadProfile">Reload saved data</button></div><div id="profileOut" class="wb-output"></div>
+</article>
+
+<article class="wb-panel" id="tab-process">
+<p class="eyebrow">PROCESS INTELLIGENCE</p><h2>Process health & treatment</h2><p>Add processes and quantify effort, exceptions and errors. The workbench converts the inputs into a deterministic treatment lens.</p>
+<div class="wb-form">
+<label>Process name<input id="pName" placeholder="Order management"></label>
+<label>Monthly volume<input id="pVolume" type="number" min="0" value="1000"></label>
+<label>Minutes per transaction<input id="pMinutes" type="number" min="0" value="10"></label>
+<label>Exception rate %<input id="pExceptions" type="number" min="0" max="100" value="5"></label>
+<label>Error / rework rate %<input id="pErrors" type="number" min="0" max="100" value="2"></label>
+<label>Human judgement required?<select id="pHuman"><option>Low</option><option>Medium</option><option>High</option></select></label>
+<label>Process notes<textarea id="pNotes" placeholder="Controls, bottlenecks, systems, approvals..."></textarea></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addProcess">Add process</button><button class="wb-btn wb-light" id="clearProcesses">Clear</button></div>
+<div id="processOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-apps">
+<p class="eyebrow">APPLICATION PORTFOLIO</p><h2>Application inventory & rationalisation</h2><p>Build a simple application portfolio without requiring a connector. Import CSV later when the inventory is available.</p>
+<div class="wb-form">
+<label>Application<input id="aName" placeholder="CRM / ERP / WMS / custom app"></label>
+<label>Annual cost<input id="aCost" type="number" min="0" value="0"></label>
+<label>Business value<select id="aValue"><option>High</option><option>Medium</option><option>Low</option><option>Unknown</option></select></label>
+<label>Technical health<select id="aTech"><option>Healthy</option><option>Watch</option><option>Fragile</option><option>Legacy</option></select></label>
+<label>Usage<select id="aUsage"><option>High</option><option>Medium</option><option>Low</option><option>Unknown</option></select></label>
+<label>Redundancy<select id="aRedundancy"><option>None known</option><option>Possible overlap</option><option>Duplicate</option></select></label>
+<label>Lifecycle<select id="aLifecycle"><option>Strategic</option><option>Stable</option><option>At risk</option><option>End of life</option></select></label>
+<label>Integration complexity<select id="aIntegration"><option>Low</option><option>Medium</option><option>High</option></select></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addApp">Add application</button><button class="wb-btn wb-light" id="importApps">Import CSV</button><input id="appFile" type="file" accept=".csv,text/csv" hidden></div>
+<div id="appsOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-select">
+<p class="eyebrow">DECISION ENGINE</p><h2>Explainable investigation set</h2><p>Scores remain directional. Each candidate is accompanied by the factors that moved its score and the evidence still required.</p>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="runSelection">Run investigation set</button></div><div id="selectOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-economics">
+<p class="eyebrow">ECONOMICS</p><h2>Editable TCO & business case</h2><p>All figures are user-entered assumptions. No embedded benchmark is silently inserted.</p>
+<div class="wb-form">
+<label>Years<input id="tYears" type="number" min="1" value="5"></label>
+<label>Current annual licence/subscription<input id="tCurrentLicence" type="number" min="0" value="0"></label>
+<label>Current annual support<input id="tCurrentSupport" type="number" min="0" value="0"></label>
+<label>Current annual infrastructure<input id="tCurrentInfra" type="number" min="0" value="0"></label>
+<label>Current annual internal support<input id="tCurrentInternal" type="number" min="0" value="0"></label>
+<label>Future annual subscription<input id="tFutureSub" type="number" min="0" value="0"></label>
+<label>Future annual services/support<input id="tFutureServices" type="number" min="0" value="0"></label>
+<label>Future annual infrastructure<input id="tFutureInfra" type="number" min="0" value="0"></label>
+<label>Implementation<input id="tImplementation" type="number" min="0" value="0"></label>
+<label>Migration & data<input id="tMigration" type="number" min="0" value="0"></label>
+<label>Change & training<input id="tChange" type="number" min="0" value="0"></label>
+<label>Expected annual value<input id="tValue" type="number" min="0" value="0"></label>
+<label>Value realisation %<input id="tRealisation" type="number" min="0" max="100" value="100"></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="calcEconomics">Calculate</button></div><div id="economicsOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-execute">
+<p class="eyebrow">VALIDATE BEFORE BUYING</p><h2>RFP / RFI + POC pack</h2><p>Generate a structured starting pack from your profile and investigation set. It is intentionally a draft, not a procurement commitment.</p>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="generateRfp">Generate RFP/RFI structure</button><button class="wb-btn wb-secondary" id="generatePoc">Generate POC tests</button></div><div id="executeOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-govern">
+<p class="eyebrow">GOVERN</p><h2>Compliance, AI controls & risk</h2><p>Connect a consideration to a requirement, capability, evidence and validation gate. Add risks that must be owned before a decision.</p>
+<div class="wb-form">
+<label>Requirement<input id="gReq" placeholder="Data residency"></label>
+<label>Capability<input id="gCap" placeholder="Regional data hosting"></label>
+<label>Evidence<input id="gEvidence" placeholder="Architecture document / vendor evidence"></label>
+<label>Validation gate<input id="gGate" placeholder="POC / legal review / security review"></label>
+<label>AI capability<textarea id="gAi" placeholder="Describe an AI capability to evaluate: claim, human approval, autonomous-action risk..."></textarea></label>
+<label>Risk<textarea id="gRisk" placeholder="Risk, impact, owner, mitigation"></textarea></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addGovern">Add governance item</button></div><div id="governOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-roadmap">
+<p class="eyebrow">TRANSFORM</p><h2>Roadmap builder</h2><p>Create practical gates across 30/60/90 days, 6, 12 and 24 months. Ownership remains explicit.</p>
+<div class="wb-form">
+<label>Horizon<select id="rHorizon"><option>30 days</option><option>60 days</option><option>90 days</option><option>6 months</option><option>12 months</option><option>24 months</option></select></label>
+<label>Workstream<input id="rWorkstream" placeholder="Data, process, ERP, integration, change..."></label>
+<label>Owner<input id="rOwner" placeholder="Role / team"></label>
+<label>Gate<input id="rGate" placeholder="Decision / evidence gate"></label>
+<label>Dependency<input id="rDependency" placeholder="Precondition"></label>
+<label>Value<textarea id="rValue" placeholder="What outcome should this work create?"></textarea></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addRoadmap">Add roadmap item</button></div><div id="roadmapOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-evidence">
+<p class="eyebrow">EVIDENCE MODEL</p><h2>Claim & evidence register</h2><p>Track freshness and validation status for vendor, capability and transformation claims.</p>
+<div class="wb-form">
+<label>Claim<input id="eClaim" placeholder="Capability / vendor / architecture statement"></label>
+<label>Source<input id="eSource" placeholder="URL, document, reference, meeting"></label>
+<label>Source date<input id="eDate" type="date"></label>
+<label>Reviewer<input id="eReviewer" placeholder="Role / analyst"></label>
+<label>Status<select id="eStatus"><option>Marketing claim</option><option>Source-backed</option><option>Customer-evidenced</option><option>Demonstrated</option><option>POC validated</option><option>NOT VERIFIED</option></select></label>
+<label>Next validation<input id="eNext" placeholder="Scripted demo / reference / POC"></label>
+</div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addEvidence">Add evidence item</button></div><div id="evidenceOut"></div>
+</article>
+
+<article class="wb-panel" id="tab-report">
+<p class="eyebrow">OUTPUT</p><h2>Transformation dossier</h2><p>Save, export or print the complete workbench state. This output is designed as a foundation for the future cloud workspace.</p>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="exportJson">Export JSON</button><button class="wb-btn wb-secondary" id="printReport">Print / PDF</button><button class="wb-btn wb-light" id="resetAll">Reset workbench</button></div>
+<div id="wbReport" class="wb-output"></div>
+</article>
+</section></div></main>
+<footer><div class="wrap footer-grid"><div><a class="brand" href="./">Automation<span>Scan</span></a><p>Evidence-led transformation discovery.</p></div><div><b>Explore</b><a href="transformation-advisor.html">Navigator</a><a href="transformation-tools.html">Free tools</a><a href="methodology.html">Methodology</a></div><div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div></div><div class="wrap footer-bottom">© 2026 AutomationScan · Directional decision support.</div></footer>
+<script src="intelligence-data.js?v=20260928-1"></script><script src="decision-engine.js?v=20260928-1"></script><script src="workbench.js?v=20260928-1"></script>
+</body></html>
