@@ -1,6 +1,6 @@
 async function handler(req,res){
   res.setHeader("Cache-Control","no-store");
-  res.setHeader("Access-Control-Allow-Origin","*");
+  const origin=req.headers.origin||"";const allowed=new Set(["https://automation-scan-neon.vercel.app","https://automation-scan-7rg404ewn-alwaysinnovatives-projects.vercel.app"]);res.setHeader("Access-Control-Allow-Origin",allowed.has(origin)?origin:"https://automation-scan-neon.vercel.app");res.setHeader("Vary","Origin");
   res.setHeader("Access-Control-Allow-Headers","content-type");
   res.setHeader("Access-Control-Allow-Methods","GET,POST,OPTIONS");
   if(req.method==="OPTIONS")return res.status(204).end();
