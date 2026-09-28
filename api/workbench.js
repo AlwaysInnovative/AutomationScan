@@ -1,4 +1,4 @@
-export default async function handler(req,res){
+async function handler(req,res){
   res.setHeader("Cache-Control","no-store");
   res.setHeader("Access-Control-Allow-Origin","*");
   res.setHeader("Access-Control-Allow-Headers","content-type");
@@ -24,3 +24,4 @@ export default async function handler(req,res){
   }
   return res.status(405).json({error:"Method not allowed"});
 }
+module.exports=handler;
