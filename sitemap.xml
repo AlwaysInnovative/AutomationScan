@@ -20,4 +20,10 @@
 <url><loc>https://automation-scan-neon.vercel.app/contact.html</loc><lastmod>2026-09-27</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://automation-scan-neon.vercel.app/transformation-tools.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://automation-scan-neon.vercel.app/methodology.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://automation-scan-neon.vercel.app/tools/erp-vendor-shortlist.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://automation-scan-neon.vercel.app/tools/erp-health-check.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://automation-scan-neon.vercel.app/tools/erp-tco-calculator.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://automation-scan-neon.vercel.app/tools/erp-migration-readiness.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://automation-scan-neon.vercel.app/tools/erp-compliance-checker.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://automation-scan-neon.vercel.app/tools/automation-opportunity-scanner.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
