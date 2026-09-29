@@ -71,9 +71,16 @@ async function loadIndustryProfiles(){
   renderIndustryQuestions();
  }catch(e){console.error("Industry questionnaires unavailable",e);if(el("industryIntro"))el("industryIntro").textContent="Industry questionnaire data could not load. Refresh or contact support before continuing.";}
 }
-el("industry")&&el("industry").addEventListener("input",renderIndustryQuestions);
-document.addEventListener("automationScanUIReady",loadIndustryProfiles);
-loadIndustryProfiles();
+el("industry")&&el("industry").addEventListener("change",renderIndustryQuestions);
+var industryProfilesReady=false, industryProfilesLoading=false;
+async function ensureIndustryProfiles(){
+ if(industryProfilesReady||industryProfilesLoading)return;
+ industryProfilesLoading=true;
+ try{await loadIndustryProfiles();industryProfilesReady=true;}finally{industryProfilesLoading=false;}
+}
+document.addEventListener("automationScanUIReady",ensureIndustryProfiles);
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ensureIndustryProfiles);
+else ensureIndustryProfiles();
 if(next)next.onclick=function(){if(valid())showStep((window._advisorStep||0)+1)};if(back)back.onclick=function(){showStep((window._advisorStep||0)-1)};if(form)form.addEventListener("submit",function(e){e.preventDefault();if(!valid())return;try{renderReport();if(window.trackEvent)window.trackEvent("transformation_report_generated",{industry:value("industry")})}catch(err){console.error(err);alert("AutomationScan could not generate the report. Please refresh and try again.")}});
 var saveAssessment=document.getElementById("tSave");if(saveAssessment)saveAssessment.onclick=function(){try{var raw=sessionStorage.getItem("automationscan_transform")||"{}";var data=JSON.parse(raw);data.savedAt=new Date().toISOString();localStorage.setItem("automationscan_saved_assessment",JSON.stringify(data));var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="automationscan-assessment.json";a.click();URL.revokeObjectURL(u)}catch(e){alert("The assessment could not be saved in this browser.")}};
 var download=document.getElementById("tDownload");if(download)download.onclick=function(){window.print()};var print=document.getElementById("tPrint");if(print)print.onclick=function(){window.print()};showStep(0);
