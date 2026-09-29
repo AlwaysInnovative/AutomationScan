@@ -196,20 +196,27 @@ async function submitLeadIfConsented(r,top){
  }catch{document.getElementById("saveStatus").textContent="Report generated locally."}
 }
 
-const demos={
- accounting:{name:"Accounting firm",meta:"12-person practice · B2B · monthly client reporting",score:84,hours:"64-92",headline:"Invoice processing and client reporting are absorbing the most repeat effort.",areas:[["Invoices / payments","18 hrs/week","Document extraction + approval workflow"],["Reporting","11 hrs/week","Scheduled report generation + delivery"],["Email / follow-ups","8 hrs/week","Reminder sequences + exception handling"]],next:"Start with invoice intake because it touches finance, documents and approvals."},
- clinic:{name:"Healthcare clinic",meta:"8-person clinic · B2C · appointment-heavy",score:76,hours:"42-61",headline:"Scheduling and reminders are creating avoidable administrative load.",areas:[["Scheduling","14 hrs/week","Self-service booking + reminders"],["Customer support","8 hrs/week","FAQ and message triage"],["Documents / admin","7 hrs/week","Digital forms + document routing"]],next:"Start with scheduling and reminders; keep clinical decisions outside automation."},
- realestate:{name:"Real estate team",meta:"15-person team · mixed clients · lead-driven",score:81,hours:"49-70",headline:"Lead follow-up and CRM updates are competing with time spent selling.",areas:[["Sales admin / CRM","13 hrs/week","Lead capture + CRM enrichment"],["Email / follow-ups","10 hrs/week","Task-based follow-up sequences"],["Documents / admin","6 hrs/week","Template-driven document preparation"]],next:"Start with lead capture and follow-up consistency before adding more tools."},
- ecommerce:{name:"E-commerce business",meta:"22-person operation · B2C · multi-channel",score:79,hours:"55-79",headline:"Order support, reporting and data movement are the biggest repeat-work signals.",areas:[["Customer support","15 hrs/week","FAQ automation + ticket routing"],["Data entry","12 hrs/week","Order and inventory data sync"],["Reporting","8 hrs/week","Automated daily/weekly dashboards"]],next:"Start with support triage and repetitive order questions."},
- logistics:{name:"Logistics company",meta:"35-person operation · B2B · document-heavy",score:88,hours:"71-103",headline:"Documents and status updates create a large coordination burden.",areas:[["Documents / admin","22 hrs/week","Document capture + workflow routing"],["Data entry","16 hrs/week","System-to-system data transfer"],["Email / follow-ups","9 hrs/week","Exception alerts + customer updates"]],next:"Start with document intake and status-event workflows; preserve human review for exceptions."},
- agency:{name:"Professional services",meta:"10-person agency · project-based · B2B",score:68,hours:"34-49",headline:"Recurring reporting and client communication are taking time away from delivery.",areas:[["Reporting","9 hrs/week","Reusable report generation"],["Email / follow-ups","7 hrs/week","Client update workflows"],["Documents / admin","5 hrs/week","Templates and approval steps"]],next:"Start with recurring reports where inputs and outputs are already structured."}
-};
-function renderDemo(key){
- const d=demos[key]||demos.accounting;
- const demoTotal=d.areas.reduce((sum,x)=>sum+Number(String(x[1]).match(/\d+/)?.[0]||0),0);
- const demoBars=d.areas.map((x)=>{const hrs=Number(String(x[1]).match(/\d+/)?.[0]||0);const pct=Math.round(hrs/Math.max(demoTotal,1)*100);return '<div class="demo-bar-row"><div class="demo-bar-meta"><span>'+escapeHtml(x[0])+'</span><strong>'+hrs+' hrs <b>'+pct+'%</b></strong></div><div class="demo-bar-track"><i style="width:'+Math.max(10,pct)+'%"></i></div></div>';}).join("");
- document.getElementById("demoPanel").innerHTML='<div class="demo-top"><div><span class="demo-kicker">ILLUSTRATIVE SCAN</span><h3>'+d.name+'</h3><p>'+d.meta+'</p></div><div class="demo-score"><strong>'+d.score+'</strong><span>/100</span></div></div><div class="demo-headline">'+d.headline+'</div><div class="demo-hours"><div><span>Estimated work worth investigating</span><small>Directional monthly range</small></div><strong>'+d.hours+'<small>hrs/month</small></strong></div><div class="demo-mini-chart"><div class="demo-chart-title"><div><b>Where the weekly effort sits</b><span>Illustrative share of the three highlighted areas</span></div><strong>'+demoTotal+'<small> hrs/week</small></strong></div><div class="demo-bars">'+demoBars+'</div></div><div class="demo-areas">'+d.areas.map((x,i)=>'<div class="demo-area"><div class="demo-area-top"><small>PRIORITY '+(i+1)+'</small><span>'+x[1]+'</span></div><b>'+x[0]+'</b><p>'+x[2]+'</p></div>').join("")+'</div><div class="demo-next"><b>What the output suggests</b><span>'+d.next+'</span></div>';
+let demos=[];
+function renderDemo(d){
+ const panel=document.getElementById("demoPanel"); if(!panel||!d)return;
+ const areas=Array.isArray(d.areas)?d.areas:[];
+ const total=areas.reduce((sum,x)=>sum+Number(String(x[1]||"").match(/\\d+/)?.[0]||0),0);
+ const bars=areas.map(x=>{const hrs=Number(String(x[1]||"").match(/\\d+/)?.[0]||0);const pct=Math.round(hrs/Math.max(total,1)*100);return '<div class="demo-bar-row"><div class="demo-bar-meta"><span>'+escapeHtml(x[0])+'</span><strong>'+hrs+' hrs <b>'+pct+'%</b></strong></div><div class="demo-bar-track"><i style="width:'+Math.max(10,pct)+'%"></i></div></div>';}).join("");
+ panel.innerHTML='<div class="demo-top"><div><span class="demo-kicker">ILLUSTRATIVE SCAN</span><h3>'+escapeHtml(d.name)+'</h3><p>'+escapeHtml(d.meta)+'</p></div><div class="demo-score"><strong>'+Number(d.score||0)+'</strong><span>/100</span></div></div><div class="demo-headline">'+escapeHtml(d.headline)+'</div><div class="demo-hours"><div><span>Estimated work worth investigating</span><small>Directional monthly range</small></div><strong>'+escapeHtml(d.hours_range||"—")+'<small>hrs/month</small></strong></div><div class="demo-mini-chart"><div class="demo-chart-title"><div><b>Where the weekly effort sits</b><span>Illustrative share of the highlighted areas</span></div><strong>'+total+'<small> hrs/week</small></strong></div><div class="demo-bars">'+bars+'</div></div><div class="demo-areas">'+areas.map((x,i)=>'<div class="demo-area"><div class="demo-area-top"><small>PRIORITY '+(i+1)+'</small><span>'+escapeHtml(x[1])+'</span></div><b>'+escapeHtml(x[0])+'</b><p>'+escapeHtml(x[2])+'</p></div>').join("")+'</div><div class="demo-next"><b>What the output suggests</b><span>'+escapeHtml(d.next_step||"")+'</span></div>';
 }
+async function setupExamples(){
+ const list=document.getElementById("demoList"),panel=document.getElementById("demoPanel"); if(!list||!panel)return;
+ try{
+  const res=await fetch("api/demos",{cache:"no-store"}); if(!res.ok)throw new Error("demo_api_"+res.status);
+  const data=await res.json(); demos=Array.isArray(data.scenarios)?data.scenarios:[];
+  if(!demos.length){panel.textContent="Illustrative examples are temporarily unavailable.";return;}
+  list.innerHTML=demos.map((d,i)=>'<button type="button" class="demo-tab'+(i===0?" active":"")+'" data-demo="'+escapeHtml(d.id)+'"><span>'+escapeHtml(d.name)+'</span><small>'+escapeHtml(d.meta)+'</small></button>').join("");
+  const tabs=[...list.querySelectorAll(".demo-tab")];
+  tabs.forEach(t=>t.addEventListener("click",function(){tabs.forEach(x=>x.classList.remove("active"));t.classList.add("active");const d=demos.find(x=>x.id===t.dataset.demo);renderDemo(d);}));
+  renderDemo(demos[0]);
+ }catch(e){panel.textContent="Illustrative examples are temporarily unavailable.";console.warn("Examples unavailable",e);}
+}
+setupExamples();
 function setupExamples(){const tabs=[...document.querySelectorAll(".demo-tab")];if(!tabs.length)return;tabs.forEach(t=>{t.type="button";t.addEventListener("click",e=>{e.preventDefault();tabs.forEach(x=>x.classList.remove("active"));t.classList.add("active");renderDemo(t.dataset.demo);});});renderDemo(tabs.find(t=>t.classList.contains("active"))?.dataset.demo||"accounting");} setupExamples();
 show(0);
 
