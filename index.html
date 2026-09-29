@@ -25,7 +25,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"A free browser-based business automation assessment that helps organizations identify repetitive work and prioritize opportunities for process automation.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/","logo":"https://automation-scan-neon.vercel.app/favicon.svg"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is AutomationScan?","acceptedAnswer":{"@type":"Answer","text":"AutomationScan is a free discovery tool that asks about repetitive work, workload and common business systems, then produces a directional automation opportunity report."}},{"@type":"Question","name":"Who should use AutomationScan?","acceptedAnswer":{"@type":"Answer","text":"Owners, operators, managers, consultants and teams in small and growing businesses can use the scan to identify repetitive administrative work worth investigating."}},{"@type":"Question","name":"Does AutomationScan automatically change business processes?","acceptedAnswer":{"@type":"Answer","text":"No. The assessment identifies and prioritizes opportunities. Implementation decisions remain with the business."}},{"@type":"Question","name":"Is the score a guaranteed savings estimate?","acceptedAnswer":{"@type":"Answer","text":"No. The score and hours estimate are directional and should be validated against the actual process before an investment decision."}}]}</script>
-<script src="marketing-config.js?v=20260927-3"></script>
+<script src="ui-config.js?v=20260929-1"></script><script src="marketing-config.js?v=20260927-3"></script>
 <script>
 window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
@@ -174,12 +174,12 @@ window.enableAnalytics=function(){
       <fieldset class="step active">
         <legend>Tell us about the business</legend>
         <div class="field-grid two">
-          <label>Industry<select name="industry" required><option value="">Choose one</option><option>Accounting / Finance</option><option>Real Estate</option><option>Retail / E-commerce</option><option>Professional Services</option><option>Healthcare / Clinic</option><option>Education / Training</option><option>Manufacturing</option><option>Logistics</option><option>Hospitality</option><option>Other</option></select></label>
-          <label>Team size<select name="employees" required><option value="">Choose</option><option value="1">1</option><option value="5">2-10</option><option value="15">11-25</option><option value="35">26-50</option><option value="75">51-100</option><option value="150">101+</option></select></label>
+          <label>Industry<select name="industry" required></select></label>
+          <label>Team size<select name="employees" required></select></label>
         </div>
         <div class="field-grid two">
-          <label>Revenue range<select name="revenue"><option>Prefer not to say</option><option>Under INR 5L</option><option>INR 5L-INR 25L</option><option>INR 25L-INR 1Cr</option><option>INR 1Cr+</option></select></label>
-          <label>Customer type<select name="customerType"><option>B2B</option><option>B2C</option><option>Both</option></select></label>
+          <label>Revenue range<select name="revenue"></select></label>
+          <label>Customer type<select name="customerType"></select></label>
         </div>
       </fieldset>
 
@@ -212,15 +212,15 @@ window.enableAnalytics=function(){
           <label><input type="checkbox" name="tools" value="None">None</label>
         </div>
         <div class="field-grid two">
-          <label>Copying information between systems<select name="copyPaste"><option>Rarely</option><option>Sometimes</option><option>Often</option><option>Constantly</option></select></label>
-          <label>How repetitive is the work?<select name="repetition"><option>Low</option><option>Medium</option><option>High</option><option>Very high</option></select></label>
+          <label>Copying information between systems<select name="copyPaste"></select></label>
+          <label>How repetitive is the work?<select name="repetition"></select></label>
         </div>
       </fieldset>
 
       <fieldset class="step">
         <legend>What would you change first?</legend>
         <div id="industryPainQuestions" class="industry-pain-questions"></div><label>Anything else that causes friction?<textarea name="pain" rows="4" maxlength="800" placeholder="Describe a recurring problem, delay, error or hand-off in your own words."></textarea></label>
-        <label>Main goal<select name="goal"><option>Save staff time</option><option>Reduce errors</option><option>Respond faster</option><option>Increase sales capacity</option><option>Reduce admin costs</option></select></label>
+        <label>Main goal<select name="goal"></select></label>
         <label>Email for your report <small>(optional)</small><input type="email" name="emailAddress" autocomplete="email" placeholder="you@company.com"></label>
         <label class="consent-row"><input type="checkbox" name="consent" value="yes">I agree to receive my AutomationScan report and occasional product updates. <a href="privacy.html">Privacy</a></label>
         <p class="form-note">You can complete the assessment without an email. Never enter confidential customer or financial information.</p>
@@ -313,7 +313,7 @@ window.enableAnalytics=function(){
   <div class="consent-actions"><button type="button" id="consentReject" class="btn btn-light">Reject optional</button><button type="button" id="consentAccept" class="btn btn-copper">Accept optional</button></div>
 </section>
 
-<script src="api-config.js?v=20260927-1"></script>
-<script src="app.js?v=20260927-5"></script>
+<script src="ui-config.js?v=20260929-1"></script><script src="api-config.js?v=20260927-1"></script>
+<script src="ui-config.js?v=20260929-1"></script><script src="app.js?v=20260927-5"></script>
 </body>
 </html>
