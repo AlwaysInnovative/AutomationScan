@@ -50,7 +50,7 @@ function renderReport(){
  if(el("tScoreBreakdown"))el("tScoreBreakdown").innerHTML="<p>Signal = process scope ("+processes.length+"×8) + pain signals ("+pains.length+"×5) + goals ("+goals.length+"×4) + supplied business context. This is a discovery signal, not a benchmark or probability.</p>";
  if(el("tGoals"))el("tGoals").innerHTML=goals.map(function(x){return"<span>"+esc(x)+"</span>"}).join("")||"No goals selected";
  if(el("decisionPack"))el("decisionPack").innerHTML="<p>Use the Workbench to persist requirements, evidence, candidate responses, POC results, migration readiness and customer-specific economics.</p>";
- var results=el("transformResults");if(results){results.classList.remove("hidden");results.scrollIntoView({behavior:"smooth"})}
+ var results=el("transformResults");if(results){results.classList.remove("hidden");results.hidden=false;results.style.display="block";results.scrollIntoView({behavior:"smooth"});window.__automationScanReportReady=true}
  var data={industry:industry,businessModel:value("businessModel"),current:value("current"),processes:processes,pains:pains,candidates:candidates,goals:goals,savedAt:new Date().toISOString()};try{sessionStorage.setItem("automationscan_transform",JSON.stringify(data))}catch(e){}
 }
 function selectedIndustry(){
