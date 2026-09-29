@@ -349,7 +349,9 @@ jobs:
             for (const key of Object.keys(explicitContext)) {
               await page.locator('#' + key).selectOption({label:explicitContext[key]}).catch(()=>{});
             }
-            await expect(page.locator('#wbGoals')).toHaveCount(1, {timeout:30000});
+            await expect(page.locator('#wbGoals')).toHaveCount(1, {timeout:30000}).catch(async () => {
+              throw new Error('Workbench profile DOM missing at URL ' + page.url() + ' title=' + await page.title() + ' body=' + (await page.locator('body').innerText()).slice(0,500));
+            });
             await expect(page.locator('#wbGoals')).toBeVisible({timeout:10000});
             await page.locator('#wbGoals').fill('UAT growth, control and cost improvement');
             await page.locator('#wbPain').fill('UAT manual reconciliation and repeated handoffs');
@@ -491,7 +493,20 @@ jobs:
                 await checks.nth(0).check();
 
                 await page.locator('#tNext').click();
-                await expect(page.locator('#tProgress')).toContainText('Step 2');
+                await expect(page.locator('#tProgress')).toContainText('Step 2', {timeout:5000}).catch(async () => {
+                  const diag = await page.evaluate(() => ({
+                    progress: document.getElementById('tProgress')?.textContent,
+                    industry: document.getElementById('industry')?.value,
+                    business: document.querySelector('[name="businessModel"]')?.value,
+                    current: document.querySelector('[name="current"]')?.value,
+                    industryValid: document.getElementById('industry')?.checkValidity(),
+                    businessValid: document.querySelector('[name="businessModel"]')?.checkValidity(),
+                    currentValid: document.querySelector('[name="current"]')?.checkValidity(),
+                    nextHidden: document.getElementById('tNext')?.hidden,
+                    nextHandler: !!document.getElementById('tNext')?.onclick
+                  }));
+                  throw new Error('Navigator Continue did not advance: ' + JSON.stringify(diag));
+                });
                 const painChecks = page.locator('#industryPainOptions input[type="checkbox"]');
                 expect(await painChecks.count()).toBeGreaterThan(0);
                 await painChecks.nth(0).scrollIntoViewIfNeeded();
