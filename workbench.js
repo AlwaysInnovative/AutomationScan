@@ -161,5 +161,5 @@ function bind(){
   }catch(e){console.warn("Upstream assessment import skipped",e)}
   renderProfileOut();renderProcesses();renderApps();renderCandidates();renderCapabilities();renderGov();renderRoadmap();renderRequirements();renderCompare();renderPortfolio();renderPoc();renderEvidence();report();
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind);else bind();
+document.addEventListener("automationScanUIReady",bind);if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind);else bind();
 })();
