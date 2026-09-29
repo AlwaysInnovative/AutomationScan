@@ -220,8 +220,9 @@ jobs:
                   const touched = await fillVisibleFormFields(page, steps.nth(3), profile.id + ' step4');
                   expect(await page.locator('#submit')).toBeVisible();
                   await page.locator('#submit').click();
-                  await expect(page.locator('#results')).toBeVisible();
-                  await expect(page.locator('#workloadChart')).toBeVisible();
+                  await page.waitForURL(/\/report\.html(?:$|\?)/, {timeout:10000});
+                  await expect(page.locator('body')).toContainText('AutomationScan Assessment');
+                  await expect(page.locator('#downloadPdf, #print')).toHaveCount(1);
                   expect(touched.length).toBeGreaterThanOrEqual(0);
                 });
 
@@ -302,7 +303,7 @@ jobs:
                   await page.locator('#tGenerate').click();
                 });
 
-                await expect(page.locator('#transformResults')).toBeVisible();
+                await expect(page.locator('#transformResults')).toBeVisible({timeout:10000});
                 await expect(page.locator('#tInputs')).toContainText(profile.name);
                 await expect(page.locator('#tCaps')).toContainText(profile.processes[0][0]);
                 await expect(page.locator('#tPainDetail')).toContainText(profile.pain_points[0]);
@@ -488,6 +489,7 @@ jobs:
                 await checks.nth(0).check();
 
                 await page.locator('#tNext').click();
+                await expect(page.locator('#tProgress')).toContainText('Step 2');
                 const painChecks = page.locator('#industryPainOptions input[type="checkbox"]');
                 expect(await painChecks.count()).toBeGreaterThan(0);
                 await painChecks.nth(0).scrollIntoViewIfNeeded();
@@ -495,11 +497,13 @@ jobs:
                 await page.locator('#painList').fill(s.pain);
 
                 await page.locator('#tNext').click();
+                await expect(page.locator('#tProgress')).toContainText('Step 4');
                 await page.locator('[name="revenue"]').selectOption(await firstOption(page.locator('[name="revenue"]')));
                 await page.locator('[name="employees"]').selectOption(await firstOption(page.locator('[name="employees"]')));
                 await page.locator('[name="erpSpend"]').selectOption(await firstOption(page.locator('[name="erpSpend"]')));
 
                 await page.locator('#tNext').click();
+                await expect(page.locator('#tProgress')).toContainText('Step 5');
                 const goals=page.locator('[name="goal"]');
                 expect(await goals.count()).toBeGreaterThan(0);
                 await goals.first().check();
