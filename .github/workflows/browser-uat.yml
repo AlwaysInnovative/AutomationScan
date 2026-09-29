@@ -207,15 +207,14 @@ jobs:
                   expect(touched.length).toBeGreaterThan(0);
                 });
 
+                await page.locator('#next').click();
+                await expect(page.locator('#progressText')).toContainText('Step 4');
                 await page.locator('[name="emailAddress"]').fill('uat-' + profile.id + '@example.com');
                 await page.locator('[name="consent"]').check();
 
                 await page.route('**/api/lead', async route => {
                   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true})});
                 });
-
-                await page.locator('#next').click();
-                await expect(page.locator('#progressText')).toContainText('Step 4');
 
                 await test.step('Step 4 - final controls and report generation', async () => {
                   const touched = await fillVisibleFormFields(page, steps.nth(3), profile.id + ' step4');
