@@ -34,7 +34,7 @@ jobs:
 
           const base = process.env.BASE_URL;
 
-          async function firstOption(locator) {
+          async function selectLabel(locator, desired) {\n            const option = locator.locator('option').evaluateAll((opts, d) => {\n              const exact = opts.find(o => o.textContent.trim() === d || o.value === d);\n              const partial = opts.find(o => o.textContent.trim().toLowerCase().startsWith(String(d).toLowerCase()));\n              return (exact || partial)?.value || null;\n            }, desired);\n            if (option === null) throw new Error('No option matching ' + desired);\n            await locator.selectOption(option);\n          }\n\n          async function firstOption(locator) {
             return locator.locator('option').evaluateAll(opts => {
               const x = opts.find(o => !o.disabled && String(o.value).trim() !== '');
               return x ? x.value : null;
@@ -464,8 +464,8 @@ jobs:
                 await page.goto(base + '/transformation-advisor.html', {waitUntil:'networkidle'});
 
                 await page.locator('#industry').selectOption({label:s.industry});
-                await page.locator('[name="businessModel"]').selectOption({label:s.business});
-                await page.locator('[name="current"]').selectOption({label:s.current});
+                await selectLabel(page.locator('[name="businessModel"]'), s.business);
+                await selectLabel(page.locator('[name="current"]'), s.current);
 
                 const processLabels = page.locator('#industryProcesses label');
                 const processText = (await processLabels.allTextContents()).join(' ');
