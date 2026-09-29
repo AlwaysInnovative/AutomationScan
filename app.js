@@ -65,8 +65,8 @@ async function ensureIndustryProfiles(){
  try{await loadIndustryProfiles();industryProfilesReady=true;}finally{industryProfilesLoading=false;}
 }
 document.addEventListener("automationScanUIReady",ensureIndustryProfiles);
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ensureIndustryProfiles);
-else ensureIndustryProfiles();
+if(window.AutomationScanUI&&window.AutomationScanUI.ready&&typeof window.AutomationScanUI.ready.then==="function")window.AutomationScanUI.ready.then(ensureIndustryProfiles);
+else if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ensureIndustryProfiles);
 function calc(){
  const ind=industryData();
  const dynamicHours=ind.extra||{};
