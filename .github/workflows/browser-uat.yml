@@ -221,7 +221,7 @@ jobs:
                   expect(await page.locator('#submit')).toBeVisible();
                   await page.locator('#submit').click();
                   await page.waitForURL(/\/report\.html(?:$|\?)/, {timeout:10000});
-                  await expect(page.locator('body')).toContainText('AutomationScan Assessment');
+                  await expect(page.locator('body')).toContainText('YOUR BUSINESS VISIBILITY REPORT');
                   await expect(page.locator('#downloadPdf, #print')).toHaveCount(1);
                   expect(touched.length).toBeGreaterThanOrEqual(0);
                 });
@@ -349,7 +349,8 @@ jobs:
             for (const key of Object.keys(explicitContext)) {
               await page.locator('#' + key).selectOption({label:explicitContext[key]}).catch(()=>{});
             }
-            await expect(page.locator('#wbGoals')).toBeVisible();
+            await expect(page.locator('#wbGoals')).toHaveCount(1, {timeout:30000});
+            await expect(page.locator('#wbGoals')).toBeVisible({timeout:10000});
             await page.locator('#wbGoals').fill('UAT growth, control and cost improvement');
             await page.locator('#wbPain').fill('UAT manual reconciliation and repeated handoffs');
             await page.locator('#saveProfile').click();
@@ -485,6 +486,7 @@ jobs:
                 const checks = page.locator('#industryProcesses input[type="checkbox"]');
                 const count = await checks.count();
                 expect(count).toBeGreaterThan(0);
+                await expect(page.locator('#tProgress')).toContainText('Step 2');
                 await checks.nth(0).scrollIntoViewIfNeeded();
                 await checks.nth(0).check();
 
