@@ -51,6 +51,21 @@ async function load(){
     cta.innerHTML=esc(cfg.navigation.cta.label)+" <span>→</span>";
   }
   const page=location.pathname.endsWith("transformation-advisor.html")?"navigator":location.pathname.endsWith("transformation-workbench.html")?"workbench":"assessment";
+  const groups=cfg.checkboxes&&cfg.checkboxes[page]||{};
+  Object.keys(groups).forEach(function(key){
+    const box=document.querySelector('[data-config-checkboxes="'+CSS.escape(key)+'"]');
+    if(!box)return;
+    box.innerHTML="";
+    groups[key].forEach(function(item){
+      const label=document.createElement("label");
+      label.className=box.dataset.checkboxClass||"config-check";
+      const input=document.createElement("input");input.type="checkbox";input.name=key;input.value=String(item[0]??"");
+      label.appendChild(input);
+      const span=document.createElement("span");span.innerHTML=esc(item[1]??item[0]??"");label.appendChild(span);
+      if(item[2]){const small=document.createElement("small");small.textContent=String(item[2]);label.appendChild(small);}
+      box.appendChild(label);
+    });
+  });
   const fields=cfg.fields&&cfg.fields[page]||{};
   Object.keys(fields).forEach(function(key){
     if(page==="assessment"&&key==="industry")return;
