@@ -15,7 +15,7 @@
 <body>
 <header class="site-header"><div class="wrap nav"><a class="brand" href="./">Automation<span>Scan</span></a><nav aria-label="Primary"><a href="./#scanner">Assessment</a><a href="transformation-advisor.html">Navigator</a><a href="transformation-workbench.html">Workbench</a></nav><a class="btn btn-light" href="contact.html">Contact</a></div></header>
 <section class="hero-small"><div class="wrap"><p class="eyebrow eyebrow-light">TRANSFORMATION WORKBENCH</p><h1>From assessment to <em>evidence-backed action.</em></h1><p>Build a reusable transformation dossier across processes, applications, vendor investigation, economics, RFP/POC, governance and roadmap. Data is stored in this browser unless you export it.</p></div></section>
-<main class="workbench"><div class="wrap"><section class="wb-journey" id="journeyHub"><div class="wb-journey-top"><div><p class="eyebrow">YOUR TRANSFORMATION WORKSPACE</p><h2 id="journeyTitle">Choose where you want to start</h2><p id="journeySummary">AutomationScan will use information you have already entered, preserve your work, and guide you to the next useful step.</p></div><label class="journey-switch">Switch journey<select id="journeySelect"><option>Loading journeys…</option></select></label></div><div id="journeyContext" class="wb-journey-context"></div><div id="journeyStages" class="wb-stages"></div><div class="wb-journey-actions"><button class="wb-btn wb-primary" id="journeyNext">Start / continue</button><button class="wb-btn wb-light" id="journeyStartOver">Start this journey with current data</button></div></section></div><div class="wrap wb-grid">
+<main class="workbench"><div class="wrap"><section class="wb-journey" id="journeyHub"><div class="wb-journey-top"><div><p class="eyebrow">YOUR TRANSFORMATION WORKSPACE</p><h2 id="journeyTitle">Choose where you want to start</h2><p id="journeySummary">AutomationScan will use information you have already entered, preserve your work, and guide you to the next useful step.</p></div><label class="journey-switch">Switch journey<select id="journeySelect"></select></label></div><div id="journeyContext" class="wb-journey-context"></div><div id="journeyStages" class="wb-stages"></div><div class="wb-journey-actions"><button class="wb-btn wb-primary" id="journeyNext">Start / continue</button><button class="wb-btn wb-light" id="journeyStartOver">Start this journey with current data</button></div></section></div><div class="wrap wb-grid">
 <aside class="wb-nav" aria-label="Workbench sections">
 <button class="active" data-tab="profile">1. Profile</button>
 <button data-tab="process">2. Processes</button>
@@ -34,14 +34,14 @@
 <label>Industry / sector<input id="wbIndustry" placeholder="e.g. Retail, Manufacturing, Healthcare, Banking"></label>
 <label>Current platform<input id="wbCurrent" placeholder="Current ERP / core platform"></label>
 <label>Business model<input id="wbBusiness" placeholder="e.g. B2B distribution"></label>
-<label>Scale<select id="wbScale"><option>SMB</option><option>Mid-market</option><option>Enterprise</option></select></label>
-<label>Revenue model<select id="wbRevenue"><option>Recurring / subscription</option><option>Transactional</option><option>Project</option><option>Usage</option><option>Mixed</option></select></label>
+<label>Scale<select id="wbScale"></select></label>
+<label>Revenue model<select id="wbRevenue"></select></label>
 <label>Fulfilment model<input id="wbFulfilment" placeholder="MTS, ETO, DTC, wholesale..."></label>
-<label>Delivery model<select id="wbDelivery"><option>Continuous</option><option>Project-based</option><option>Hybrid</option></select></label>
-<label>Regulatory intensity<select id="wbRegulatory"><option>Low</option><option>Moderate</option><option>High</option><option>Critical / highly regulated</option></select></label>
-<label>Transformation appetite<select id="wbAppetite"><option>Conservative</option><option>Balanced</option><option>Transformational</option></select></label>
-<label>Target horizon<select id="wbHorizon"><option>0–12 months</option><option>12–24 months</option><option>24–36 months</option><option>Exploratory</option></select></label>
-<label>Integration complexity<select id="wbIntegration"><option>Low</option><option>Moderate</option><option>High</option><option>Very high</option><option>Unknown</option></select></label>
+<label>Delivery model<select id="wbDelivery"></select></label>
+<label>Regulatory intensity<select id="wbRegulatory"></select></label>
+<label>Transformation appetite<select id="wbAppetite"></select></label>
+<label>Target horizon<select id="wbHorizon"></select></label>
+<label>Integration complexity<select id="wbIntegration"></select></label>
 <label>Goals<textarea id="wbGoals" placeholder="Revenue growth, margin, control, speed, customer experience..."></textarea></label>
 <label>Business pain<textarea id="wbPain" placeholder="Describe the most important pain or constraint"></textarea></label>
 </div>
@@ -56,7 +56,7 @@
 <label>Minutes per transaction<input id="pMinutes" type="number" min="0" value="10"></label>
 <label>Exception rate %<input id="pExceptions" type="number" min="0" max="100" value="5"></label>
 <label>Error / rework rate %<input id="pErrors" type="number" min="0" max="100" value="2"></label>
-<label>Human judgement required?<select id="pHuman"><option>Low</option><option>Medium</option><option>High</option></select></label>
+<label>Human judgement required?<select id="pHuman"></select></label>
 <label>Process notes<textarea id="pNotes" placeholder="Controls, bottlenecks, systems, approvals..."></textarea></label>
 </div>
 <div class="wb-actions"><button class="wb-btn wb-primary" id="addProcess">Add process</button><button class="wb-btn wb-light" id="clearProcesses">Clear</button></div>
@@ -68,12 +68,12 @@
 <div class="wb-form">
 <label>Application<input id="aName" placeholder="CRM / ERP / WMS / custom app"></label>
 <label>Annual cost<input id="aCost" type="number" min="0" value="0"></label>
-<label>Business value<select id="aValue"><option>High</option><option>Medium</option><option>Low</option><option>Unknown</option></select></label>
-<label>Technical health<select id="aTech"><option>Healthy</option><option>Watch</option><option>Fragile</option><option>Legacy</option></select></label>
-<label>Usage<select id="aUsage"><option>High</option><option>Medium</option><option>Low</option><option>Unknown</option></select></label>
-<label>Redundancy<select id="aRedundancy"><option>None known</option><option>Possible overlap</option><option>Duplicate</option></select></label>
-<label>Lifecycle<select id="aLifecycle"><option>Strategic</option><option>Stable</option><option>At risk</option><option>End of life</option></select></label>
-<label>Integration complexity<select id="aIntegration"><option>Low</option><option>Medium</option><option>High</option></select></label>
+<label>Business value<select id="aValue"></select></label>
+<label>Technical health<select id="aTech"></select></label>
+<label>Usage<select id="aUsage"></select></label>
+<label>Redundancy<select id="aRedundancy"></select></label>
+<label>Lifecycle<select id="aLifecycle"></select></label>
+<label>Integration complexity<select id="aIntegration"></select></label>
 </div>
 <div class="wb-actions"><button class="wb-btn wb-primary" id="addApp">Add application</button><button class="wb-btn wb-light" id="importApps">Import CSV</button><input id="appFile" type="file" accept=".csv,text/csv" hidden></div>
 <div id="appsOut"></div>
@@ -83,12 +83,12 @@
 <p class="eyebrow">CAPABILITY MODEL</p><h2>Capability map & gap analysis</h2><p>Connect business capabilities to requirements, applications and evidence. Keep the model editable so it can reflect the organisation rather than a generic template.</p>
 <div class="wb-form">
 <label>Capability<input id="cName" placeholder="e.g. Demand planning"></label>
-<label>Business criticality<select id="cCriticality"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></label>
+<label>Business criticality<select id="cCriticality"></select></label>
 <label>Current maturity %<input id="cCurrent" type="number" min="0" max="100" value="50"></label>
 <label>Target maturity %<input id="cTarget" type="number" min="0" max="100" value="80"></label>
 <label>Current application<input id="cApp" placeholder="Linked application"></label>
 <label>Requirement ID<input id="cReq" placeholder="REQ-001"></label>
-<label>Evidence status<select id="cEvidence"><option>Not verified</option><option>Documented</option><option>Demonstrated</option><option>POC validated</option></select></label>
+<label>Evidence status<select id="cEvidence"></select></label>
 <label>Gap / action<textarea id="cGap" placeholder="Configuration, extension, specialist application, integration, process redesign..."></textarea></label>
 </div><div class="wb-actions"><button class="wb-btn wb-primary" id="addCapability">Add capability</button></div><div id="capabilityOut"></div>
 </article>
@@ -137,7 +137,7 @@
 <div class="wb-form">
 <label>POC candidate<input id="pocCandidate" placeholder="Candidate name"></label><label>Scenario<input id="pocScenario" placeholder="Critical business scenario"></label>
 <label>Expected result<textarea id="pocExpected"></textarea></label><label>Observed result<textarea id="pocObserved"></textarea></label>
-<label>Evidence status<select id="pocEvidence"><option>Not started</option><option>Scripted</option><option>Demonstrated</option><option>Validated</option><option>Failed / gap</option></select></label>
+<label>Evidence status<select id="pocEvidence"></select></label>
 <label>Decision note<textarea id="pocDecision"></textarea></label>
 </div><div class="wb-actions"><button class="wb-btn wb-primary" id="addPoc">Add POC result</button></div><div id="pocOut"></div>
 <h3>Migration readiness</h3><div class="wb-form"><label>Data readiness %<input id="mData" type="number" min="0" max="100" value="50"></label><label>Integration readiness %<input id="mIntegration" type="number" min="0" max="100" value="50"></label><label>Customisation readiness %<input id="mCustom" type="number" min="0" max="100" value="50"></label><label>People/change readiness %<input id="mPeople" type="number" min="0" max="100" value="50"></label><label>Security/control readiness %<input id="mSecurity" type="number" min="0" max="100" value="50"></label><label>Testing/cutover readiness %<input id="mTesting" type="number" min="0" max="100" value="50"></label></div><button class="wb-btn wb-secondary" id="scoreMigration">Calculate readiness</button><div id="migrationOut"></div>
@@ -158,7 +158,7 @@
 <article class="wb-panel" id="tab-roadmap">
 <p class="eyebrow">TRANSFORM</p><h2>Roadmap builder</h2><p>Create practical gates across 30/60/90 days, 6, 12 and 24 months. Ownership remains explicit.</p>
 <div class="wb-form">
-<label>Horizon<select id="rHorizon"><option>30 days</option><option>60 days</option><option>90 days</option><option>6 months</option><option>12 months</option><option>24 months</option></select></label>
+<label>Horizon<select id="rHorizon"></select></label>
 <label>Workstream<input id="rWorkstream" placeholder="Data, process, ERP, integration, change..."></label>
 <label>Owner<input id="rOwner" placeholder="Role / team"></label>
 <label>Gate<input id="rGate" placeholder="Decision / evidence gate"></label>
@@ -172,8 +172,8 @@
 <p class="eyebrow">REQUIREMENTS</p><h2>Requirements library & traceability</h2><p>Create reusable requirements and trace them to processes, candidates, evidence and validation gates.</p>
 <div class="wb-form">
 <label>Requirement<input id="qText" placeholder="e.g. Support lot traceability across inbound and production"></label>
-<label>Type<select id="qType"><option>Business</option><option>Functional</option><option>Non-functional</option><option>Integration</option><option>Security</option><option>Data</option><option>AI</option><option>Compliance</option><option>Migration</option><option>Commercial</option></select></label>
-<label>Priority<select id="qPriority"><option>Must</option><option>Should</option><option>Could</option><option>Informational</option></select></label>
+<label>Type<select id="qType"></select></label>
+<label>Priority<select id="qPriority"></select></label>
 <label>Process<input id="qProcess" placeholder="Linked process"></label>
 <label>Acceptance criterion<textarea id="qAcceptance" placeholder="How will the requirement be demonstrated or tested?"></textarea></label>
 <label>Evidence gate<input id="qGate" placeholder="POC / reference / document / security review"></label>
@@ -184,10 +184,10 @@
 <article class="wb-panel" id="tab-compare">
 <p class="eyebrow">VENDOR RESPONSE</p><h2>Vendor response comparison</h2><p>Paste or import structured response text. AutomationScan extracts requirement IDs, response status and evidence notes for side-by-side review. This is a comparison aid, not an autonomous procurement decision.</p>
 <div class="wb-form">
-<label>Candidate<select id="vCandidate"><option>Candidate A</option><option>Candidate B</option><option>Candidate C</option><option>Other</option></select></label>
+<label>Candidate<select id="vCandidate"></select></label>
 <label>Requirement ID<input id="vReq" placeholder="REQ-001"></label>
-<label>Response status<select id="vStatus"><option>Supported</option><option>Configuration</option><option>Extension</option><option>Custom development</option><option>Partner / specialist</option><option>Not supported</option><option>Unclear</option></select></label>
-<label>Evidence status<select id="vEvidence"><option>Documented</option><option>Demonstrated</option><option>Customer reference</option><option>POC required</option><option>Not verified</option></select></label>
+<label>Response status<select id="vStatus"></select></label>
+<label>Evidence status<select id="vEvidence"></select></label>
 <label>Vendor response<textarea id="vResponse" placeholder="Paste the relevant vendor response or analyst note"></textarea></label>
 <label>Dependencies / exceptions<textarea id="vDependency" placeholder="Dependencies, assumptions, exclusions, licensing or integration concerns"></textarea></label>
 </div>
@@ -201,7 +201,7 @@
 <label>Source<input id="eSource" placeholder="URL, document, reference, meeting"></label>
 <label>Source date<input id="eDate" type="date"></label>
 <label>Reviewer<input id="eReviewer" placeholder="Role / analyst"></label>
-<label>Status<select id="eStatus"><option>Marketing claim</option><option>Source-backed</option><option>Customer-evidenced</option><option>Demonstrated</option><option>POC validated</option><option>NOT VERIFIED</option></select></label>
+<label>Status<select id="eStatus"></select></label>
 <label>Next validation<input id="eNext" placeholder="Scripted demo / reference / POC"></label>
 </div>
 <div class="wb-actions"><button class="wb-btn wb-primary" id="addEvidence">Add evidence item</button></div><div id="evidenceOut"></div>
@@ -214,5 +214,5 @@
 </article>
 </section></div></main>
 <footer><div class="wrap footer-grid"><div><a class="brand" href="./">Automation<span>Scan</span></a><p>Evidence-led transformation discovery.</p></div><div><b>Explore</b><a href="transformation-advisor.html">Navigator</a><a href="transformation-tools.html">Free tools</a><a href="methodology.html">Methodology</a></div><div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div></div><div class="wrap footer-bottom">© 2026 AutomationScan · Directional decision support.</div></footer>
-<script src="decision-engine.js?v=20260928-2"></script><script src="workbench.js?v=20260928-3"></script>
+<script src="ui-config.js?v=20260929-1"></script><script src="decision-engine.js?v=20260928-2"></script><script src="ui-config.js?v=20260929-1"></script><script src="workbench.js?v=20260928-3"></script>
 </body></html>
