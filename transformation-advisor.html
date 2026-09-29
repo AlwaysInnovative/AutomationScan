@@ -25,25 +25,25 @@
 <div class="transform-progress"><span id="tProgress">Step 1 of 5</span><i id="tProgressBar"></i></div>
 <fieldset class="t-step active" data-step="1"><legend>1. Understand the business</legend><p class="hint">These answers establish the context for everything that follows.</p><div class="field-grid two">
 <label>Industry / sector<input name="industry" id="industry" required maxlength="120" placeholder="e.g. Retail, Manufacturing, Healthcare, Banking"></label>
-<label>Business model<select name="businessModel" required><option value="">Choose</option></select></label>
-<label>Current platform<select name="current" required><option value="">Choose</option><option>Infor</option><option>SAP</option><option>Oracle</option><option>Microsoft Dynamics</option><option>NetSuite</option><option>IFS</option><option>Legacy / custom ERP</option><option>Other</option></select></label>
-<label>Operating footprint<select name="scale"><option>Single country / single site</option><option>Multi-site / regional</option><option>Multi-country</option><option>Global enterprise</option></select></label>
+<label>Business model<select name="businessModel" required></select></label>
+<label>Current platform<select name="current" required></select></label>
+<label>Operating footprint<select name="scale"></select></label>
 </div><div class="dynamic-callout" id="industryIntro">Choose an industry to see the business processes and issues AutomationScan will investigate.</div></fieldset>
 <fieldset class="t-step" data-step="2"><legend>2. What actually runs the business?</legend><p class="hint">The process library changes by industry. Select everything that materially affects the transformation.</p><div id="industryProcesses" class="capability-checks"></div><div class="process-more"><label>What is missing or unusual in your business?<textarea name="customProcess" rows="3" placeholder="Describe a process, regulatory requirement, operating model or unique business rule…"></textarea></label></div></fieldset>
 <fieldset class="t-step" data-step="3"><legend>3. Where is the pain?</legend><p class="hint">Select the problems that leadership would actually pay to fix.</p><textarea name="painList" id="painList" rows="5" placeholder="List business pains, one per line or separated by commas"></textarea><label>What is the biggest problem in your own words?<textarea name="painText" rows="4" placeholder="Example: our replenishment is spreadsheet-driven and planners spend days reconciling store demand…"></textarea></label></fieldset>
 <fieldset class="t-step" data-step="4"><legend>4. Technology, economics & change</legend><p class="hint">Better numbers produce better value signals. Estimates are fine.</p><div class="field-grid two">
-<label>Annual revenue / turnover<select name="revenue"><option>Prefer not to say</option><option>Under $10M</option><option>$10M–$50M</option><option>$50M–$250M</option><option>$250M–$1B</option><option>$1B–$5B</option><option>Over $5B</option></select></label>
-<label>Employees<select name="employees"><option>Under 100</option><option>100–500</option><option>500–2,000</option><option>2,000–10,000</option><option>10,000+</option></select></label>
-<label>Annual ERP / core-app spend<select name="erpSpend"><option>Unknown</option><option>Under $100K</option><option>$100K–$500K</option><option>$500K–$2M</option><option>$2M–$10M</option><option>Over $10M</option></select></label>
+<label>Annual revenue / turnover<select name="revenue"></select></label>
+<label>Employees<select name="employees"></select></label>
+<label>Annual ERP / core-app spend<select name="erpSpend"></select></label>
 <label>Custom business process / exception (optional)<textarea name="customProcesses" rows="4" placeholder="Describe a process you believe is unique to your business, including approvals, exceptions, calculations, controls or workarounds."></textarea></label>
-<label>Customisation today<select name="custom"><option>Low</option><option>Medium</option><option>High</option><option>Very high</option></select></label>
-<label>Integration complexity<select name="integration"><option>Low</option><option>Medium</option><option>High</option><option>Very high</option></select></label>
-<label>Revenue model<select name="revenueModel"><option>Transactional</option><option>Subscription / recurring</option><option>Project / milestone</option><option>Usage-based</option><option>Mixed</option></select></label>
-<label>Fulfilment model<select name="fulfilmentModel"><option>Make-to-stock</option><option>Make-to-order</option><option>Engineer-to-order</option><option>Configure-to-order</option><option>Direct-to-consumer</option><option>Marketplace</option><option>Wholesale</option><option>Franchise</option><option>Service delivery</option></select></label>
-<label>Delivery model<select name="deliveryModel"><option>Continuous operations</option><option>Project-based</option><option>Hybrid</option></select></label>
-<label>Regulatory intensity<select name="regulatoryIntensity"><option>Low</option><option>Moderate</option><option>High</option><option>Critical / highly regulated</option></select></label>
-<label>Transformation appetite<select name="migration"><option>Conservative — preserve most processes</option><option>Balanced — simplify where practical</option><option>Transformational — redesign the operating model</option></select></label>
-</div><div class="field-grid two"><label>Existing ecosystem<select name="ecosystem"><option>Microsoft-heavy</option><option>SAP-heavy</option><option>Oracle-heavy</option><option>Mixed</option><option>Minimal dependency</option></select></label><label>Target horizon<select name="horizon"><option>0–12 months</option><option>12–24 months</option><option>2–3 years</option><option>Exploring only</option></select></label></div></fieldset>
+<label>Customisation today<select name="custom"></select></label>
+<label>Integration complexity<select name="integration"></select></label>
+<label>Revenue model<select name="revenueModel"></select></label>
+<label>Fulfilment model<select name="fulfilmentModel"></select></label>
+<label>Delivery model<select name="deliveryModel"></select></label>
+<label>Regulatory intensity<select name="regulatoryIntensity"></select></label>
+<label>Transformation appetite<select name="migration"></select></label>
+</div><div class="field-grid two"><label>Existing ecosystem<select name="ecosystem"></select></label><label>Target horizon<select name="horizon"></select></label></div></fieldset>
 <fieldset class="t-step" data-step="5"><legend>5. What do you want the navigator to decide?</legend><p class="hint">Pick the outcome you need from this first assessment.</p><div class="goal-cards"><label><input type="checkbox" name="goal" value="Market shortlist" checked><b>Market shortlist</b><span>Which ecosystems deserve deeper discovery?</span></label><label><input type="checkbox" name="goal" value="Process fit"><b>Process fit</b><span>Which capabilities appear covered or need specialist products?</span></label><label><input type="checkbox" name="goal" value="Value opportunity"><b>Value opportunity</b><span>Where could automation, simplification or better planning create measurable value?</span></label><label><input type="checkbox" name="goal" value="Migration roadmap"><b>Migration roadmap</b><span>What should be validated before programme mobilisation?</span></label><label><input type="checkbox" name="goal" value="Architecture"><b>Target architecture</b><span>What belongs in ERP, industry apps, data, integration and AI?</span></label><label><input type="checkbox" name="goal" value="RFP preparation"><b>RFP preparation</b><span>What should the future-state requirements and demo scripts cover?</span></label></div><label>Candidate / vendor / application names<input type="text" name="candidateList" placeholder="Enter names separated by commas"></label><label>Optional email for a copy<input type="email" name="email" placeholder="you@company.com"></label></fieldset>
 <div class="actions"><button type="button" id="tBack" class="btn btn-light" hidden>← Back</button><button type="button" id="tNext" class="btn btn-teal">Continue →</button><button type="submit" id="tGenerate" class="btn btn-copper" hidden>Generate my market-fit report →</button></div>
 </div></form></div></section>
@@ -71,6 +71,6 @@
 </div></section>
 </main>
 <footer><div class="wrap footer-grid"><div><a class="brand" href="./">Automation<span>Scan</span></a><p>From repetitive work to transformation decisions.</p></div><div><b>Explore</b><a href="./">Automation assessment</a><a href="#navigator">Market Fit Navigator</a><a href="#market">Market landscape</a><a href="transformation-tools.html">Free transformation tools</a></div><div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div></div><div class="wrap footer-bottom">© 2026 AutomationScan · Validate before investment.</div></footer>
-<script src="decision-engine.js?v=20260928-2"></script>
-<script src="transformation-advisor.js?v=20260929-1"></script>
+<script src="ui-config.js?v=20260929-1"></script><script src="decision-engine.js?v=20260928-2"></script>
+<script src="ui-config.js?v=20260929-1"></script><script src="transformation-advisor.js?v=20260929-1"></script>
 </body></html>
