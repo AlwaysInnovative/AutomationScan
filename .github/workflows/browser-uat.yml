@@ -86,7 +86,7 @@ jobs:
             return 'filled';
           }
 
-          async function fillVisibleFormFields(page, scope, label) {
+          async function fillVisibleFormFields(page, scope, label, preserveNames = []) {
             const controls = scope.locator('input, select, textarea');
             const count = await controls.count();
             const touched = [];
@@ -96,7 +96,7 @@ jobs:
               const name = await c.getAttribute('name');
               const id = await c.getAttribute('id');
               const placeholder = await c.getAttribute('placeholder');
-              const result = await fillControl(page, c, 'UAT ' + label + ' ' + (name || id || 'field'));
+              const result = preserveNames.includes(name) ? 'preserved' : await fillControl(page, c, 'UAT ' + label + ' ' + (name || id || 'field'));
               touched.push({name, id, result, placeholder});
             }
             return touched;
@@ -266,8 +266,7 @@ jobs:
                   const current = form.locator('[name="current"]');
                   if (await business.isVisible()) await business.selectOption({label:'Subscription / recurring'}).catch(async()=>{ await business.selectOption(await firstOption(business)); });
                   if (await current.isVisible()) await current.selectOption({label:'Microsoft Dynamics'}).catch(async()=>{ await current.selectOption(await firstOption(current)); });
-                  await fillVisibleFormFields(page, form.locator('.t-step').nth(0), profile.name + ' context');
-                  await page.locator('#industry').selectOption({label: profile.name});
+                  await fillVisibleFormFields(page, form.locator('.t-step').nth(0), profile.name + ' context', ['industry','businessModel','current']);
                 });
 
                 await page.locator('#tNext').click();
@@ -337,6 +336,8 @@ jobs:
             page.on('dialog', async dialog => { await dialog.dismiss(); });
 
             await page.goto(base + '/transformation-workbench.html', {waitUntil:'networkidle'});
+            await page.waitForSelector('#wbGoals', {state:'visible', timeout:15000});
+            await page.waitForSelector('#journeySelect', {state:'visible', timeout:15000});
             await expect(page.locator('#journeySelect')).not.toBeEmpty();
 
             const explicitContext = {
