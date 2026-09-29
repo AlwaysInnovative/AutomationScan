@@ -58,11 +58,12 @@ function renderIndustryQuestionnaire(){
  pain.innerHTML='<div class="pain-heading"><b>Industry pain points</b><span>Pick the problems that sound familiar. These directly influence the recommendations.</span></div>'+p.pain.map((x,i)=>'<label class="pain-choice"><input type="checkbox" name="pain_'+i+'" value="'+escapeHtml(x)+'"><span>'+escapeHtml(x)+'</span></label>').join("");
 }
 function industryData(){const p=dynamicIndustryProfile(form.elements.industry.value);const extra={};document.querySelectorAll("[data-industry-key]").forEach(x=>{const k=x.dataset.industryKey;extra[k]=(extra[k]||0)+Number(x.value||0)});const painChoices=[...document.querySelectorAll(".pain-choice input:checked")].map(x=>x.value);return {profile:p,extra,painChoices};}
-form.elements.industry?.addEventListener("change",()=>{renderIndustryQuestionnaire();show(0);});
+form.elements.industry?.addEventListener("change",()=>{renderIndustryQuestionnaire();});
 renderIndustryQuestionnaire();
 function calc(){
  const ind=industryData();
- const h={"Data entry":n("dataEntry"),"Email / follow-ups":n("email"),"Transactions":n("transactions"),"Customer support":n("support"),Scheduling:n("scheduling"),Reporting:n("reporting"),"Documents / admin":n("documents"),"Sales admin / CRM":n("salesAdmin")};
+ const dynamicHours=ind.extra||{};
+ const h={"Data entry":Math.max(n("dataEntry"),Number(dynamicHours.dataEntry)||0),"Email / follow-ups":Math.max(n("email"),Number(dynamicHours.email)||0),"Transactions":Math.max(n("invoices"),Number(dynamicHours.transactions)||0),"Customer support":Math.max(n("support"),Number(dynamicHours.support)||0),"Scheduling":Math.max(n("scheduling"),Number(dynamicHours.scheduling)||0),"Reporting":Math.max(n("reporting"),Number(dynamicHours.reporting)||0),"Documents / admin":Math.max(n("documents"),Number(dynamicHours.documents)||0),"Sales admin / CRM":Math.max(n("salesAdmin"),Number(dynamicHours.salesAdmin)||0)};
  const total=Object.values(h).reduce((a,b)=>a+b,0);
  const copy={Rarely:0,Sometimes:5,Often:12,Constantly:20}[form.elements.copyPaste.value]||0;
  const rep={Low:0,Medium:6,High:12,"Very high":18}[form.elements.repetition.value]||0;
@@ -155,7 +156,8 @@ function generateReport(){
     renderResult();
     const report=document.getElementById("results");
     if(!report) throw new Error("Report container was not found.");
-    sessionStorage.setItem("automationScanReportHtml",report.innerHTML);\n    try{sessionStorage.setItem("automationScanAssessment",JSON.stringify({industry:r.industry,goal:r.goal,score:r.score,coverage:r.coverage,workload:r.h,selectedPainPoints:r.selectedPainPoints,topOpportunities:top.map(x=>({name:x[0],hours:x[1]})),tools:r.tools,source:"automation-assessment",savedAt:new Date().toISOString()}));}catch(e){}
+    sessionStorage.setItem("automationScanReportHtml",report.innerHTML);
+    try{const result=calc();const opportunities=Object.entries(result.h).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,6);sessionStorage.setItem("automationScanAssessment",JSON.stringify({industry:result.industry,goal:result.goal,score:result.score,coverage:result.coverage,workload:result.h,selectedPainPoints:result.selectedPainPoints,topOpportunities:opportunities.map(x=>({name:x[0],hours:x[1]})),tools:result.tools,source:"automation-assessment",savedAt:new Date().toISOString()}));}catch(e){console.warn("Assessment handoff save failed",e)}
     sessionStorage.setItem("automationScanReportGenerated","1");
     window.location.href="report.html";
   }catch(err){
