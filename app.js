@@ -58,8 +58,15 @@ async function loadIndustryProfiles(){
  }catch(e){console.error("Industry questionnaire configuration unavailable",e);const q=document.getElementById("industryQuestions");if(q)q.innerHTML='<p class="form-note">Industry questions could not be loaded. Refresh the page or contact support.</p>';}
 }
 form.elements.industry?.addEventListener("change",renderIndustryQuestionnaire);
-document.addEventListener("automationScanUIReady",loadIndustryProfiles);
-loadIndustryProfiles();
+var industryProfilesReady=false, industryProfilesLoading=false;
+async function ensureIndustryProfiles(){
+ if(industryProfilesReady||industryProfilesLoading)return;
+ industryProfilesLoading=true;
+ try{await loadIndustryProfiles();industryProfilesReady=true;}finally{industryProfilesLoading=false;}
+}
+document.addEventListener("automationScanUIReady",ensureIndustryProfiles);
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ensureIndustryProfiles);
+else ensureIndustryProfiles();
 function calc(){
  const ind=industryData();
  const dynamicHours=ind.extra||{};
