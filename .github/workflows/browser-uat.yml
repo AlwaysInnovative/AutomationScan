@@ -34,7 +34,17 @@ jobs:
 
           const base = process.env.BASE_URL;
 
-          async function selectLabel(locator, desired) {\n            const option = locator.locator('option').evaluateAll((opts, d) => {\n              const exact = opts.find(o => o.textContent.trim() === d || o.value === d);\n              const partial = opts.find(o => o.textContent.trim().toLowerCase().startsWith(String(d).toLowerCase()));\n              return (exact || partial)?.value || null;\n            }, desired);\n            if (option === null) throw new Error('No option matching ' + desired);\n            await locator.selectOption(option);\n          }\n\n          async function firstOption(locator) {
+          async function selectLabel(locator, desired) {
+            const option = await locator.locator('option').evaluateAll((opts, d) => {
+              const exact = opts.find(o => o.textContent.trim() === d || o.value === d);
+              const partial = opts.find(o => o.textContent.trim().toLowerCase().startsWith(String(d).toLowerCase()));
+              return (exact || partial)?.value || null;
+            }, desired);
+            if (option === null) throw new Error('No option matching ' + desired);
+            await locator.selectOption(option);
+          }
+
+          async function firstOption(locator) {
             return locator.locator('option').evaluateAll(opts => {
               const x = opts.find(o => !o.disabled && String(o.value).trim() !== '');
               return x ? x.value : null;
