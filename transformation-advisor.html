@@ -24,13 +24,13 @@
 <form id="transformForm" novalidate><div class="transform-formcard">
 <div class="transform-progress"><span id="tProgress">Step 1 of 5</span><i id="tProgressBar"></i></div>
 <fieldset class="t-step active" data-step="1"><legend>1. Understand the business</legend><p class="hint">These answers establish the context for everything that follows.</p><div class="field-grid two">
-<label>Industry / sector<input name="industry" id="industry" required maxlength="120" placeholder="e.g. Retail, Manufacturing, Healthcare, Banking"></label>
+<label>Industry / sector<input name="industry" id="industry" list="industryOptions" required maxlength="120" placeholder="Choose or enter your industry"><datalist id="industryOptions"></datalist></label>
 <label>Business model<select name="businessModel" required></select></label>
 <label>Current platform<select name="current" required></select></label>
 <label>Operating footprint<select name="scale"></select></label>
 </div><div class="dynamic-callout" id="industryIntro">Choose an industry to see the business processes and issues AutomationScan will investigate.</div></fieldset>
 <fieldset class="t-step" data-step="2"><legend>2. What actually runs the business?</legend><p class="hint">The process library changes by industry. Select everything that materially affects the transformation.</p><div id="industryProcesses" class="capability-checks"></div><div class="process-more"><label>What is missing or unusual in your business?<textarea name="customProcess" rows="3" placeholder="Describe a process, regulatory requirement, operating model or unique business rule…"></textarea></label></div></fieldset>
-<fieldset class="t-step" data-step="3"><legend>3. Where is the pain?</legend><p class="hint">Select the problems that leadership would actually pay to fix.</p><textarea name="painList" id="painList" rows="5" placeholder="List business pains, one per line or separated by commas"></textarea><label>What is the biggest problem in your own words?<textarea name="painText" rows="4" placeholder="Example: our replenishment is spreadsheet-driven and planners spend days reconciling store demand…"></textarea></label></fieldset>
+<fieldset class="t-step" data-step="3"><legend>3. Where is the pain?</legend><p class="hint">Select the problems that leadership would actually pay to fix.</p><div id="industryPainOptions" class="capability-checks"></div><textarea name="painList" id="painList" rows="5" placeholder="Add any additional business pains, one per line or separated by commas"></textarea><label>What is the biggest problem in your own words?<textarea name="painText" rows="4" placeholder="Example: our replenishment is spreadsheet-driven and planners spend days reconciling store demand…"></textarea></label></fieldset>
 <fieldset class="t-step" data-step="4"><legend>4. Technology, economics & change</legend><p class="hint">Better numbers produce better value signals. Estimates are fine.</p><div class="field-grid two">
 <label>Annual revenue / turnover<select name="revenue"></select></label>
 <label>Employees<select name="employees"></select></label>
