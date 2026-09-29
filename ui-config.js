@@ -76,10 +76,8 @@ async function load(){
   });
   document.dispatchEvent(new CustomEvent("automationScanUIReady"));
   return cfg;
- }catch(e){console.warn("Dynamic UI configuration unavailable",e);return null;
- }finally{
-  document.dispatchEvent(new CustomEvent("automationScanUIReady"));
- }
+ }catch(e){console.warn("Dynamic UI configuration unavailable",e);return null;}
+}
 window.AutomationScanUI.load=load;
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",load);else load();
 })();
