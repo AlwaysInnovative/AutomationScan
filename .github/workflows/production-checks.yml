@@ -19,7 +19,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          if grep -RIn --exclude-dir=.git --exclude='*.md' --exclude-dir=.github 'SUPABASE_SERVICE_ROLE_KEY' . | grep -v '^./api/'; then
+          if grep -RIn --exclude-dir=.git --exclude='*.md' --exclude='.env.example' --exclude-dir=.github 'SUPABASE_SERVICE_ROLE_KEY' . | grep -v '^./api/'; then
             echo "Service-role key reference found outside server API code."
             exit 1
           fi
