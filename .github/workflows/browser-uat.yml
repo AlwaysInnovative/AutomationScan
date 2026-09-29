@@ -104,7 +104,8 @@ jobs:
 
           function installErrorCapture(page) {
             const errors = [];
-            page.on('pageerror', e => errors.push('PAGEERROR: ' + String(e)));
+            page.on('pageerror', e => { errors.push('PAGEERROR: ' + String(e)); });
+            page.on('console', m => { if (m.type() === 'error') { errors.push('CONSOLE: ' + m.text()); } });
             page.on('console', m => {
               if (m.type() === 'error') errors.push('CONSOLE: ' + m.text());
             });
@@ -312,9 +313,10 @@ jobs:
                   hidden: document.getElementById('transformResults')?.classList.contains('hidden'),
                   step: document.querySelector('.t-step.active')?.getAttribute('data-step'),
                   industry: document.getElementById('industry')?.value,
+                  reportReady: window.__automationScanReportReady === true,
                   consoleErrors: window.__uatErrors || []
                 }));
-                if (generationState.hidden) throw new Error('Navigator report did not render. State=' + JSON.stringify(generationState));
+                if (generationState.hidden || generationState.reportReady !== true) throw new Error('Navigator report did not render. State=' + JSON.stringify(generationState));
 
                 await expect(page.locator('#transformResults')).toBeVisible({timeout:15000});
                 await expect(page.locator('#tInputs')).toContainText(profile.name);
