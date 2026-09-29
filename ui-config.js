@@ -58,6 +58,7 @@ async function load(){
     const byId=document.getElementById(key);
     if(byId&&byId.tagName==="SELECT")populate(byId,fields[key]);
   });
+  document.dispatchEvent(new CustomEvent("automationScanUIReady"));
   return cfg;
  }catch(e){console.warn("Dynamic UI configuration unavailable",e);return null;}
 }
