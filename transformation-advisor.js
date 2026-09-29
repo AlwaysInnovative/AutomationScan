@@ -53,7 +53,19 @@ function renderReport(){
  var results=el("transformResults");if(results){results.classList.remove("hidden");results.scrollIntoView({behavior:"smooth"})}
  var data={industry:industry,businessModel:value("businessModel"),current:value("current"),processes:processes,pains:pains,candidates:candidates,goals:goals,savedAt:new Date().toISOString()};try{sessionStorage.setItem("automationscan_transform",JSON.stringify(data))}catch(e){}
 }
+async function loadDynamicOptions(){
+ try{
+  var response=await fetch("api/options",{cache:"no-store"});
+  if(!response.ok)return;
+  var data=await response.json(),items=(data.options&&data.options.business_model)||[];
+  var select=form&&form.querySelector('[name="businessModel"]');
+  if(!select)return;
+  var current=select.value;
+  select.innerHTML='<option value="">Choose</option>'+items.map(function(x){return '<option value="'+esc(x.value)+'">'+esc(x.label)+'</option>'}).join("");
+  if(current)select.value=current;
+ }catch(e){console.warn("Dynamic options unavailable",e);}
+}
 if(next)next.onclick=function(){if(valid())showStep((window._advisorStep||0)+1)};if(back)back.onclick=function(){showStep((window._advisorStep||0)-1)};if(form)form.addEventListener("submit",function(e){e.preventDefault();if(!valid())return;try{renderReport();if(window.trackEvent)window.trackEvent("transformation_report_generated",{industry:value("industry")})}catch(err){console.error(err);alert("AutomationScan could not generate the report. Please refresh and try again.")}});
 var saveAssessment=document.getElementById("tSave");if(saveAssessment)saveAssessment.onclick=function(){try{var raw=sessionStorage.getItem("automationscan_transform")||"{}";var data=JSON.parse(raw);data.savedAt=new Date().toISOString();localStorage.setItem("automationscan_saved_assessment",JSON.stringify(data));var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="automationscan-assessment.json";a.click();URL.revokeObjectURL(u)}catch(e){alert("The assessment could not be saved in this browser.")}};
-var download=document.getElementById("tDownload");if(download)download.onclick=function(){window.print()};var print=document.getElementById("tPrint");if(print)print.onclick=function(){window.print()};showStep(0);
+var download=document.getElementById("tDownload");if(download)download.onclick=function(){window.print()};var print=document.getElementById("tPrint");if(print)print.onclick=function(){window.print()};showStep(0);loadDynamicOptions();
 })();
