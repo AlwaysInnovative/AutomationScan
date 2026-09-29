@@ -1,0 +1,143 @@
+name: AutomationScan browser UAT
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  browser-uat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+
+      - name: Run production browser UAT
+        env:
+          BASE_URL: https://automation-scan-neon.vercel.app
+        run: |
+          cat > uat.spec.js <<'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          const base = process.env.BASE_URL;
+
+          test('production smoke and APIs', async ({ page, request }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e)));
+            page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+
+            const response = await page.goto(base + '/', { waitUntil: 'networkidle' });
+            expect(response.status()).toBe(200);
+            await expect(page.locator('body')).toContainText('AutomationScan');
+
+            for (const route of ['/api/industries','/api/journeys','/api/ui-config','/api/demos']) {
+              expect((await request.get(base + route)).status(), route).toBe(200);
+            }
+
+            expect(errors).toEqual([]);
+          });
+
+          test('Manufacturing assessment to Workbench handoff', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e)));
+            page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+
+            await page.goto(base + '/transformation-advisor.html', { waitUntil: 'networkidle' });
+
+            const industry = page.locator('#industry');
+            await expect(industry).toBeVisible();
+            await industry.selectOption({ label: 'Manufacturing' });
+
+            await expect(page.locator('#industryProcesses')).toContainText('Planning');
+            await expect(page.locator('#industryProcesses')).toContainText('Inventory');
+            await expect(page.locator('#industryPainOptions')).toContainText('Where are production or planning inputs copied between systems?');
+
+            await page.locator('select[name="businessModel"]').selectOption({ label: 'Subscription' });
+            await page.locator('select[name="current"]').selectOption({ label: 'Microsoft Dynamics' });
+
+            const processLabels = await page.locator('#industryProcesses label').allTextContents();
+            expect(processLabels.join(' ')).toContain('Planning');
+            expect(processLabels.join(' ')).toContain('Inventory');
+
+            for (let i = 1; i < 5; i++) {
+              await page.locator('#tNext').click();
+            }
+
+            await expect(page.locator('#tGenerate')).toBeVisible();
+            await page.locator('#tGenerate').click();
+
+            await expect(page.locator('#transformResults')).toBeVisible();
+            await expect(page.locator('#tInputs')).toContainText('Manufacturing');
+            await expect(page.locator('#tInputs')).toContainText('Subscription');
+            await expect(page.locator('#tInputs')).toContainText('Microsoft Dynamics');
+
+            const saved = await page.evaluate(() => sessionStorage.getItem('automationscan_transform'));
+            expect(saved).toContain('Manufacturing');
+            expect(saved).toContain('Subscription');
+            expect(saved).toContain('Microsoft Dynamics');
+
+            await page.locator('#continueToWorkbench').click();
+            await page.waitForLoadState('networkidle');
+
+            await expect(page).toHaveURL(/transformation-workbench\.html/);
+            await expect(page.locator('#wbIndustry')).toHaveValue('Manufacturing');
+            await expect(page.locator('#wbBusiness')).toHaveValue('Subscription');
+            await expect(page.locator('#wbCurrent')).toHaveValue('Microsoft Dynamics');
+            await expect(page.locator('#journeyStages')).not.toBeEmpty();
+
+            expect(errors).toEqual([]);
+          });
+
+          test('Workbench journey switch preserves context', async ({ page }) => {
+            await page.goto(base + '/transformation-workbench.html', { waitUntil: 'networkidle' });
+            await expect(page.locator('#journeySelect')).not.toBeEmpty();
+
+            const before = await page.evaluate(() => ({
+              industry: document.querySelector('#wbIndustry')?.value,
+              business: document.querySelector('#wbBusiness')?.value,
+              current: document.querySelector('#wbCurrent')?.value
+            }));
+
+            const options = await page.locator('#journeySelect option').evaluateAll(opts => opts.map(o => o.value).filter(Boolean));
+            if (options.length > 1) await page.locator('#journeySelect').selectOption(options[1]);
+
+            const after = await page.evaluate(() => ({
+              industry: document.querySelector('#wbIndustry')?.value,
+              business: document.querySelector('#wbBusiness')?.value,
+              current: document.querySelector('#wbCurrent')?.value
+            }));
+
+            expect(after).toEqual(before);
+          });
+
+          test('Contact page exposes direct email', async ({ page }) => {
+            const response = await page.goto(base + '/contact.html', { waitUntil: 'networkidle' });
+            expect(response.status()).toBe(200);
+            await expect(page.locator('body')).toContainText('talentdetectorai@gmail.com');
+            await expect(page.locator('a[href="mailto:talentdetectorai@gmail.com"]')).toHaveCount(1);
+          });
+          EOF
+          npx playwright test uat.spec.js --reporter=list
+
+      - name: Upload browser test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automationscan-browser-uat
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
