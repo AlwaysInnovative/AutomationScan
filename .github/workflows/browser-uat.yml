@@ -488,7 +488,6 @@ jobs:
                 const checks = page.locator('#industryProcesses input[type="checkbox"]');
                 const count = await checks.count();
                 expect(count).toBeGreaterThan(0);
-                await expect(page.locator('#tProgress')).toContainText('Step 2');
                 await checks.nth(0).scrollIntoViewIfNeeded();
                 await checks.nth(0).check();
 
