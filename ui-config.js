@@ -17,6 +17,14 @@ async function load(){
   if(!r.ok)throw new Error("ui config "+r.status);
   const data=await r.json(),cfg=data.config||{};
   window.AutomationScanUI.config=cfg;
+  if(cfg.navigation&&Array.isArray(cfg.navigation.workbenchSections)){
+    document.querySelectorAll(".wb-nav").forEach(function(box){
+      box.innerHTML="";
+      cfg.navigation.workbenchSections.forEach(function(item){
+        const b=document.createElement("button");b.type="button";b.dataset.tab=item.key;b.textContent=item.label;box.appendChild(b);
+      });
+    });
+  }
   const nav=cfg.navigation&&cfg.navigation.primary;
   const navEl=document.querySelector("header nav");
   if(navEl&&Array.isArray(nav)){
