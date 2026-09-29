@@ -17,6 +17,24 @@ async function load(){
   if(!r.ok)throw new Error("ui config "+r.status);
   const data=await r.json(),cfg=data.config||{};
   window.AutomationScanUI.config=cfg;
+  const nav=cfg.navigation&&cfg.navigation.primary;
+  const navEl=document.querySelector("header nav");
+  if(navEl&&Array.isArray(nav)){
+    navEl.innerHTML="";
+    nav.forEach(function(item){
+      const a=document.createElement("a");a.href=item.href;a.textContent=item.label;a.dataset.navKey=item.key;navEl.appendChild(a);
+    });
+  }
+  const contact=document.querySelector("header .nav-link-contact");
+  if(contact&&Array.isArray(nav)){
+    const item=nav.find(function(x){return x.key==="contact";});
+    if(item){contact.href=item.href;contact.textContent=item.label;}
+  }
+  const cta=document.querySelector("header .navcta");
+  if(cta&&cfg.navigation&&cfg.navigation.cta){
+    cta.href=cfg.navigation.cta.href;
+    cta.innerHTML=esc(cfg.navigation.cta.label)+" <span>→</span>";
+  }
   const page=location.pathname.endsWith("transformation-advisor.html")?"navigator":location.pathname.endsWith("transformation-workbench.html")?"workbench":"assessment";
   const fields=cfg.fields&&cfg.fields[page]||{};
   Object.keys(fields).forEach(function(key){
