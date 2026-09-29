@@ -114,7 +114,17 @@ function exportJson(){var blob=new Blob([JSON.stringify(state,null,2)],{type:"ap
 function parseCsvLine(line){var out=[],cur="",quoted=false;for(var i=0;i<line.length;i++){var ch=line[i];if(ch==="\""&&line[i+1]==="\""&&quoted){cur+="\"";i++;continue}if(ch==="\""){quoted=!quoted;continue}if(ch===","&&!quoted){out.push(cur);cur="";continue}cur+=ch}out.push(cur);return out}
 function importApps(file){var reader=new FileReader();reader.onload=function(){var lines=reader.result.split(/\r?\n/).filter(function(x){return x.trim()});if(!lines.length)return;var head=parseCsvLine(lines.shift()).map(function(x){return x.trim().toLowerCase()});lines.forEach(function(line){var c=parseCsvLine(line),o={};head.forEach(function(h,i){o[h]=String(c[i]||"").trim()});if(o.application)state.applications.push({name:o.application,cost:Math.max(0,Number(o.cost)||0),value:o.value||"Unknown",tech:o.technical_health||o.tech||"Unknown",usage:o.usage||"Unknown",redundancy:o.redundancy||"None known",lifecycle:o.lifecycle||"Stable",integration:o.integration||"Medium",disposition:"Assess"})});save();renderApps()};reader.readAsText(file)}
 function journeyContext(){var p=state.profile||{},a=[];if(p.industry)a.push("Industry: "+p.industry);if(p.businessModel)a.push("Business model: "+p.businessModel);if(p.current)a.push("Platform: "+p.current);if(state.processes.length)a.push(state.processes.length+" processes");if(state.applications.length)a.push(state.applications.length+" applications");if(state.requirements.length)a.push(state.requirements.length+" requirements");if(state.candidates.length)a.push(state.candidates.length+" candidates");if(state.evidence.length)a.push(state.evidence.length+" evidence items");return a}
-function journeyActivate(key,preserveStage){var b=document.querySelector('[data-tab="'+key+'"]');if(b){state._preserveJourneyStage=!!preserveStage;b.click()}}
+function journeyActivate(key,preserveStage){var b=document.querySelector('[data-tab="'+key+'"]');if(b){state._preserveJourneyStage=!!preserveStage;b.click();setTimeout(renderJourneyPanelCue,0)}}
+function renderJourneyPanelCue(){
+ var j=state.journeyTemplate,st=j&&j.stages||[],i=Number(state.journeyStage||0),b=document.querySelector('.wb-nav button.active'),panel=b?document.getElementById('tab-'+b.dataset.tab):null;
+ if(!panel||!st.length)return;
+ var old=panel.querySelector('.wb-step-cue');if(old)old.remove();
+ var cue=document.createElement('div');cue.className='wb-step-cue';
+ var stateText=i===0?'START HERE':i===st.length-1?'FINAL REVIEW':'IN PROGRESS';
+ var next=st[i+1]?st[i+1].label:'Review dossier';
+ cue.innerHTML='<span class="wb-step-cue-number">'+String(i+1).padStart(2,'0')+' / '+String(st.length).padStart(2,'0')+'</span><div><strong>Step '+(i+1)+' of '+st.length+': '+esc(st[i]?st[i].label:'Current step')+'</strong><small>'+stateText+(st[i+1]?' · Next: '+esc(next):' · This is the final stage')+'</small></div>';
+ panel.insertBefore(cue,panel.firstChild);
+}
 function syncJourneyNav(){
  var stages=(state.journeyTemplate&&state.journeyTemplate.stages)||[],allowed=stages.map(function(s){return s.section;});
  document.querySelectorAll(".wb-nav button").forEach(function(b){
