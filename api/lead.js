@@ -43,7 +43,8 @@ export default async function handler(req,res){
     const supabaseUrl=process.env.SUPABASE_URL, supabaseKey=process.env.SUPABASE_SERVICE_ROLE_KEY;
     if(supabaseUrl&&supabaseKey){
       const ip=String(req.headers["x-forwarded-for"]||req.socket?.remoteAddress||"unknown").split(",")[0].slice(0,100);
-      const rr=await fetch(supabaseUrl+"/rest/v1/rpc/consume_api_rate_limit",{method:"POST",headers:{apikey:supabaseKey,Authorization:"Bearer "+supabaseKey,"Content-Type":"application/json"},body:JSON.stringify({p_rate_key:"lead:"+ip,p_limit:10,p_window_seconds:300})});\n      if(rr.ok && (await rr.json())!==true)return res.status(429).json({error:"Too many requests. Please try again later."});
+      const rr=await fetch(supabaseUrl+"/rest/v1/rpc/consume_api_rate_limit",{method:"POST",headers:{apikey:supabaseKey,Authorization:"Bearer "+supabaseKey,"Content-Type":"application/json"},body:JSON.stringify({p_rate_key:"lead:"+ip,p_limit:10,p_window_seconds:300})});
+      if(rr.ok && (await rr.json())!==true)return res.status(429).json({error:"Too many requests. Please try again later."});
     }
 
     const key=process.env.RESEND_API_KEY;
