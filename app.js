@@ -21,45 +21,45 @@ back.onclick=()=>show(Math.max(current-1,0));
 const n=k=>Number(form.elements[k]?.value||0);
 
 
-/* 2026-09-27 industry questionnaire engine */
-function dynamicIndustryProfile(industry){
- const ind=String(industry||"Your industry").trim()||"Your industry";
- return {
-  intro:"Customer-defined discovery for "+ind+". Enter actual work, pain points and hours rather than relying on a prebuilt industry benchmark.",
-  work:[
-   ["Data movement","Hours spent copying, re-keying, reconciling or validating information?","dataEntry"],
-   ["Communication","Hours spent on repetitive emails, messages, reminders or status updates?","email"],
-   ["Transactions","Hours spent processing invoices, orders, payments, claims or similar transactions?","transactions"],
-   ["Customer / case work","Hours spent answering, routing or updating customer/case requests?","support"],
-   ["Scheduling","Hours spent booking, rescheduling, coordinating or reminding?","scheduling"],
-   ["Reporting","Hours spent compiling recurring reports, dashboards or management packs?","reporting"],
-   ["Documents / admin","Hours spent creating, checking, naming or routing documents?","documents"],
-   ["Sales / CRM admin","Hours spent updating leads, opportunities, contacts or follow-ups?","salesAdmin"]
-  ],
-  pain:["Where is work repeatedly copied or re-entered?","Where does work wait for chasing or approval?","Which exceptions or errors create the most rework?","Which recurring report or document takes the most effort?"],
-  suggestions:{
-   dataEntry:"Map source-to-target fields, validation rules, duplicate handling and exception ownership.",
-   email:"Map triggers, approvals, escalation rules and human review before automating.",
-   transactions:"Map validation, matching, approval, exception and audit steps.",
-   support:"Define classification, routing, knowledge use, escalation and human-control boundaries.",
-   scheduling:"Define availability, conflict handling, confirmations, reschedules and exceptions.",
-   reporting:"Define authoritative sources, calculation logic, refresh cadence and control ownership.",
-   documents:"Define inputs, templates, approvals, versioning, retention and auditability.",
-   salesAdmin:"Define source systems, data quality, ownership, follow-up rules and approval controls."
-  }
- };
+/* Industry questionnaires are loaded from Supabase; unknown industries use the generic profile. */
+let industryProfiles=[];
+function profileFor(industry){
+ const term=String(industry||"").trim().toLowerCase();
+ return industryProfiles.find(p=>p.name.toLowerCase()===term||(p.aliases||[]).some(a=>String(a).toLowerCase()===term))||industryProfiles.find(p=>p.id==="generic")||{id:"generic",name:"Other / custom",intro:"Describe the processes and controls specific to your business.",processes:[],pain_points:[],suggestions:{}};
 }
-
+function dynamicIndustryProfile(industry){
+ const p=profileFor(industry);
+ return {intro:p.intro,work:p.processes||[],pain:p.pain_points||[],suggestions:p.suggestions||{}};
+}
 function renderIndustryQuestionnaire(){
  const p=dynamicIndustryProfile(form.elements.industry.value);
- const q=document.getElementById("industryQuestions"); const pain=document.getElementById("industryPainQuestions");
+ const q=document.getElementById("industryQuestions"),pain=document.getElementById("industryPainQuestions");
  if(!q||!pain)return;
- q.innerHTML='<div class="industry-context"><b>'+escapeHtml(form.elements.industry.value||"Your industry")+'</b><span>'+escapeHtml(p.intro)+'</span></div>'+p.work.map((x,i)=>'<label>'+escapeHtml(x[0])+'<span class="question-help">'+escapeHtml(x[1])+'</span><input type="number" name="industry_'+i+'" data-industry-key="'+escapeHtml(x[2])+'" min="0" max="200" value="0" aria-label="'+escapeHtml(x[0])+' hours per week"></label>').join("");
- pain.innerHTML='<div class="pain-heading"><b>Industry pain points</b><span>Pick the problems that sound familiar. These directly influence the recommendations.</span></div>'+p.pain.map((x,i)=>'<label class="pain-choice"><input type="checkbox" name="pain_'+i+'" value="'+escapeHtml(x)+'"><span>'+escapeHtml(x)+'</span></label>').join("");
+ q.innerHTML='<div class="industry-context"><b>'+escapeHtml(form.elements.industry.value||p.name||"Your industry")+'</b><span>'+escapeHtml(p.intro)+'</span></div>'+(p.work||[]).map((x,i)=>'<label>'+escapeHtml(x[0])+'<span class="question-help">'+escapeHtml(x[1])+'</span><input type="number" name="industry_'+i+'" data-industry-key="'+escapeHtml(x[2])+'" min="0" max="200" value="0" aria-label="'+escapeHtml(x[0])+' hours per week"></label>').join("");
+ pain.innerHTML='<div class="pain-heading"><b>Industry pain points</b><span>Select the issues relevant to your operation. These influence the investigation.</span></div>'+(p.pain||[]).map((x,i)=>'<label class="pain-choice"><input type="checkbox" name="pain_'+i+'" value="'+escapeHtml(x)+'"><span>'+escapeHtml(x)+'</span></label>').join("");
 }
-function industryData(){const p=dynamicIndustryProfile(form.elements.industry.value);const extra={};document.querySelectorAll("[data-industry-key]").forEach(x=>{const k=x.dataset.industryKey;extra[k]=(extra[k]||0)+Number(x.value||0)});const painChoices=[...document.querySelectorAll(".pain-choice input:checked")].map(x=>x.value);return {profile:p,extra,painChoices};}
-form.elements.industry?.addEventListener("change",()=>{renderIndustryQuestionnaire();});
-renderIndustryQuestionnaire();
+function industryData(){
+ const p=dynamicIndustryProfile(form.elements.industry.value),extra={};
+ document.querySelectorAll("[data-industry-key]").forEach(x=>{const k=x.dataset.industryKey;extra[k]=(extra[k]||0)+Number(x.value||0)});
+ const painChoices=[...document.querySelectorAll(".pain-choice input:checked")].map(x=>x.value);
+ return {profile:p,extra,painChoices};
+}
+async function loadIndustryProfiles(){
+ try{
+  const response=await fetch("api/industries",{cache:"no-store"});
+  if(!response.ok)throw new Error("industry_api_"+response.status);
+  const data=await response.json();industryProfiles=Array.isArray(data.profiles)?data.profiles:[];
+  const select=form.elements.industry,previous=select.value;
+  select.innerHTML="";
+  const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="Choose industry";select.appendChild(placeholder);
+  industryProfiles.forEach(p=>{const o=document.createElement("option");o.value=p.name;o.textContent=p.name;select.appendChild(o)});
+  select.value=industryProfiles.some(p=>p.name===previous)?previous:"";
+  renderIndustryQuestionnaire();
+ }catch(e){console.error("Industry questionnaire configuration unavailable",e);const q=document.getElementById("industryQuestions");if(q)q.innerHTML='<p class="form-note">Industry questions could not be loaded. Refresh the page or contact support.</p>';}
+}
+form.elements.industry?.addEventListener("change",renderIndustryQuestionnaire);
+document.addEventListener("automationScanUIReady",loadIndustryProfiles);
+loadIndustryProfiles();
 function calc(){
  const ind=industryData();
  const dynamicHours=ind.extra||{};
