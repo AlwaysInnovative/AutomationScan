@@ -1,4 +1,4 @@
-name: AutomationScan browser UAT
+name: AutomationScan rigorous browser UAT
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ permissions:
 jobs:
   browser-uat:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -25,7 +25,7 @@ jobs:
           npm install --no-save @playwright/test
           npx playwright install --with-deps chromium
 
-      - name: Run production browser UAT
+      - name: Run rigorous production UAT
         env:
           BASE_URL: https://automation-scan-neon.vercel.app
         run: |
@@ -34,109 +34,418 @@ jobs:
 
           const base = process.env.BASE_URL;
 
-          test('production smoke and APIs', async ({ page, request }) => {
-            const errors = [];
-            page.on('pageerror', e => errors.push(String(e)));
-            page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+          async function firstOption(locator) {
+            return locator.locator('option').evaluateAll(opts => {
+              const x = opts.find(o => !o.disabled && String(o.value).trim() !== '');
+              return x ? x.value : null;
+            });
+          }
 
-            const response = await page.goto(base + '/', { waitUntil: 'networkidle' });
-            expect(response.status()).toBe(200);
+          async function fillControl(page, locator, seed) {
+            const tag = await locator.evaluate(el => el.tagName.toLowerCase());
+            const type = await locator.getAttribute('type');
+            if (await locator.isDisabled().catch(() => true)) return 'disabled';
+
+            if (tag === 'select') {
+              const value = await firstOption(locator);
+              if (value !== null) {
+                await locator.selectOption(value);
+                return 'selected';
+              }
+              return 'empty-select';
+            }
+
+            if (type === 'checkbox' || type === 'radio') {
+              if (!(await locator.isChecked().catch(() => false))) await locator.check();
+              return 'checked';
+            }
+
+            if (type === 'file' || type === 'hidden') return 'skipped';
+
+            if (type === 'number') {
+              await locator.fill('10');
+              return 'number';
+            }
+
+            if (type === 'date') {
+              await locator.fill('2026-09-29');
+              return 'date';
+            }
+
+            await locator.fill(seed);
+            return 'filled';
+          }
+
+          async function fillVisibleFormFields(page, scope, label) {
+            const controls = scope.locator('input, select, textarea');
+            const count = await controls.count();
+            const touched = [];
+            for (let i = 0; i < count; i++) {
+              const c = controls.nth(i);
+              if (!(await c.isVisible().catch(() => false))) continue;
+              const name = await c.getAttribute('name');
+              const id = await c.getAttribute('id');
+              const placeholder = await c.getAttribute('placeholder');
+              const result = await fillControl(page, c, 'UAT ' + label + ' ' + (name || id || 'field'));
+              touched.push({name, id, result, placeholder});
+            }
+            return touched;
+          }
+
+          function installErrorCapture(page) {
+            const errors = [];
+            page.on('pageerror', e => errors.push('PAGEERROR: ' + String(e)));
+            page.on('console', m => {
+              if (m.type() === 'error') errors.push('CONSOLE: ' + m.text());
+            });
+            page.on('requestfailed', req => {
+              const url = req.url();
+              if (!url.includes('favicon')) errors.push('REQUESTFAILED: ' + url + ' :: ' + (req.failure()?.errorText || 'unknown'));
+            });
+            return errors;
+          }
+
+          test('01 - live production contracts and dynamic datasets', async ({ page, request }) => {
+            const errors = installErrorCapture(page);
+            const home = await page.goto(base + '/', {waitUntil:'networkidle'});
+            expect(home.status()).toBe(200);
             await expect(page.locator('body')).toContainText('AutomationScan');
 
-            for (const route of ['/api/industries','/api/journeys','/api/ui-config','/api/demos']) {
+            const endpoints = ['/api/industries','/api/journeys','/api/ui-config','/api/demos'];
+            for (const route of endpoints) {
               expect((await request.get(base + route)).status(), route).toBe(200);
             }
 
+            const industries = await (await request.get(base + '/api/industries')).json();
+            const journeys = await (await request.get(base + '/api/journeys')).json();
+            const config = await (await request.get(base + '/api/ui-config')).json();
+            const demos = await (await request.get(base + '/api/demos')).json();
+
+            expect(industries.profiles.length).toBeGreaterThan(0);
+            expect(journeys.journeys.length).toBeGreaterThan(1);
+            expect(config.config.fields.navigator).toBeTruthy();
+            expect(config.config.fields.workbench).toBeTruthy();
+            expect(demos.scenarios.length).toBeGreaterThan(1);
+
+            for (const link of await page.locator('header nav a').evaluateAll(as => as.map(a => a.href))) {
+              const response = await request.get(link);
+              expect(response.status(), link).toBe(200);
+            }
+
             expect(errors).toEqual([]);
           });
 
-          test('Manufacturing assessment to Workbench handoff', async ({ page }) => {
-            const errors = [];
-            page.on('pageerror', e => errors.push(String(e)));
-            page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+          test('02 - homepage illustrative scenario by scenario', async ({ page, request }) => {
+            const errors = installErrorCapture(page);
+            const data = await (await request.get(base + '/api/demos')).json();
+            await page.goto(base + '/', {waitUntil:'networkidle'});
+            await expect(page.locator('#demoList')).toBeVisible();
 
-            await page.goto(base + '/transformation-advisor.html', { waitUntil: 'networkidle' });
-
-            const industry = page.locator('#industry');
-            await expect(industry).toBeVisible();
-            await industry.selectOption({ label: 'Manufacturing' });
-
-            await expect(page.locator('#industryProcesses')).toContainText('Planning');
-            await expect(page.locator('#industryProcesses')).toContainText('Inventory');
-            await expect(page.locator('#industryPainOptions')).toContainText('Where are production or planning inputs copied between systems?');
-
-            await page.locator('select[name="businessModel"]').selectOption({ label: 'Subscription' });
-            await page.locator('select[name="current"]').selectOption({ label: 'Microsoft Dynamics' });
-
-            const processLabels = await page.locator('#industryProcesses label').allTextContents();
-            expect(processLabels.join(' ')).toContain('Planning');
-            expect(processLabels.join(' ')).toContain('Inventory');
-
-            for (let i = 1; i < 5; i++) {
-              await page.locator('#tNext').click();
+            for (const scenario of data.scenarios) {
+              await test.step('Illustrative scenario: ' + scenario.name, async () => {
+                const tab = page.locator('.demo-tab[data-demo="' + scenario.id + '"]');
+                await expect(tab).toHaveCount(1);
+                await tab.click();
+                await expect(page.locator('#demoPanel')).toContainText(scenario.name);
+                await expect(page.locator('#demoPanel')).toContainText(String(scenario.headline));
+                await expect(page.locator('#demoPanel .demo-bars')).toBeVisible();
+                expect(await page.locator('#demoPanel .demo-bar-row').count()).toBeGreaterThan(0);
+                await expect(tab).toHaveClass(/active/);
+              });
             }
 
-            await expect(page.locator('#tGenerate')).toBeVisible();
-            await page.locator('#tGenerate').click();
+            expect(errors).toEqual([]);
+          });
 
-            await expect(page.locator('#transformResults')).toBeVisible();
-            await expect(page.locator('#tInputs')).toContainText('Manufacturing');
-            await expect(page.locator('#tInputs')).toContainText('Subscription');
-            await expect(page.locator('#tInputs')).toContainText('Microsoft Dynamics');
+          test('03 - Assessment: every industry, every step, every field', async ({ page, request }) => {
+            const errors = installErrorCapture(page);
+            const data = await (await request.get(base + '/api/industries')).json();
 
-            const saved = await page.evaluate(() => sessionStorage.getItem('automationscan_transform'));
-            expect(saved).toContain('Manufacturing');
-            expect(saved).toContain('Subscription');
-            expect(saved).toContain('Microsoft Dynamics');
+            for (const profile of data.profiles) {
+              await test.step('Assessment scenario: ' + profile.name, async () => {
+                await page.goto(base + '/', {waitUntil:'networkidle'});
+                const form = page.locator('#scanForm');
+                await expect(form).toBeVisible();
 
-            await page.locator('#continueToWorkbench').click();
-            await page.waitForLoadState('networkidle');
+                const industry = form.locator('[name="industry"]');
+                await industry.selectOption({label: profile.name});
+                await expect(page.locator('#industryQuestions')).toContainText(profile.processes[0][0]);
 
-            await expect(page).toHaveURL(/transformation-workbench\.html/);
+                const steps = page.locator('.step');
+                expect(await steps.count()).toBe(4);
+
+                await test.step('Step 1 - Business fields', async () => {
+                  const touched = await fillVisibleFormFields(page, steps.nth(0), profile.id + ' step1');
+                  expect(touched.length).toBeGreaterThan(1);
+                });
+
+                await page.locator('#next').click();
+                await expect(page.locator('#progressText')).toContainText('Step 2');
+                await test.step('Step 2 - Industry workload fields', async () => {
+                  const touched = await fillVisibleFormFields(page, steps.nth(1), profile.id + ' step2');
+                  expect(await page.locator('#industryQuestions input[data-industry-key]').count()).toBeGreaterThan(0);
+                  expect(touched.length).toBeGreaterThan(0);
+                });
+
+                await page.locator('#back').click();
+                await expect(page.locator('#progressText')).toContainText('Step 1');
+                await page.locator('#next').click();
+                await page.locator('#next').click();
+
+                await test.step('Step 3 - Pain, goal, consent', async () => {
+                  const touched = await fillVisibleFormFields(page, steps.nth(2), profile.id + ' step3');
+                  expect(touched.some(x => x.name === 'pain')).toBeTruthy();
+                  expect(touched.some(x => x.name === 'goal')).toBeTruthy();
+                });
+
+                await page.locator('[name="emailAddress"]').fill('uat-' + profile.id + '@example.com');
+                await page.locator('[name="consent"]').check();
+
+                await page.route('**/api/lead', async route => {
+                  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true})});
+                });
+
+                await page.locator('#next').click();
+                await expect(page.locator('#progressText')).toContainText('Step 4');
+
+                await test.step('Step 4 - final controls and report generation', async () => {
+                  const touched = await fillVisibleFormFields(page, steps.nth(3), profile.id + ' step4');
+                  expect(await page.locator('#submit')).toBeVisible();
+                  await page.locator('#submit').click();
+                  await expect(page.locator('#results')).toBeVisible();
+                  await expect(page.locator('#workloadChart')).toBeVisible();
+                  expect(touched.length).toBeGreaterThanOrEqual(0);
+                });
+
+                const handoff = await page.evaluate(() => JSON.parse(sessionStorage.getItem('automationScanAssessment') || '{}'));
+                expect(handoff.industry).toBe(profile.name);
+                expect(handoff.source).toBe('automation-assessment');
+                expect(Object.keys(handoff.workload || {}).length).toBeGreaterThan(0);
+
+                const printed = await page.evaluate(() => {
+                  let n = 0;
+                  window.print = () => { n++; };
+                  document.getElementById('downloadPdf')?.click();
+                  return n;
+                });
+                expect(printed).toBe(1);
+
+                await page.unroute('**/api/lead');
+              });
+            }
+
+            expect(errors).toEqual([]);
+          });
+
+          test('04 - Navigator: every industry, every step, every visible field', async ({ page, request }) => {
+            const industryData = await (await request.get(base + '/api/industries')).json();
+            const ui = await (await request.get(base + '/api/ui-config')).json();
+            const navigatorFields = Object.keys(ui.config.fields.navigator || {});
+
+            for (const profile of industryData.profiles) {
+              await test.step('Navigator scenario: ' + profile.name, async () => {
+                await page.goto(base + '/transformation-advisor.html', {waitUntil:'networkidle'});
+                const form = page.locator('#transformForm');
+                await expect(form).toBeVisible();
+
+                await page.locator('#industry').selectOption({label: profile.name});
+                await expect(page.locator('#industryProcesses')).toContainText(profile.processes[0][0]);
+                await expect(page.locator('#industryPainOptions')).toContainText(profile.pain_points[0]);
+
+                await test.step('Step 1 - context fields', async () => {
+                  const business = form.locator('[name="businessModel"]');
+                  const current = form.locator('[name="current"]');
+                  if (await business.isVisible()) await business.selectOption({label:'Subscription'}).catch(async()=>{ await business.selectOption(await firstOption(business)); });
+                  if (await current.isVisible()) await current.selectOption({label:'Microsoft Dynamics'}).catch(async()=>{ await current.selectOption(await firstOption(current)); });
+                  await fillVisibleFormFields(page, form.locator('.t-step').nth(0), profile.name + ' context');
+                });
+
+                await page.locator('#tNext').click();
+                await test.step('Step 2 - every industry process', async () => {
+                  const processChecks = page.locator('#industryProcesses input[type="checkbox"]');
+                  expect(await processChecks.count()).toBe(profile.processes.length);
+                  for (let i = 0; i < await processChecks.count(); i++) await processChecks.nth(i).check();
+                  await fillVisibleFormFields(page, form.locator('.t-step').nth(1), profile.name + ' processes');
+                });
+
+                await page.locator('#tNext').click();
+                await test.step('Step 3 - every pain point and free text', async () => {
+                  const painChecks = page.locator('#industryPainOptions input[type="checkbox"]');
+                  expect(await painChecks.count()).toBe(profile.pain_points.length);
+                  for (let i = 0; i < await painChecks.count(); i++) await painChecks.nth(i).check();
+                  await page.locator('#painList').fill('UAT additional recurring pain and manual handoff');
+                  await page.locator('[name="painText"]').fill('UAT end-to-end business pain description');
+                });
+
+                await page.locator('#tNext').click();
+                await test.step('Step 4 - every technology/economic field', async () => {
+                  const touched = await fillVisibleFormFields(page, form.locator('.t-step').nth(3), profile.name + ' technology');
+                  expect(touched.length).toBeGreaterThan(3);
+                });
+
+                await page.locator('#tNext').click();
+                await test.step('Step 5 - every goal and candidate fields', async () => {
+                  const goals = page.locator('[name="goal"]');
+                  expect(await goals.count()).toBeGreaterThan(0);
+                  for (let i = 0; i < await goals.count(); i++) await goals.nth(i).check().catch(()=>{});
+                  await page.locator('[name="candidateList"]').fill('UAT Candidate 1, UAT Candidate 2');
+                  await page.locator('[name="email"]').fill('navigator-' + profile.id + '@example.com');
+                  await expect(page.locator('#tGenerate')).toBeVisible();
+                  await page.locator('#tGenerate').click();
+                });
+
+                await expect(page.locator('#transformResults')).toBeVisible();
+                await expect(page.locator('#tInputs')).toContainText(profile.name);
+                await expect(page.locator('#tCaps')).toContainText(profile.processes[0][0]);
+                await expect(page.locator('#tPainDetail')).toContainText(profile.pain_points[0]);
+
+                const saved = await page.evaluate(() => JSON.parse(sessionStorage.getItem('automationscan_transform') || '{}'));
+                expect(saved.industry).toBe(profile.name);
+                expect(saved.processes.length).toBe(profile.processes.length);
+                expect(saved.pains.length).toBeGreaterThanOrEqual(profile.pain_points.length);
+
+                const printed = await page.evaluate(() => {
+                  let n = 0;
+                  window.print = () => { n++; };
+                  document.getElementById('tDownload')?.click();
+                  return n;
+                });
+                expect(printed).toBe(1);
+
+                await page.locator('#continueToWorkbench').click();
+                await page.waitForLoadState('networkidle');
+                await expect(page.locator('#wbIndustry')).toHaveValue(profile.name);
+              });
+            }
+
+            expect(errors).toEqual([]);
+          });
+
+          test('05 - Workbench: every journey, stage, configured field and safe action', async ({ page, request }) => {
+            const journeyData = await (await request.get(base + '/api/journeys')).json();
+            const errors = installErrorCapture(page);
+            page.on('dialog', async dialog => { await dialog.dismiss(); });
+
+            await page.goto(base + '/transformation-workbench.html', {waitUntil:'networkidle'});
+            await expect(page.locator('#journeySelect')).not.toBeEmpty();
+
+            const explicitContext = {
+              wbIndustry: 'Manufacturing',
+              wbBusiness: 'Subscription',
+              wbCurrent: 'Microsoft Dynamics'
+            };
+
+            for (const key of Object.keys(explicitContext)) {
+              await page.locator('#' + key).selectOption({label:explicitContext[key]}).catch(()=>{});
+            }
+            await page.locator('#wbGoals').fill('UAT growth, control and cost improvement');
+            await page.locator('#wbPain').fill('UAT manual reconciliation and repeated handoffs');
+            await page.locator('#saveProfile').click();
+
+            for (const journey of journeyData.journeys) {
+              await test.step('Workbench journey: ' + journey.name, async () => {
+                await page.locator('#journeySelect').selectOption(journey.id);
+                await expect(page.locator('#journeyTitle')).toContainText(journey.name);
+
+                const stages = page.locator('#journeyStages .wb-stage');
+                expect(await stages.count()).toBe(journey.stages.length);
+
+                const expectedSections = journey.stages.map(s => s.section);
+                const visibleNavSections = await page.locator('.wb-nav button:not([hidden])').evaluateAll(btns => btns.map(b => b.dataset.tab));
+                for (const section of visibleNavSections) expect(expectedSections).toContain(section);
+
+                for (let i = 0; i < journey.stages.length; i++) {
+                  await test.step('Stage ' + String(i + 1).padStart(2,'0') + ': ' + journey.stages[i].label, async () => {
+                    await page.locator('#journeyStages .wb-stage').nth(i).click();
+                    await expect(page.locator('#journeyStages .wb-stage').nth(i)).toHaveAttribute('aria-current','step');
+                    await expect(page.locator('#tab-' + journey.stages[i].section)).toHaveClass(/active/);
+
+                    const panel = page.locator('#tab-' + journey.stages[i].section);
+                    const touched = await fillVisibleFormFields(page, panel, 'journey ' + journey.id + ' stage ' + i);
+                    expect(touched).toBeTruthy();
+                  });
+                }
+
+                const navRefs = await page.locator('.wb-nav button:not([hidden])').evaluateAll(btns => btns.map(b => b.dataset.tab));
+                for (const section of navRefs) {
+                  await test.step('Nav section: ' + section, async () => {
+                    await page.locator('.wb-nav button[data-tab="' + section + '"]').click();
+                    await expect(page.locator('#tab-' + section)).toHaveClass(/active/);
+                  });
+                }
+
+                // Exercise the state-changing actions available in the journey-safe set.
+                const actions = [
+                  '#saveProfile','#runSelection','#scorePortfolio','#scoreMigration',
+                  '#runTraceability','#calcEconomics','#generateRfp','#generatePoc',
+                  '#addCapability','#addRequirement','#addVendorResponse',
+                  '#addGovern','#addRoadmap','#addEvidence'
+                ];
+                for (const id of actions) {
+                  const b = page.locator(id);
+                  if (await b.count() && await b.isVisible().catch(()=>false) && await b.isEnabled().catch(()=>false)) {
+                    await test.step('Action ' + id, async () => { await b.click(); });
+                  }
+                }
+
+                await expect(page.locator('#wbIndustry')).toHaveValue('Manufacturing');
+                await expect(page.locator('#wbBusiness')).toHaveValue('Subscription');
+                await expect(page.locator('#wbCurrent')).toHaveValue('Microsoft Dynamics');
+              });
+            }
+
+            expect(errors).toEqual([]);
+          });
+
+          test('06 - Workbench browser persistence', async ({ page }) => {
+            const errors = installErrorCapture(page);
+            await page.goto(base + '/transformation-workbench.html', {waitUntil:'networkidle'});
+
+            await page.locator('#wbIndustry').selectOption({label:'Manufacturing'}).catch(()=>{});
+            await page.locator('#wbBusiness').selectOption({label:'Subscription'}).catch(()=>{});
+            await page.locator('#wbCurrent').selectOption({label:'Microsoft Dynamics'}).catch(()=>{});
+            await page.locator('#wbGoals').fill('Persisted UAT goal');
+            await page.locator('#saveProfile').click();
+
+            await page.reload({waitUntil:'networkidle'});
             await expect(page.locator('#wbIndustry')).toHaveValue('Manufacturing');
             await expect(page.locator('#wbBusiness')).toHaveValue('Subscription');
             await expect(page.locator('#wbCurrent')).toHaveValue('Microsoft Dynamics');
-            await expect(page.locator('#journeyStages')).not.toBeEmpty();
+            await expect(page.locator('#wbGoals')).toHaveValue('Persisted UAT goal');
 
             expect(errors).toEqual([]);
           });
 
-          test('Workbench journey switch preserves context', async ({ page }) => {
-            await page.goto(base + '/transformation-workbench.html', { waitUntil: 'networkidle' });
-            await expect(page.locator('#journeySelect')).not.toBeEmpty();
-
-            const before = await page.evaluate(() => ({
-              industry: document.querySelector('#wbIndustry')?.value,
-              business: document.querySelector('#wbBusiness')?.value,
-              current: document.querySelector('#wbCurrent')?.value
-            }));
-
-            const options = await page.locator('#journeySelect option').evaluateAll(opts => opts.map(o => o.value).filter(Boolean));
-            if (options.length > 1) await page.locator('#journeySelect').selectOption(options[1]);
-
-            const after = await page.evaluate(() => ({
-              industry: document.querySelector('#wbIndustry')?.value,
-              business: document.querySelector('#wbBusiness')?.value,
-              current: document.querySelector('#wbCurrent')?.value
-            }));
-
-            expect(after).toEqual(before);
-          });
-
-          test('Contact page exposes direct email', async ({ page }) => {
-            const response = await page.goto(base + '/contact.html', { waitUntil: 'networkidle' });
-            expect(response.status()).toBe(200);
+          test('07 - Contact field by field and intercepted submission', async ({ page }) => {
+            const errors = installErrorCapture(page);
+            await page.goto(base + '/contact.html', {waitUntil:'networkidle'});
             await expect(page.locator('body')).toContainText('talentdetectorai@gmail.com');
             await expect(page.locator('a[href="mailto:talentdetectorai@gmail.com"]')).toHaveCount(1);
+
+            await page.route('**/api/contact', async route => {
+              await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true})});
+            });
+
+            const form = page.locator('#contactForm');
+            const touched = await fillVisibleFormFields(page, form, 'contact');
+            expect(touched.some(x => x.name === 'name')).toBeTruthy();
+            expect(touched.some(x => x.name === 'email')).toBeTruthy();
+            expect(touched.some(x => x.name === 'subject')).toBeTruthy();
+            expect(touched.some(x => x.name === 'message')).toBeTruthy();
+            if (await form.locator('[name="consent"]').count()) await form.locator('[name="consent"]').check();
+
+            await form.locator('button[type="submit"]').click();
+            await expect(page.locator('#contactStatus')).toContainText('submitted');
+            expect(errors).toEqual([]);
           });
           EOF
-          npx playwright test uat.spec.js --reporter=list
+          npx playwright test uat.spec.js --reporter=list --workers=2
 
-      - name: Upload browser test artifacts
+      - name: Upload browser UAT artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: automationscan-browser-uat
+          name: automationscan-rigorous-browser-uat
           path: |
             playwright-report/
             test-results/
