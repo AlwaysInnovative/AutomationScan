@@ -117,6 +117,7 @@ jobs:
 
           test('01 - live production contracts and dynamic datasets', async ({ page, request }) => {
             const errors = installErrorCapture(page);
+            await page.addInitScript(() => { window.__uatErrors = []; window.addEventListener('error', e => window.__uatErrors.push(String(e.error || e.message))); window.addEventListener('unhandledrejection', e => window.__uatErrors.push(String(e.reason))); });
             const home = await page.goto(base + '/', {waitUntil:'networkidle'});
             expect(home.status()).toBe(200);
             await expect(page.locator('body')).toContainText('AutomationScan');
@@ -306,6 +307,14 @@ jobs:
                   expect(generateState.onclick).toBe(true);
                   await page.locator('#tGenerate').click();
                 });
+
+                const generationState = await page.evaluate(() => ({
+                  hidden: document.getElementById('transformResults')?.classList.contains('hidden'),
+                  step: document.querySelector('.t-step.active')?.getAttribute('data-step'),
+                  industry: document.getElementById('industry')?.value,
+                  consoleErrors: window.__uatErrors || []
+                }));
+                if (generationState.hidden) throw new Error('Navigator report did not render. State=' + JSON.stringify(generationState));
 
                 await expect(page.locator('#transformResults')).toBeVisible({timeout:15000});
                 await expect(page.locator('#tInputs')).toContainText(profile.name);
