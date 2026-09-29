@@ -67,7 +67,7 @@ async function loadIndustryProfiles(){
  try{
   var response=await fetch("api/industries",{cache:"no-store"});if(!response.ok)throw new Error("industry_api_"+response.status);
   var data=await response.json();industryProfiles=Array.isArray(data.profiles)?data.profiles:[];
-  var dl=el("industryOptions");if(dl)dl.innerHTML=industryProfiles.map(function(p){return '<option value="'+esc(p.name)+'"></option>'}).join("");
+  var select=el("industry");if(select){var current=select.value;select.innerHTML='<option value="">Choose industry</option>'+industryProfiles.map(function(p){return '<option value="'+esc(p.name)+'">'+esc(p.name)+'</option>'}).join("");if(current)select.value=current;}
   renderIndustryQuestions();
  }catch(e){console.error("Industry questionnaires unavailable",e);if(el("industryIntro"))el("industryIntro").textContent="Industry questionnaire data could not load. Refresh or contact support before continuing.";}
 }
