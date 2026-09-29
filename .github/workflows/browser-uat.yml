@@ -222,7 +222,7 @@ jobs:
                   await page.locator('#submit').click();
                   await page.waitForURL(/\/report\.html(?:$|\?)/, {timeout:10000});
                   await expect(page.locator('body')).toContainText('YOUR BUSINESS VISIBILITY REPORT');
-                  await expect(page.locator('#downloadPdf, #print')).toHaveCount(1);
+                  await expect(page.locator('#downloadPdf, #print')).toHaveCount(2);
                   expect(touched.length).toBeGreaterThanOrEqual(0);
                 });
 
@@ -300,6 +300,10 @@ jobs:
                   await page.locator('[name="candidateList"]').fill('UAT Candidate 1, UAT Candidate 2');
                   await page.locator('[name="email"]').fill('navigator-' + profile.id + '@example.com');
                   await expect(page.locator('#tGenerate')).toBeVisible();
+                  const generateState = await page.locator('#tGenerate').evaluate(el => ({hidden:el.hidden, disabled:el.disabled, type:el.type, onclick:!!el.onclick}));
+                  expect(generateState.hidden).toBe(false);
+                  expect(generateState.disabled).toBe(false);
+                  expect(generateState.onclick).toBe(true);
                   await page.locator('#tGenerate').click();
                 });
 
@@ -335,7 +339,9 @@ jobs:
             const errors = installErrorCapture(page);
             page.on('dialog', async dialog => { await dialog.dismiss(); });
 
-            await page.goto(base + '/transformation-workbench.html', {waitUntil:'networkidle'});
+            const wbResponse = await page.goto(base + '/transformation-workbench.html', {waitUntil:'networkidle'});
+            expect(wbResponse.status()).toBe(200);
+            expect(page.url()).toContain('transformation-workbench.html');
             await page.waitForSelector('#wbGoals', {state:'visible', timeout:15000});
             await page.waitForSelector('#journeySelect', {state:'visible', timeout:15000});
             await expect(page.locator('#journeySelect')).not.toBeEmpty();
