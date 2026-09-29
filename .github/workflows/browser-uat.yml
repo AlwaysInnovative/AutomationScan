@@ -255,7 +255,7 @@ jobs:
                 await test.step('Step 1 - context fields', async () => {
                   const business = form.locator('[name="businessModel"]');
                   const current = form.locator('[name="current"]');
-                  if (await business.isVisible()) await business.selectOption({label:'Subscription'}).catch(async()=>{ await business.selectOption(await firstOption(business)); });
+                  if (await business.isVisible()) await business.selectOption({label:'Subscription / recurring'}).catch(async()=>{ await business.selectOption(await firstOption(business)); });
                   if (await current.isVisible()) await current.selectOption({label:'Microsoft Dynamics'}).catch(async()=>{ await current.selectOption(await firstOption(current)); });
                   await fillVisibleFormFields(page, form.locator('.t-step').nth(0), profile.name + ' context');
                 });
@@ -402,8 +402,9 @@ jobs:
             await page.goto(base + '/transformation-workbench.html', {waitUntil:'networkidle'});
 
             await page.locator('#wbIndustry').selectOption({label:'Manufacturing'}).catch(()=>{});
-            await page.locator('#wbBusiness').selectOption({label:'Subscription'}).catch(()=>{});
+            await page.locator('#wbBusiness').selectOption({label:'Subscription / recurring'}).catch(()=>{});
             await page.locator('#wbCurrent').selectOption({label:'Microsoft Dynamics'}).catch(()=>{});
+            await expect(page.locator('#wbGoals')).toBeVisible();
             await page.locator('#wbGoals').fill('Persisted UAT goal');
             await page.locator('#saveProfile').click();
 
@@ -414,6 +415,98 @@ jobs:
             await expect(page.locator('#wbGoals')).toHaveValue('Persisted UAT goal');
 
             expect(errors).toEqual([]);
+          });
+
+
+          test('08 - live business scenarios: end-to-end realistic handoffs', async ({ page }) => {
+            const scenarios = [
+              {
+                name:'Manufacturing / Subscription / Microsoft Dynamics',
+                industry:'Manufacturing',
+                business:'Subscription',
+                current:'Microsoft Dynamics',
+                processes:['Planning','Inventory'],
+                pain:'Where are production or planning inputs copied between systems?',
+                goal:'Reduce admin costs'
+              },
+              {
+                name:'Retail / B2C / SAP',
+                industry:'Retail',
+                business:'B2C',
+                current:'SAP',
+                processes:['Sales','Inventory'],
+                pain:'Store and online demand signals are reconciled manually.',
+                goal:'Save staff time'
+              },
+              {
+                name:'Healthcare / B2B / Oracle',
+                industry:'Healthcare',
+                business:'B2B',
+                current:'Oracle',
+                processes:['Patient administration','Billing'],
+                pain:'Staff re-key information between clinical and finance workflows.',
+                goal:'Reduce errors'
+              },
+              {
+                name:'Logistics / B2B / Microsoft Dynamics',
+                industry:'Logistics',
+                business:'B2B',
+                current:'Microsoft Dynamics',
+                processes:['Order management','Fleet / delivery'],
+                pain:'Shipment status is copied across multiple systems.',
+                goal:'Respond faster'
+              }
+            ];
+
+            for (const s of scenarios) {
+              await test.step('Scenario: ' + s.name, async () => {
+                await page.goto(base + '/transformation-advisor.html', {waitUntil:'networkidle'});
+
+                await page.locator('#industry').selectOption({label:s.industry});
+                await page.locator('[name="businessModel"]').selectOption(s.business === 'Subscription' ? 'Subscription' : s.business);
+                await page.locator('[name="current"]').selectOption({label:s.current});
+
+                const processLabels = page.locator('#industryProcesses label');
+                const processText = (await processLabels.allTextContents()).join(' ');
+                expect(processText.length).toBeGreaterThan(0);
+
+                const checks = page.locator('#industryProcesses input[type="checkbox"]');
+                const count = await checks.count();
+                expect(count).toBeGreaterThan(0);
+                await checks.nth(0).check();
+
+                await page.locator('#tNext').click();
+                const painChecks = page.locator('#industryPainOptions input[type="checkbox"]');
+                expect(await painChecks.count()).toBeGreaterThan(0);
+                await painChecks.nth(0).check();
+                await page.locator('#painList').fill(s.pain);
+
+                await page.locator('#tNext').click();
+                await page.locator('[name="revenue"]').selectOption(await firstOption(page.locator('[name="revenue"]')));
+                await page.locator('[name="employees"]').selectOption(await firstOption(page.locator('[name="employees"]')));
+                await page.locator('[name="erpSpend"]').selectOption(await firstOption(page.locator('[name="erpSpend"]')));
+
+                await page.locator('#tNext').click();
+                const goals=page.locator('[name="goal"]');
+                expect(await goals.count()).toBeGreaterThan(0);
+                await goals.first().check();
+
+                await page.locator('#tGenerate').click();
+                await expect(page.locator('#transformResults')).toBeVisible();
+                await expect(page.locator('#tInputs')).toContainText(s.industry);
+                await expect(page.locator('#tInputs')).toContainText(s.current);
+
+                const saved = await page.evaluate(() => JSON.parse(sessionStorage.getItem('automationscan_transform') || '{}'));
+                expect(saved.industry).toBe(s.industry);
+                expect(saved.businessModel).toBeTruthy();
+                expect(saved.current).toBe(s.current);
+
+                await page.locator('#continueToWorkbench').click();
+                await page.waitForLoadState('networkidle');
+                await expect(page.locator('#wbIndustry')).toHaveValue(s.industry);
+                await expect(page.locator('#wbCurrent')).toHaveValue(s.current);
+              });
+            }
           });
 
           test('07 - Contact field by field and intercepted submission', async ({ page }) => {
@@ -428,6 +521,7 @@ jobs:
 
             const form = page.locator('#contactForm');
             const touched = await fillVisibleFormFields(page, form, 'contact');
+            await form.locator('[name="email"]').fill('uat-contact@example.com');
             expect(touched.some(x => x.name === 'name')).toBeTruthy();
             expect(touched.some(x => x.name === 'email')).toBeTruthy();
             expect(touched.some(x => x.name === 'subject')).toBeTruthy();
@@ -435,7 +529,7 @@ jobs:
             if (await form.locator('[name="consent"]').count()) await form.locator('[name="consent"]').check();
 
             await form.locator('button[type="submit"]').click();
-            await expect(page.locator('#contactStatus')).toContainText('submitted');
+            await expect(page.locator('#contactStatus')).toContainText('Thanks — your message has been submitted.');
             expect(errors).toEqual([]);
           });
           EOF
