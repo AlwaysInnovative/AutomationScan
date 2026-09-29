@@ -6,7 +6,7 @@ module.exports=async function(req,res){
  const url=process.env.SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!url||!key)return res.status(503).json({error:"journeys_not_configured"});
  try{
-  const r=await fetch(url+"/rest/v1/journey_templates?active=eq.true&select=id,name,summary,objective_prompt,entry_rules,stages,version&order=sort_order.asc",{headers:{apikey:key,Authorization:"Bearer "+key}});
+  const r=await fetch(url+"/rest/v1/journey_templates?active=eq.true&select=id,name,summary,objective_prompt,entry_rules,stages,context_rules,version&order=sort_order.asc",{headers:{apikey:key,Authorization:"Bearer "+key}});
   if(!r.ok)return res.status(502).json({error:"journey_catalog_unavailable"});
   return res.status(200).json({journeys:await r.json()});
  }catch(e){return res.status(500).json({error:"journey_catalog_error"});}
