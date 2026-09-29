@@ -53,6 +53,7 @@ async function load(){
   const page=location.pathname.endsWith("transformation-advisor.html")?"navigator":location.pathname.endsWith("transformation-workbench.html")?"workbench":"assessment";
   const fields=cfg.fields&&cfg.fields[page]||{};
   Object.keys(fields).forEach(function(key){
+    if(page==="assessment"&&key==="industry")return;
     const s=document.querySelector('[name="'+CSS.escape(key)+'"]');
     if(s)populate(s,fields[key]);
     const byId=document.getElementById(key);
