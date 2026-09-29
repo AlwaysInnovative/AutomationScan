@@ -140,4 +140,172 @@ window.enableAnalytics=function(){
       <p>These scenarios are examples, not customer case studies.</p>
     </div>
     <div class="demo-layout">
-      <div class="demo-list" id="demoList" aria-label="Illustrative scenarios"></div><div class="demo-panel" id="demoPanel"></div>
+      <div class="demo-list" id="demoList" aria-label="Illustrative scenarios"></div><div class="demo-panel" id="demoPanel"><p class="demo-loading">Loading illustrative examples…</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="guide-links" aria-labelledby="guide-links-title"><div class="wrap"><div class="section-head"><div><p class="eyebrow">AUTOMATION RESOURCES</p><h2 id="guide-links-title">Explore automation by business need.</h2></div><p>Practical guides to help you investigate repetitive work before choosing technology.</p></div><div class="guide-grid"><a href="guides/business-automation-assessment.html"><b>Business automation assessment</b><span>Map recurring work and prioritize what to investigate.</span></a><a href="guides/automation-roi-calculator.html"><b>Automation ROI</b><span>Build a directional business case for a workflow.</span></a><a href="guides/accounting-automation.html"><b>Accounting automation</b><span>Invoices, payments, reconciliation and reporting.</span></a><a href="guides/healthcare-automation.html"><b>Healthcare automation</b><span>Administrative workflows with human review.</span></a><a href="guides/real-estate-automation.html"><b>Real estate automation</b><span>Leads, CRM, documents and scheduling.</span></a><a href="guides/ecommerce-automation.html"><b>E-commerce automation</b><span>Orders, support, inventory and reporting.</span></a><a href="guides/logistics-automation.html"><b>Logistics automation</b><span>Updates, documents and operational coordination.</span></a><a href="guides/professional-services-automation.html"><b>Professional services automation</b><span>Projects, reporting, email and CRM administration.</span></a></div></div></section>
+
+<div class="ad-slot ad-top" data-ad-slot="top" aria-label="Advertisement"></div>
+<section class="scanner" id="scanner">
+  <div class="wrap scanner-head">
+    <div>
+      <p class="eyebrow eyebrow-light">FREE ASSESSMENT</p>
+      <h2>Tell us what you are trying to improve.</h2>
+      <p>Choose the path that fits your situation. Rough estimates are fine; the assessment turns your inputs into a practical discovery brief.</p>
+    </div>
+    <div class="privacy-card"><strong>Privacy first</strong><span>The assessment does not require an account. Do not enter confidential customer, financial or health information.</span></div>
+  </div>
+  <form id="scanForm" autocomplete="on">
+    <input type="hidden" name="scanSummary" id="scanSummary">
+    <p class="hidden" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></p>
+    <div class="formcard">
+      <div class="progress"><span id="progressText">Step 1 of 4</span><i id="progressBar"></i></div>
+
+      <fieldset class="step active">
+        <legend>Tell us about the business</legend>
+        <div class="field-grid two">
+          <label>Industry<select name="industry" required></select></label>
+          <label>Team size<select name="employees" required></select></label>
+        </div>
+        <div class="field-grid two">
+          <label>Revenue range<select name="revenue"></select></label>
+          <label>Customer type<select name="customerType"></select></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="step">
+        <legend>Where does your team's time go?</legend>
+        <p class="hint">Approximate hours per week. The goal is to see patterns, not produce timesheets.</p>
+        <div id="industryQuestions" class="industry-questions"></div><div class="hours">
+          <label>Data entry<input type="number" name="dataEntry" min="0" max="200" value="0"></label>
+          <label>Email / follow-ups<input type="number" name="email" min="0" max="200" value="0"></label>
+          <label>Invoices / payments<input type="number" name="invoices" min="0" max="200" value="0"></label>
+          <label>Customer support<input type="number" name="support" min="0" max="200" value="0"></label>
+          <label>Scheduling<input type="number" name="scheduling" min="0" max="200" value="0"></label>
+          <label>Reporting<input type="number" name="reporting" min="0" max="200" value="0"></label>
+          <label>Documents / admin<input type="number" name="documents" min="0" max="200" value="0"></label>
+          <label>Sales admin / CRM<input type="number" name="salesAdmin" min="0" max="200" value="0"></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="step">
+        <legend>How does work move today?</legend>
+        <label>Systems you use</label>
+        <div class="checks">
+          <label><input type="checkbox" name="tools" value="Excel">Excel</label>
+          <label><input type="checkbox" name="tools" value="Google Workspace">Google Workspace</label>
+          <label><input type="checkbox" name="tools" value="CRM">CRM</label>
+          <label><input type="checkbox" name="tools" value="Accounting">Accounting</label>
+          <label><input type="checkbox" name="tools" value="WhatsApp">WhatsApp</label>
+          <label><input type="checkbox" name="tools" value="ERP">ERP</label>
+          <label><input type="checkbox" name="tools" value="AI">AI</label>
+          <label><input type="checkbox" name="tools" value="None">None</label>
+        </div>
+        <div class="field-grid two">
+          <label>Copying information between systems<select name="copyPaste"></select></label>
+          <label>How repetitive is the work?<select name="repetition"></select></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="step">
+        <legend>What would you change first?</legend>
+        <div id="industryPainQuestions" class="industry-pain-questions"></div><label>Anything else that causes friction?<textarea name="pain" rows="4" maxlength="800" placeholder="Describe a recurring problem, delay, error or hand-off in your own words."></textarea></label>
+        <label>Main goal<select name="goal"></select></label>
+        <label>Email for your report <small>(optional)</small><input type="email" name="emailAddress" autocomplete="email" placeholder="you@company.com"></label>
+        <label class="consent-row"><input type="checkbox" name="consent" value="yes">I agree to receive my AutomationScan report and occasional product updates. <a href="privacy.html">Privacy</a></label>
+        <p class="form-note">You can complete the assessment without an email. Never enter confidential customer or financial information.</p>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" id="back" class="btn btn-light" hidden>← Back</button>
+        <button type="button" id="next" class="btn btn-teal">Continue →</button>
+        <button type="submit" id="submit" class="btn btn-copper" hidden>Generate my free report →</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+<section id="results" class="results hidden">
+  <div class="wrap">
+    <div class="report-letterhead" aria-hidden="true"><div><strong>Automation<span>Scan</span></strong><small>TRANSFORMATION DISCOVERY REPORT</small></div><span>CONFIDENTIAL — PREPARED FROM YOUR INPUTS</span></div>
+    <div class="resulthead">
+      <div><p class="eyebrow">YOUR BUSINESS VISIBILITY REPORT</p><h2>Now you can see where to look first.</h2><p id="sub"></p></div>
+      <div class="result-actions"><button id="downloadPdf" class="btn btn-copper">Save / download PDF</button><button id="print" class="btn btn-light">Print / save PDF</button></div>
+    </div>
+    <div class="resultbox">
+      <div class="score"><small>OPPORTUNITY SIGNAL</small><strong id="score">0</strong><span>/100</span><b id="label"></b></div>
+      <div class="result-summary"><span class="report-kicker">AUTOMATIONSCAN ASSESSMENT</span><h3>Estimated work worth investigating</h3><p class="big-range" id="range">0-0 hours/month</p><p class="fine">Directional estimate based on your answers. Validate the real process and economics before investing.</p></div>
+    </div>
+    <div class="report-meta" id="reportMeta"></div>
+    <div id="opportunities" class="opportunities"></div>
+    <section class="report-detail-section" id="reportDetails" aria-label="Full assessment details">
+      <div class="report-detail-head"><p class="eyebrow">FULL ASSESSMENT</p><h3>Industry, pain points and recommended automation paths</h3><p>This section records the diagnostic reasoning behind the shortlist so the report can be used as a starting brief for a real process review.</p></div>
+      <div id="executiveSummary" class="report-detail-grid"></div>
+      <div id="painPointSummary" class="report-detail-panel"></div>
+      <div id="recommendationDetails" class="recommendation-list"></div>
+      <div id="implementationGuidance" class="report-detail-grid"></div>
+      <div id="validationChecklist" class="report-detail-panel"></div>
+    </section>
+    <section class="analysis-dashboard" id="analysisDashboard" aria-label="Detailed analysis">
+      <div class="analysis-head">
+        <div><p class="eyebrow">DETAILED ANALYSIS</p><h3>Where the opportunity is concentrated</h3><p>Percentages show each category's share of the weekly hours you entered. They are diagnostic signals, not guaranteed savings.</p></div>
+      </div>
+      <div class="analysis-grid">
+        <div class="analysis-card">
+          <div class="analysis-card-head"><strong>Workload distribution</strong><span id="workloadTotal">0 hrs/week</span></div>
+          <div id="workloadChart" class="bar-chart" aria-label="Workload distribution chart"></div>
+        </div>
+        <div class="analysis-card">
+          <div class="analysis-card-head"><strong>Opportunity score breakdown</strong><span id="scoreCoverage">0%</span></div>
+          <div id="scoreBreakdown" class="score-breakdown"></div>
+        </div>
+      </div>
+      <div class="analysis-metrics" id="analysisMetrics"></div>
+      <div class="analysis-table-wrap">
+        <div class="analysis-card-head"><strong>Priority analysis</strong><span>Entered workload · share · investigation focus</span></div>
+        <div id="analysisTable" class="analysis-table"></div>
+      </div>
+    </section>
+    <div class="next-card">
+      <div><p class="eyebrow">NEXT STEP</p><h3>Take the shortlist into a real process review.</h3><p>Share the PDF with your operations lead, consultant or automation partner. It is designed to be a useful starting brief - not a black-box answer.</p></div>
+      <a class="btn btn-teal" href="guides/automation-assessment.html">Explore the automation guide →</a>
+    </div>
+    <p class="save-status" id="saveStatus" role="status"></p>
+    <div class="report-footer" aria-hidden="true"><span>AutomationScan · Business Automation Assessment</span><span>Directional analysis — validate against the real process before investment</span></div>
+  </div>
+</section>
+
+<div class="ad-slot ad-bottom" data-ad-slot="bottom" aria-label="Advertisement"></div>
+<section class="faq">
+  <div class="wrap">
+    <div class="section-head"><div><p class="eyebrow">QUESTIONS, ANSWERED</p><h2>Before you start</h2></div><p>A few important things to know about the assessment.</p></div>
+    <div class="faq-grid">
+      <details open><summary>What is AutomationScan?</summary><p>A free discovery tool for understanding repetitive business work and identifying automation opportunities worth investigating.</p></details>
+      <details><summary>Is this an AI consultant?</summary><p>No. The public scanner is a browser-based rules engine with lightweight text signal extraction. It does not claim to understand your business like a human consultant would.</p></details>
+      <details><summary>Does it automate anything automatically?</summary><p>No. It helps you see and prioritize opportunities. Your business decides what to implement, with which tools and at what cost.</p></details>
+      <details><summary>Is the score a guarantee?</summary><p>No. It is a directional signal based on your inputs, not a promise of savings or a technical automation assessment.</p></details>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="contact-strip"><div class="wrap contact-inner"><div><p class="eyebrow eyebrow-light">WORK WITH US</p><h2>Have a question, idea or automation project?</h2><p>Send a message. We’ll use the details you provide only to respond and follow up on your request.</p></div><a class="btn btn-copper" href="contact.html">Contact AutomationScan →</a></div></div>
+  <div class="wrap footer-grid">
+    <div><a class="brand" href="./"></a><p>Practical visibility for better business processes.</p></div>
+    <div><b>Product</b><a href="#scanner">Assessment</a><a href="transformation-advisor.html">Navigator</a><a href="transformation-workbench.html">Workbench</a><a href="contact.html">Contact</a></div>
+    <div><b>Trust</b></div>
+  </div>
+  <div class="wrap footer-bottom">© 2026 AutomationScan · Built to help teams see the work behind the work.</div>
+</footer>
+<section class="consent-banner" id="consentBanner" role="dialog" aria-label="Privacy choices" hidden>
+  <div><strong>Your privacy choices</strong><p>Optional analytics is used only after your choice. Advertising is disabled until a compliant Google ad-consent setup is configured and consent is obtained.</p></div>
+  <div class="consent-actions"><button type="button" id="consentReject" class="btn btn-light">Reject optional</button><button type="button" id="consentAccept" class="btn btn-copper">Accept optional</button></div>
+</section>
+
+<script src="api-config.js?v=20260927-1"></script>
+<script src="app.js?v=20260929-4"></script>
+</body>
+</html>
