@@ -217,7 +217,7 @@ async function setupExamples(){
  }catch(e){panel.textContent="Illustrative examples are temporarily unavailable.";console.warn("Examples unavailable",e);}
 }
 setupExamples();
-function setupExamples(){const tabs=[...document.querySelectorAll(".demo-tab")];if(!tabs.length)return;tabs.forEach(t=>{t.type="button";t.addEventListener("click",e=>{e.preventDefault();tabs.forEach(x=>x.classList.remove("active"));t.classList.add("active");renderDemo(t.dataset.demo);});});renderDemo(tabs.find(t=>t.classList.contains("active"))?.dataset.demo||"accounting");} setupExamples();
+
 show(0);
 
 
