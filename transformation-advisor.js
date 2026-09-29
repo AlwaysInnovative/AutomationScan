@@ -1,12 +1,12 @@
 (function(){
 "use strict";
-var form=document.getElementById("transformForm"),steps=[].slice.call(document.querySelectorAll(".t-step")),next=document.getElementById("tNext"),back=document.getElementById("tBack"),generate=document.getElementById("tGenerate");
+var form=document.getElementById("transformForm"),steps=[].slice.call(document.querySelectorAll(".t-step")),next=document.getElementById("tNext"),back=document.getElementById("tBack"),generate=document.getElementById("tGenerate"),industryProfiles=[];
 function el(id){return document.getElementById(id)} function value(n){var x=form&&form.querySelector('[name="'+n+'"]');return x?x.value.trim():""} function esc(v){return String(v==null?"":v).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function list(n){return value(n).split(/[\n,;]+/).map(function(x){return x.trim()}).filter(Boolean)}
 function showStep(n){n=Math.max(0,Math.min(steps.length-1,n));steps.forEach(function(s,i){s.classList.toggle("active",i===n)});if(el("tProgress"))el("tProgress").textContent="Step "+(n+1)+" of "+steps.length;if(el("tProgressBar"))el("tProgressBar").style.width=((n+1)/steps.length*100)+"%";if(back)back.hidden=n===0;if(next)next.hidden=n===steps.length-1;if(generate)generate.hidden=n!==steps.length-1;window._advisorStep=n}
 function valid(){var s=steps[window._advisorStep||0];if(!s)return true;var req=s.querySelectorAll("[required]");for(var i=0;i<req.length;i++)if(!req[i].checkValidity()){req[i].reportValidity();return false}return true}
 function renderReport(){
- var industry=value("industry"),processes=list("processText"),pains=list("painList"),candidates=list("candidateList"),goals=[].slice.call(form.querySelectorAll('[name="goal"]:checked')).map(function(x){return x.value});
+ var industry=value("industry"),processes=[].slice.call(form.querySelectorAll('[name="processes"]:checked')).map(function(x){return x.value}),pains=list("painList").concat([].slice.call(form.querySelectorAll('[name="painSignals"]:checked')).map(function(x){return x.value})),candidates=list("candidateList"),goals=[].slice.call(form.querySelectorAll('[name="goal"]:checked')).map(function(x){return x.value});
  var reqs=processes.map(function(p,i){return{id:"REQ-"+String(i+1).padStart(3,"0"),text:p,type:"Business",priority:i<3?"Must":"Should",process:p,acceptance:"Demonstrate the process using the customer's real scenario",gate:"Evidence / POC"}});
  var caps=processes.map(function(p){return{name:p,current:0,target:100}});
  var cands=candidates.map(function(name){return{name:name,capabilities:"",notes:"Customer-entered candidate; source and scope must be validated."}});
@@ -53,19 +53,28 @@ function renderReport(){
  var results=el("transformResults");if(results){results.classList.remove("hidden");results.scrollIntoView({behavior:"smooth"})}
  var data={industry:industry,businessModel:value("businessModel"),current:value("current"),processes:processes,pains:pains,candidates:candidates,goals:goals,savedAt:new Date().toISOString()};try{sessionStorage.setItem("automationscan_transform",JSON.stringify(data))}catch(e){}
 }
-async function loadDynamicOptions(){
- try{
-  var response=await fetch("api/options",{cache:"no-store"});
-  if(!response.ok)return;
-  var data=await response.json(),items=(data.options&&data.options.business_model)||[];
-  var select=form&&form.querySelector('[name="businessModel"]');
-  if(!select)return;
-  var current=select.value;
-  select.innerHTML='<option value="">Choose</option>'+items.map(function(x){return '<option value="'+esc(x.value)+'">'+esc(x.label)+'</option>'}).join("");
-  if(current)select.value=current;
- }catch(e){console.warn("Dynamic options unavailable",e);}
+function selectedIndustry(){
+ var term=value("industry").toLowerCase();
+ return industryProfiles.find(function(p){return p.name.toLowerCase()===term||(p.aliases||[]).some(function(a){return String(a).toLowerCase()===term})})||industryProfiles.find(function(p){return p.id==="generic"})||{name:"Other / custom",intro:"Describe the processes and controls specific to your business.",processes:[],pain_points:[]};
 }
+function renderIndustryQuestions(){
+ var p=selectedIndustry(),processBox=el("industryProcesses"),painBox=el("industryPainOptions"),intro=el("industryIntro");
+ if(intro)intro.textContent=p.intro||"Choose relevant processes and describe your own operating context.";
+ if(processBox)processBox.innerHTML=(p.processes||[]).map(function(x,i){return '<label class="capability-check"><input type="checkbox" name="processes" value="'+esc(x[0])+'"><span><b>'+esc(x[0])+'</b><small>'+esc(x[1])+'</small></span></label>'}).join("")||"<p>Describe your custom processes in the field below.</p>";
+ if(painBox)painBox.innerHTML=(p.pain_points||[]).map(function(x){return '<label class="capability-check"><input type="checkbox" name="painSignals" value="'+esc(x)+'"><span>'+esc(x)+'</span></label>'}).join("");
+}
+async function loadIndustryProfiles(){
+ try{
+  var response=await fetch("api/industries",{cache:"no-store"});if(!response.ok)throw new Error("industry_api_"+response.status);
+  var data=await response.json();industryProfiles=Array.isArray(data.profiles)?data.profiles:[];
+  var dl=el("industryOptions");if(dl)dl.innerHTML=industryProfiles.map(function(p){return '<option value="'+esc(p.name)+'"></option>'}).join("");
+  renderIndustryQuestions();
+ }catch(e){console.error("Industry questionnaires unavailable",e);if(el("industryIntro"))el("industryIntro").textContent="Industry questionnaire data could not load. Refresh or contact support before continuing.";}
+}
+el("industry")&&el("industry").addEventListener("input",renderIndustryQuestions);
+document.addEventListener("automationScanUIReady",loadIndustryProfiles);
+loadIndustryProfiles();
 if(next)next.onclick=function(){if(valid())showStep((window._advisorStep||0)+1)};if(back)back.onclick=function(){showStep((window._advisorStep||0)-1)};if(form)form.addEventListener("submit",function(e){e.preventDefault();if(!valid())return;try{renderReport();if(window.trackEvent)window.trackEvent("transformation_report_generated",{industry:value("industry")})}catch(err){console.error(err);alert("AutomationScan could not generate the report. Please refresh and try again.")}});
 var saveAssessment=document.getElementById("tSave");if(saveAssessment)saveAssessment.onclick=function(){try{var raw=sessionStorage.getItem("automationscan_transform")||"{}";var data=JSON.parse(raw);data.savedAt=new Date().toISOString();localStorage.setItem("automationscan_saved_assessment",JSON.stringify(data));var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="automationscan-assessment.json";a.click();URL.revokeObjectURL(u)}catch(e){alert("The assessment could not be saved in this browser.")}};
-var download=document.getElementById("tDownload");if(download)download.onclick=function(){window.print()};var print=document.getElementById("tPrint");if(print)print.onclick=function(){window.print()};showStep(0);loadDynamicOptions();
+var download=document.getElementById("tDownload");if(download)download.onclick=function(){window.print()};var print=document.getElementById("tPrint");if(print)print.onclick=function(){window.print()};showStep(0);
 })();
