@@ -116,12 +116,41 @@ function importApps(file){var reader=new FileReader();reader.onload=function(){v
 function journeyContext(){var p=state.profile||{},a=[];if(p.industry)a.push("Industry: "+p.industry);if(p.businessModel)a.push("Business model: "+p.businessModel);if(p.current)a.push("Platform: "+p.current);if(state.processes.length)a.push(state.processes.length+" processes");if(state.applications.length)a.push(state.applications.length+" applications");if(state.requirements.length)a.push(state.requirements.length+" requirements");if(state.candidates.length)a.push(state.candidates.length+" candidates");if(state.evidence.length)a.push(state.evidence.length+" evidence items");return a}
 function journeyActivate(key,preserveStage){var b=document.querySelector('[data-tab="'+key+'"]');if(b){state._preserveJourneyStage=!!preserveStage;b.click()}}
 function syncJourneyNav(){
- var allowed=(state.journeyTemplate&&state.journeyTemplate.stages||[]).map(function(s){return s.section;});
+ var stages=(state.journeyTemplate&&state.journeyTemplate.stages)||[],allowed=stages.map(function(s){return s.section;});
  document.querySelectorAll(".wb-nav button").forEach(function(b){
-   b.hidden=allowed.length>0&&!allowed.includes(b.dataset.tab);
+   var ix=allowed.indexOf(b.dataset.tab);
+   b.hidden=allowed.length>0&&ix<0;
+   if(ix>=0){
+     b.dataset.journeyIndex=ix;
+     b.classList.toggle("active",ix===Number(state.journeyStage||0));
+     b.classList.toggle("done",ix<Number(state.journeyStage||0));
+     b.setAttribute("aria-current",ix===Number(state.journeyStage||0)?"step":"false");
+     var label=b.querySelector(".wb-nav-label")||b;
+     if(!b.querySelector(".wb-nav-number")){
+       var txt=label.textContent.trim();
+       label.innerHTML='<span class="wb-nav-number">'+String(ix+1).padStart(2,"0")+'</span><span class="wb-nav-label">'+esc(txt)+'</span>';
+     }else{
+       b.querySelector(".wb-nav-number").textContent=String(ix+1).padStart(2,"0");
+     }
+     b.title=ix===Number(state.journeyStage||0)?"Current step":ix<Number(state.journeyStage||0)?"Completed step":"Next step";
+   }
  });
 }
-function journeyRender(){var j=state.journeyTemplate;if(!j||!$("journeyTitle"))return;$("journeyTitle").textContent=j.name;$("journeySummary").textContent=j.summary+" "+j.objective_prompt;var c=journeyContext();$("journeyContext").innerHTML=c.map(function(x){return'<span class="wb-context-pill">'+esc(x)+'</span>'}).join("")||'<span class="wb-context-pill">No previous context — start with Profile</span>';var st=j.stages||[],i=Number(state.journeyStage||0);$("journeyStages").innerHTML=st.map(function(s,n){return'<button type="button" aria-current="'+(n===i?'step':'false')+'" class="wb-stage '+(n===i?'active ':'')+(n<i?'done':'')+'" data-journey-index="'+n+'"><strong>'+String(n+1).padStart(2,'0')+'. '+esc(s.label)+'</strong><small>'+esc(s.why||"")+'</small></button>'}).join("");document.querySelectorAll("[data-journey-index]").forEach(function(b){b.onclick=function(){state.journeyStage=Number(b.dataset.journeyIndex);save();journeyActivate(st[state.journeyStage].section,true);journeyRender()}});syncJourneyNav();$("journeyNext").textContent=i>=st.length-1?"Review dossier":"Continue: "+(st[i]?st[i].label:"Profile")}
+function journeyRender(){
+ var j=state.journeyTemplate;if(!j||!$("journeyTitle"))return;
+ var st=j.stages||[],i=Number(state.journeyStage||0);
+ $("journeyTitle").textContent=j.name;
+ $("journeySummary").textContent=(j.summary||"")+" "+(j.objective_prompt||"");
+ var c=journeyContext();
+ $("journeyContext").innerHTML=c.map(function(x){return'<span class="wb-context-pill">'+esc(x)+'</span>'}).join("")||'<span class="wb-context-pill">No previous context — start with Profile</span>';
+ var stageName=st[i]?st[i].label:"Profile";
+ var nextName=st[i+1]?st[i+1].label:"Review dossier";
+ $("journeyStages").innerHTML='<div class="wb-path-intro"><strong>Follow this path from left to right.</strong><span>The journey controls which work areas you see. Switching journey changes the recommended path, not your saved information.</span></div>'+st.map(function(s,n){return'<button type="button" aria-current="'+(n===i?'step':'false')+'" class="wb-stage '+(n===i?'active ':'')+(n<i?'done ':'')+(n>i?'upcoming':'')+'" data-journey-index="'+n+'"><span class="wb-stage-number">'+String(n+1).padStart(2,"0")+'</span><strong>'+esc(s.label)+'</strong><small>'+esc(s.why||"")+'</small><em>'+(n===i?"YOU ARE HERE":n<i?"COMPLETED":n===i+1?"NEXT":"LATER")+'</em></button>'}).join("");
+ document.querySelectorAll("[data-journey-index]").forEach(function(b){b.onclick=function(){state.journeyStage=Number(b.dataset.journeyIndex);save();journeyActivate(st[state.journeyStage].section,true);journeyRender();window.scrollTo({top:document.getElementById("journeyHub").offsetTop-20,behavior:"smooth"})}});
+ syncJourneyNav();
+ $("journeyNext").textContent=i>=st.length-1?"Review dossier":"Continue to "+nextName;
+ $("journeyNext").setAttribute("aria-label",i>=st.length-1?"Review dossier":"Continue to "+nextName);
+}
 function journeyScore(j){
  var p=state.profile||{},r=j.context_rules||{},score=Number(r.priority)||0,hay=[String(p.industry||""),String(p.businessModel||""),String(p.current||""),String(p.revenueModel||"")].map(function(x){return x.toLowerCase()});
  (r.industry_ids||[]).forEach(function(x){if(hay[0]===String(x).toLowerCase())score+=20});
@@ -136,7 +165,7 @@ function bind(){
  bound=true;
  var industryField=$("wbIndustry"); if(industryField && industryField.tagName==="SELECT" && !industryField.options.length){industryField.innerHTML="<option value=\"\">Enter or choose an industry</option>";}
  document.querySelectorAll("[data-tab]").forEach(function(b){b.onclick=function(){document.querySelectorAll(".wb-nav button").forEach(function(x){x.classList.remove("active")});b.classList.add("active");document.querySelectorAll(".wb-panel").forEach(function(x){x.classList.remove("active")});var panel=$("tab-"+b.dataset.tab);if(panel)panel.classList.add("active");if(b.dataset.tab==="report")report();if(!state._preserveJourneyStage&&state.journeyTemplate){var st=state.journeyTemplate.stages||[],ix=st.findIndex(function(s){return s.section===b.dataset.tab});if(ix>=0){state.journeyStage=ix;save();journeyRender()}}state._preserveJourneyStage=false;}});
- $("journeySelect").onchange=function(){var j=(window.AutomationScanJourneys||[]).find(function(x){return x.id===this.value},this);if(!j)return;state.journeyId=j.id;state.journeyTemplate=j;state.journeyStage=0;save();journeyRender();journeyActivate((j.stages||[])[0].section,true);track("journey_switched",{journey:j.id})};$("journeyNext").onclick=function(){var j=state.journeyTemplate;if(!j)return;var st=j.stages||[],i=Number(state.journeyStage||0);if(i<st.length-1){state.journeyStage=i+1;save();journeyActivate(st[i+1].section,true);journeyRender()}else journeyActivate("report")};$("journeyStartOver").onclick=function(){state.journeyStage=0;save();journeyActivate((state.journeyTemplate?.stages||[])[0]?.section||"profile",true);journeyRender()}; $("cloudSave").onclick=cloudSave;$("cloudLoad").onclick=cloudLoad;
+ $("journeySelect").onchange=function(){var j=(window.AutomationScanJourneys||[]).find(function(x){return x.id===this.value},this);if(!j)return;state.journeyId=j.id;state.journeyTemplate=j;state.journeyStage=0;save();journeyRender();journeyActivate((j.stages||[])[0].section,true);track("journey_switched",{journey:j.id})};$("journeyNext").onclick=function(){var j=state.journeyTemplate;if(!j)return;var st=j.stages||[],i=Number(state.journeyStage||0);if(i<st.length-1){state.journeyStage=i+1;save();journeyActivate(st[i+1].section,true);journeyRender()}else journeyActivate("report")};$("journeyStartOver").onclick=function(){state.journeyStage=0;save();journeyActivate((state.journeyTemplate?.stages||[])[0]?.section||"profile",true);journeyRender();window.scrollTo({top:document.getElementById("journeyHub").offsetTop-20,behavior:"smooth"})}; $("cloudSave").onclick=cloudSave;$("cloudLoad").onclick=cloudLoad;
  $("saveProfile").onclick=function(){state.profile={industry:val("wbIndustry").trim(),current:val("wbCurrent"),businessModel:val("wbBusiness"),scale:val("wbScale"),revenueModel:val("wbRevenue"),fulfilmentModel:val("wbFulfilment"),deliveryModel:val("wbDelivery"),regulatoryIntensity:val("wbRegulatory"),appetite:val("wbAppetite"),horizon:val("wbHorizon"),goals:val("wbGoals"),pain:val("wbPain"),integration:val("wbIntegration"),custom:val("wbCustom"),erpSpend:val("wbErpSpend")};save();renderProfileOut();track("workbench_profile_saved")};
  $("loadProfile").onclick=function(){var p=state.profile;var map={industry:"wbIndustry",current:"wbCurrent",businessModel:"wbBusiness",scale:"wbScale",revenueModel:"wbRevenue",fulfilmentModel:"wbFulfilment",deliveryModel:"wbDelivery",regulatoryIntensity:"wbRegulatory",appetite:"wbAppetite",horizon:"wbHorizon",goals:"wbGoals",pain:"wbPain",integration:"wbIntegration",custom:"wbCustom",erpSpend:"wbErpSpend"};Object.keys(map).forEach(function(k){set(map[k],p[k])});renderProfileOut()};
  $("addProcess").onclick=function(){var x={name:val("pName").trim(),volume:Math.max(0,Number(val("pVolume"))||0),minutes:Math.max(0,Number(val("pMinutes"))||0),exceptions:Math.min(100,Math.max(0,Number(val("pExceptions"))||0)),errors:Math.min(100,Math.max(0,Number(val("pErrors"))||0)),human:val("pHuman"),notes:val("pNotes")};if(!x.name)return alert("Enter a process name.");x.treatment=x.human==="High"?"Keep human / simplify":"Automate / simplify";if(x.exceptions>=20||x.errors>=10)x.treatment="Simplify / standardise first";state.processes.push(x);save();renderProcesses()};
