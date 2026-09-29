@@ -30,6 +30,13 @@ async function load(){
     const item=nav.find(function(x){return x.key==="contact";});
     if(item){contact.href=item.href;contact.textContent=item.label;}
   }
+  const footer=cfg.navigation&&cfg.navigation.footer;
+  if(footer){
+    document.querySelectorAll("footer .brand").forEach(function(a){if(footer.brand){a.href=footer.brand.href;a.textContent=footer.brand.label;}});
+    const cols=document.querySelectorAll("footer .footer-grid>div");
+    if(cols[1]&&Array.isArray(footer.explore)){cols[1].innerHTML="<b>Explore</b>";footer.explore.forEach(function(item){const a=document.createElement("a");a.href=item.href;a.textContent=item.label;cols[1].appendChild(a);});}
+    if(cols[2]&&Array.isArray(footer.trust)){cols[2].innerHTML="<b>Trust</b>";footer.trust.forEach(function(item){const a=document.createElement("a");a.href=item.href;a.textContent=item.label;cols[2].appendChild(a);});}
+  }
   const cta=document.querySelector("header .navcta");
   if(cta&&cfg.navigation&&cfg.navigation.cta){
     cta.href=cfg.navigation.cta.href;
