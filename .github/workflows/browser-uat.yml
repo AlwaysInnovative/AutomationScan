@@ -236,7 +236,9 @@ jobs:
                 const printed = await page.evaluate(() => {
                   let n = 0;
                   window.print = () => { n++; };
-                  document.getElementById('downloadPdf')?.click();
+                  const button = document.getElementById('downloadPdf');
+                  if (!button) return -1;
+                  button.click();
                   return n;
                 });
                 expect(printed).toBe(1);
@@ -508,7 +510,7 @@ jobs:
                 const checks = page.locator('#industryProcesses input[type="checkbox"]');
                 const count = await checks.count();
                 expect(count).toBeGreaterThan(0);
-                await checks.nth(0).scrollIntoViewIfNeeded();
+                await expect(checks.nth(0)).toBeVisible({timeout:5000});
                 await checks.nth(0).check();
 
                 await page.locator('#tNext').click();
