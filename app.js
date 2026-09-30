@@ -10,6 +10,13 @@ function captureLeadSource(){
   try{if(!sessionStorage.getItem("automationscan_source"))sessionStorage.setItem("automationscan_source",JSON.stringify(source));}catch(e){}
   return source;
 }
+if(location.pathname.endsWith("/index.html")||location.pathname==="/"){
+  try{
+    sessionStorage.removeItem("automationScanAssessment");
+    sessionStorage.removeItem("automationScanReportHtml");
+    sessionStorage.removeItem("automationScanReportGenerated");
+  }catch(e){}
+}
 const leadSource=captureLeadSource();
 track("scan_page_view",{page_location:location.pathname,utm_source:leadSource.utm_source||"(direct)",utm_medium:leadSource.utm_medium||"(none)"});
 
