@@ -120,7 +120,7 @@ function renderSelection(){
  if(!state.profile.industry){$("selectOut").innerHTML="<div class='wb-note'>Save the transformation profile before running the investigation set.</div>";return}
  var p=state.profile, ctx={industry:p.industry,businessModel:p.businessModel,current:p.current,scale:p.scale,custom:p.custom,customProcesses:p.customProcesses,integration:p.integration,goals:p.goals,revenueModel:p.revenueModel,fulfilmentModel:p.fulfilmentModel,deliveryModel:p.deliveryModel,regulatoryIntensity:p.regulatoryIntensity,erpSpend:p.erpSpend,processes:state.processes.map(function(x){return x.name}),pains:p.pain?[p.pain]:[],requirements:state.requirements,capabilities:state.capabilities,evidence:state.evidence,candidates:state.candidates};
  var rows=E.shortlist?E.shortlist(ctx):[];
- state.selection=rows.slice(0,5).map(function(x){return {name:x.name,score:x.score,processHits:x.processHits||[],painHits:x.painHits||[],industryFit:x.industryFit,continuity:x.continuity}})
+ state.selection=rows.slice(0,5).map(function(x){return {name:x.name,score:x.score,explanation:x.explanation||[],processHits:x.processHits||[],painHits:x.painHits||[],industryFit:x.industryFit,continuity:x.continuity}})
  renderList("selectOut",state.selection,["Investigation candidate","Signal","Why it surfaced","Evidence still needed"],function(x){
  return[esc(x.name),esc(x.score)+"/100",esc((x.explanation||[]).join("; ")), '<span class="wb-tag">Validate with evidence / POC</span>']})
 }
