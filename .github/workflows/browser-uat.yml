@@ -339,7 +339,8 @@ jobs:
                 expect(printed).toBe(1);
 
                 await page.locator('#continueToWorkbench').click();
-                await page.waitForLoadState('networkidle');
+                await page.waitForLoadState('domcontentloaded');
+                await page.waitForSelector('#wbIndustry', {state:'visible', timeout:15000});
                 await expect(page.locator('#wbIndustry')).toHaveValue(profile.name);
               });
             }
