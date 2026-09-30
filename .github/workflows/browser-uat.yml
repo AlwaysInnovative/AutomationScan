@@ -175,7 +175,7 @@ jobs:
 
             for (const profile of data.profiles) {
               await test.step('Assessment scenario: ' + profile.name, async () => {
-                await page.evaluate(() => { sessionStorage.clear(); });
+                await page.evaluate(() => { try { sessionStorage.clear(); } catch (e) {} });
                 await page.goto(base + '/', {waitUntil:'networkidle'});
                 const form = page.locator('#scanForm');
                 await expect(form).toBeVisible();
@@ -252,6 +252,7 @@ jobs:
           });
 
           test('04 - Navigator: every industry, every step, every visible field', async ({ page, request }) => {
+            const errors = installErrorCapture(page);
             const industryData = await (await request.get(base + '/api/industries')).json();
             const ui = await (await request.get(base + '/api/ui-config')).json();
             const navigatorFields = Object.keys(ui.config.fields.navigator || {});
