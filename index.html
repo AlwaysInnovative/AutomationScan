@@ -41,7 +41,7 @@ window.enableAnalytics=function(){
 };
 </script>
 </head>
-<body>
+<body><div id="cookie-consent" class="consent-banner" role="dialog" aria-label="Privacy choices"><strong>Privacy choices</strong><p>Analytics is optional. You can continue without analytics.</p><button type="button" id="consentAccept">Allow analytics</button><button type="button" id="consentDecline">Continue without analytics</button><a href="privacy.html">Privacy policy</a></div>
 <header class="site-header">
   <div class="wrap nav">
     <a class="brand" href="./"></a>
@@ -298,5 +298,7 @@ window.enableAnalytics=function(){
 <script src="api-config.js?v=20260927-1"></script>
 <script src="decision-engine.js?v=20261001-1"></script>
 <script src="app.js?v=20260930-3"></script>
-</body>
+<script>
+(function(){function done(v){try{localStorage.setItem("as-analytics-consent",v)}catch(e){}window.__analyticsConsent=v;var b=document.getElementById("cookie-consent");if(b)b.hidden=true;if(v==="granted"&&window.enableAnalytics)window.enableAnalytics()}document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("cookie-consent");if(!b)return;var v=null;try{v=localStorage.getItem("as-analytics-consent")}catch(e){}if(v)done(v);else b.hidden=false;var a=document.getElementById("consentAccept"),d=document.getElementById("consentDecline");if(a)a.onclick=function(){done("granted")};if(d)d.onclick=function(){done("denied")}})})();
+</script></body>
 </html>
