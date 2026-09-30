@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex,nofollow">
 <link rel="canonical" href="https://automation-scan-neon.vercel.app/transformation-workbench.html">
 <meta name="description" content="AutomationScan Transformation Workbench: evidence, process, application portfolio, vendor investigation, TCO, RFP, POC, governance and roadmap.">
-<link rel="stylesheet" href="./site.css?v=20261001-2">
+<link rel="stylesheet" href="./site.css?v=20261001-3">
 <title>AutomationScan | Transformation Workbench</title>
 <style>
 .workbench{background:#f5f3ed;padding:55px 0 90px}.wb-grid{display:grid;grid-template-columns:230px 1fr;gap:20px}.wb-nav{position:sticky;top:18px;align-self:start;background:#102a32;color:#fff;padding:14px;border-radius:6px}.wb-nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#dce7e5;padding:11px 12px;border-radius:5px;cursor:pointer;font-weight:750}.wb-nav button.active,.wb-nav button:hover{background:#1d4b54}.wb-main{min-width:0}.wb-panel{display:none;background:#fff;border:1px solid #ddd9cf;padding:28px;border-radius:6px;box-shadow:0 8px 28px #102a320d}.wb-panel.active{display:block}.wb-panel h2{font-family:Georgia,serif;font-size:31px;font-weight:500;margin:0 0 8px}.wb-panel>p{color:#667277}.wb-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:22px 0}.wb-form label{font-size:12px;font-weight:800;color:#33434a}.wb-form input,.wb-form select,.wb-form textarea{display:block;width:100%;margin-top:6px;padding:11px;border:1px solid #d5d8d4;border-radius:5px;background:#fff;font:inherit}.wb-form textarea{min-height:95px}.wb-actions{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.wb-btn{border:0;border-radius:5px;padding:11px 15px;font-weight:850;cursor:pointer}.wb-primary{background:#bd6b42;color:#fff}.wb-secondary{background:#176b70;color:#fff}.wb-light{background:#f2f0e9;color:#26363d}.wb-output{margin-top:20px}.wb-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.wb-kpi{border:1px solid #ddd9cf;padding:15px;background:#faf9f5}.wb-kpi small{display:block;color:#7a8588;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.wb-kpi strong{display:block;font-size:26px;margin-top:5px}.wb-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:12px}.wb-table th,.wb-table td{padding:10px;border-bottom:1px solid #e2dfd7;text-align:left;vertical-align:top}.wb-table th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#667277}.wb-tag{display:inline-block;padding:4px 7px;border-radius:12px;background:#e7efec;font-size:10px;font-weight:800}.wb-note{background:#f4f0e7;border-left:3px solid #bd6b42;padding:12px;margin-top:15px;font-size:12px}.wb-drop{border:2px dashed #c9c5bb;padding:20px;text-align:center;margin-top:12px;border-radius:5px}.wb-checks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.wb-checks label{border:1px solid #ddd9cf;padding:10px;font-size:12px}.wb-checks input{margin-right:7px}.wb-list{display:grid;gap:9px}.wb-card{border:1px solid #ddd9cf;padding:14px;background:#fcfbf8}.wb-card strong{display:block}.wb-card small{color:#6c777b}.hero-small{padding:95px 0 45px;background:#102a32;color:#fff}.hero-small h1{font-family:Georgia,serif;font-size:clamp(40px,5vw,65px);font-weight:500;margin:8px 0}.hero-small p{max-width:800px;color:#c8d7d5}
@@ -81,7 +81,7 @@
 </article>
 
 <article class="wb-panel" id="tab-apps">
-<p class="eyebrow">APPLICATION PORTFOLIO</p><h2>Application inventory & rationalisation</h2><p>Build a simple application portfolio without requiring a connector. Import CSV later when the inventory is available.</p>
+<p class="eyebrow">APPLICATION PORTFOLIO</p><h2>Application inventory & rationalisation</h2><p>Build a simple application portfolio without requiring a connector. You can enter records manually or use the complete Excel workbook for bulk intake.</p>
 <div class="wb-form">
 <label>Application<input id="aName" placeholder="CRM / ERP / WMS / custom app"></label>
 <label>Annual cost<input id="aCost" type="number" min="0"></label>
@@ -92,7 +92,7 @@
 <label>Lifecycle<select id="aLifecycle"></select></label>
 <label>Integration complexity<select id="aIntegration"></select></label>
 </div>
-<div class="wb-actions"><button class="wb-btn wb-primary" id="addApp">Add application</button><button class="wb-btn wb-light" id="importApps">Import CSV</button><input id="appFile" type="file" accept=".csv,text/csv" hidden></div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addApp">Add application</button><span class="wb-note">For bulk intake, use the complete Excel workbook above.</span></div>
 <div id="appsOut"></div>
 </article>
 
