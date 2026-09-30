@@ -152,10 +152,9 @@ function renderResult(){
  }
  document.getElementById("results").classList.remove("hidden");
  document.getElementById("results").scrollIntoView({behavior:"smooth"});
- submitLeadIfConsented(r,top);
 }
 
-function generateReport(){
+async function generateReport(){
   try{
     if(!form){throw new Error("Assessment form was not found.");}
     if(!valid()) return;
@@ -166,6 +165,9 @@ function generateReport(){
     sessionStorage.setItem("automationScanReportHtml",report.innerHTML);
     try{const result=calc();const opportunities=Object.entries(result.h).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,6);sessionStorage.setItem("automationScanAssessment",JSON.stringify({industry:result.industry,goal:result.goal,score:result.score,coverage:result.coverage,workload:result.h,selectedPainPoints:result.selectedPainPoints,topOpportunities:opportunities.map(x=>({name:x[0],hours:x[1]})),tools:result.tools,source:"automation-assessment",savedAt:new Date().toISOString()}));}catch(e){console.warn("Assessment handoff save failed",e)}
     sessionStorage.setItem("automationScanReportGenerated","1");
+    const leadResult=calc();
+    const leadTop=Object.entries(leadResult.h).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    await submitLeadIfConsented(leadResult,leadTop);
     window.location.href="report.html";
   }catch(err){
     console.error("AutomationScan report generation failed:",err);
