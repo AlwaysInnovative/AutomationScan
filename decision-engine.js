@@ -67,14 +67,15 @@ function maturity(ctx){
 }
 function portfolio(ctx){
  return (ctx.applications||[]).map(function(a){
-  var w=ctx.weights||{value:1,tech:1,usage:1,redundancy:1,lifecycle:1,integration:1},risk=0;
+  var w=ctx.weights||(ctx.engineConfig&&ctx.engineConfig.portfolio&&ctx.engineConfig.portfolio.weights)||{value:1,tech:1,usage:1,redundancy:1,lifecycle:1,integration:1},risk=0;
   risk+=(a.value==="Low"||a.value==="Unknown"?2:0)*Number(w.value||1);
   risk+=(a.tech==="Legacy"||a.tech==="Fragile"?2:0)*Number(w.tech||1);
   risk+=(a.usage==="Low"||a.usage==="Unknown"?1:0)*Number(w.usage||1);
   risk+=(a.redundancy==="Duplicate"?2:a.redundancy==="Possible overlap"?1:0)*Number(w.redundancy||1);
   risk+=(a.lifecycle==="End of life"?2:a.lifecycle==="At risk"?1:0)*Number(w.lifecycle||1);
   risk+=(a.integration==="High"?1:0)*Number(w.integration||1);
-  return {application:a,state:risk>=7?"Replace / consolidate":risk>=4?"Modernise / assess":risk>=2?"Watch / rationalise":"Keep / assess",risk:Math.round(risk*10)/10};
+  var pc=ctx.engineConfig&&ctx.engineConfig.portfolio||{},th=pc.thresholds||{},st=pc.states||{};
+    return {application:a,state:risk>=(Number(th.replace)||7)?(st.replace||"Replace / consolidate"):risk>=(Number(th.modernise)||4)?(st.modernise||"Modernise / assess"):risk>=(Number(th.watch)||2)?(st.watch||"Watch / rationalise"):(st.keep||"Keep / assess"),risk:Math.round(risk*10)/10};
  });
 }
 function evidence(ctx,short){
