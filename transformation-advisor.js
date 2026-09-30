@@ -11,8 +11,13 @@ function renderReport(){
  var caps=processes.map(function(p){return{name:p,current:0,target:100}});
  var cands=candidates.map(function(name){return{name:name,capabilities:"",notes:"Customer-entered candidate; source and scope must be validated."}});
  var ctx={industry:industry,businessModel:value("businessModel"),current:value("current"),processes:processes,requirements:reqs,capabilities:caps,candidates:cands,evidence:[]};
- var scores=window.AutomationScanDecisionEngine?window.AutomationScanDecisionEngine.shortlist(ctx):[];
- var maturity=window.AutomationScanDecisionEngine?window.AutomationScanDecisionEngine.maturity(ctx):{score:0,name:"Not enough data"};
+ var scores=[],maturity={score:0,name:"Not enough data"};
+ try{
+   if(window.AutomationScanDecisionEngine){
+     scores=window.AutomationScanDecisionEngine.shortlist(ctx)||[];
+     maturity=window.AutomationScanDecisionEngine.maturity(ctx)||maturity;
+   }
+ }catch(engineError){console.warn("Decision engine fallback",engineError);}
  var score=Math.min(100,Math.round(processes.length*8+pains.length*5+goals.length*4+(value("current")?10:0)+(value("businessModel")?10:0)));
  var interpretation=score>=70?"There is a strong case for deeper discovery":score>=45?"There are several areas worth investigating":"This is an early-stage view — more business information will improve the assessment";
  if(el("tResultTitle"))el("tResultTitle").textContent="Customer-defined transformation assessment";
