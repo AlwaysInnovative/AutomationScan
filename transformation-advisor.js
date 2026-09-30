@@ -18,8 +18,14 @@ function renderReport(){
      maturity=window.AutomationScanDecisionEngine.maturity(ctx)||maturity;
    }
  }catch(engineError){console.warn("Decision engine fallback",engineError);}
- var score=Math.min(100,Math.round(processes.length*8+pains.length*5+goals.length*4+(value("current")?10:0)+(value("businessModel")?10:0)));
- var interpretation=score>=70?"There is a strong case for deeper discovery":score>=45?"There are several areas worth investigating":"This is an early-stage view — more business information will improve the assessment";
+ var signalInputs=[
+   {key:"businessContext",score:(value("businessModel")?100:0)+(value("current")?100:0),weight:1},
+   {key:"processScope",score:Math.min(100,processes.length*20),weight:1},
+   {key:"painSignals",score:Math.min(100,pains.length*20),weight:1},
+   {key:"desiredOutcomes",score:Math.min(100,goals.length*20),weight:1}
+ ];
+ var score=window.AutomationScanDecisionEngine&&window.AutomationScanDecisionEngine.weightedScore?window.AutomationScanDecisionEngine.weightedScore(signalInputs,{businessContext:1,processScope:1,painSignals:1,desiredOutcomes:1}):0;
+ var interpretation=score===0?"Insufficient customer evidence":score<40?"Early discovery — add more customer evidence":score<70?"Discovery signal — validate the recorded business evidence":"Discovery signal — proceed to evidence-led validation";
  if(el("tResultTitle"))el("tResultTitle").textContent="Customer-defined transformation assessment";
  if(el("tResultSub"))el("tResultSub").textContent="A practical summary of your business situation, the areas worth investigating first, and the questions to take into your next technology or process discussion.";
  if(el("tScore"))el("tScore").textContent=score;
