@@ -78,16 +78,19 @@ else if(document.readyState==="loading")document.addEventListener("DOMContentLoa
 function calc(){
  const ind=industryData();
  const dynamicHours=ind.extra||{};
- const h={"Data entry":Math.max(n("dataEntry"),Number(dynamicHours.dataEntry)||0),"Email / follow-ups":Math.max(n("email"),Number(dynamicHours.email)||0),"Transactions":Math.max(n("invoices"),Number(dynamicHours.transactions)||0),"Customer support":Math.max(n("support"),Number(dynamicHours.support)||0),"Scheduling":Math.max(n("scheduling"),Number(dynamicHours.scheduling)||0),"Reporting":Math.max(n("reporting"),Number(dynamicHours.reporting)||0),"Documents / admin":Math.max(n("documents"),Number(dynamicHours.documents)||0),"Sales admin / CRM":Math.max(n("salesAdmin"),Number(dynamicHours.salesAdmin)||0)};
+ const cats=(window.AutomationScanUI.config&&window.AutomationScanUI.config.assessment&&window.AutomationScanUI.config.assessment.workCategories)||[];
+ const h={};cats.forEach(function(c){h[c.label]=Math.max(n(c.key),Number(dynamicHours[c.key])||0)});
  const total=Object.values(h).reduce((a,b)=>a+b,0);
- const copy={Rarely:0,Sometimes:5,Often:12,Constantly:20}[form.elements.copyPaste.value]||0;
- const rep={Low:0,Medium:6,High:12,"Very high":18}[form.elements.repetition.value]||0;
+ const scoreCfg=(window.AutomationScanUI.config&&window.AutomationScanUI.config.assessment)||{};
+ const copyMap=scoreCfg.copyPasteScores||{},repMap=scoreCfg.repetitionScores||{};
+ const copy=Number(copyMap[form.elements.copyPaste.value]||0),rep=Number(repMap[form.elements.repetition.value]||0);
  const emp=n("employees");
  const pain=((form.elements.pain.value||"")+" "+ind.painChoices.join(" ")).toLowerCase();
- const signals=[["copy|paste|re-enter|retype",6],["excel|spreadsheet|csv",5],["email|inbox|follow-up|remind",5],["invoice|bill|payment|receipt",5],["crm|lead|pipeline",5],["schedule|appointment|calendar|booking",5],["support|ticket|faq|question",5],["report|dashboard|monthly|weekly",5]];
- let textPoints=0;signals.forEach(([rx,p])=>{if(new RegExp(rx).test(pain))textPoints+=p});
+ const signals=scoreCfg.signalRules||[];
+ let textPoints=0;signals.forEach(function(rule){try{if(new RegExp(rule.pattern,"i").test(pain))textPoints+=Number(rule.points)||0}catch(e){}});
+ const engineCfg=scoreCfg.scoring||{};
  const scoreResult=window.AutomationScanDecisionEngine&&window.AutomationScanDecisionEngine.automationOpportunity
-   ?window.AutomationScanDecisionEngine.automationOpportunity({hours:h,copy:copy*5,repetition:rep*5,teamSignal:Math.min(100,emp/8),textSignal:Math.min(100,textPoints*5)})
+   ?window.AutomationScanDecisionEngine.automationOpportunity({hours:h,copy:copy*5,repetition:rep*5,teamSignal:Math.min(100,emp/8),textSignal:Math.min(100,textPoints*5)},engineCfg)
    :{score:0,components:{}};
  let score=scoreResult.score;
  const monthly=Math.min(total,total*.45+copy/8+rep/8+textPoints/8)*4.33;
@@ -96,7 +99,7 @@ function calc(){
  const textPointsCapped=Math.min(18,textPoints); const coverage=Math.round(((Object.values(h).filter(x=>x>0).length/8)+(pain.length>20?1:0)+(tools.length?1:0))/3*100);
  return {h,total,copy,rep,emp,textPoints:textPointsCapped,scoreResult,score,low,high,label:score>=75?"High opportunity signal":score>=55?"Moderate opportunity signal":"Early opportunity signal",industry:form.elements.industry.value,goal:form.elements.goal.value,pain,tools,coverage,industryProfile:ind.profile,industryHours:ind.extra,selectedPainPoints:ind.painChoices};
 }
-const ideas={"Data entry":"data capture and document workflows","Email / follow-ups":"email triage and follow-up sequences","Transactions":"order validation, payment, fulfilment, exception and audit steps","Invoices / payments":"invoice extraction, matching and approval workflows","Customer support":"FAQ, ticket routing and response assistance","Scheduling":"online scheduling and reminders","Reporting":"automated reports and exception alerts","Documents / admin":"document generation, approvals and filing","Sales admin / CRM":"lead capture, enrichment and CRM follow-ups"};
+const ideas=new Proxy({}, {get:function(_,key){var cats=(window.AutomationScanUI.config&&window.AutomationScanUI.config.assessment&&window.AutomationScanUI.config.assessment.workCategories)||[];var c=cats.find(function(x){return x.label===key});return c&&c.idea||"Map the current workflow and validate the repeatable steps.";}});
 
 function buildReport(){
  const r=calc();
