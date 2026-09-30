@@ -94,7 +94,7 @@ function calc(){
  const low=Math.max(2,Math.round(monthly*.65)),high=Math.max(low+2,Math.round(monthly*1.15));
  const tools=[...form.querySelectorAll('input[name="tools"]:checked')].map(x=>x.value);
  const textPointsCapped=Math.min(18,textPoints); const coverage=Math.round(((Object.values(h).filter(x=>x>0).length/8)+(pain.length>20?1:0)+(tools.length?1:0))/3*100);
- return {h,total,copy,rep,emp,textPoints:textPointsCapped,score,low,high,label:score>=75?"High opportunity signal":score>=55?"Moderate opportunity signal":"Early opportunity signal",industry:form.elements.industry.value,goal:form.elements.goal.value,pain,tools,coverage,industryProfile:ind.profile,industryHours:ind.extra,selectedPainPoints:ind.painChoices};
+ return {h,total,copy,rep,emp,textPoints:textPointsCapped,scoreResult,score,low,high,label:score>=75?"High opportunity signal":score>=55?"Moderate opportunity signal":"Early opportunity signal",industry:form.elements.industry.value,goal:form.elements.goal.value,pain,tools,coverage,industryProfile:ind.profile,industryHours:ind.extra,selectedPainPoints:ind.painChoices};
 }
 const ideas={"Data entry":"data capture and document workflows","Email / follow-ups":"email triage and follow-up sequences","Transactions":"order validation, payment, fulfilment, exception and audit steps","Invoices / payments":"invoice extraction, matching and approval workflows","Customer support":"FAQ, ticket routing and response assistance","Scheduling":"online scheduling and reminders","Reporting":"automated reports and exception alerts","Documents / admin":"document generation, approvals and filing","Sales admin / CRM":"lead capture, enrichment and CRM follow-ups"};
 
@@ -116,11 +116,11 @@ function renderAnalysis(r,top){
    return '<div class="bar-row"><div class="bar-label"><span>'+escapeHtml(name)+'</span><b>'+h+'h · '+pct+'%</b></div><div class="bar-track"><i style="width:'+Math.max(4,h/max*100)+'%"></i></div></div>';
  }).join(""):'<p class="analysis-empty">No weekly hours were entered. Run the scan again with rough estimates.</p>';
  const scoreParts=[
-   ["Weekly workload",Math.min(45,Math.round(Math.min(45,r.total*1.6))),45],
-   ["Copy / paste friction",r.copy,20],
-   ["Repetition level",r.rep,18],
-   ["Team-size signal",Math.min(15,Math.round(r.emp/8)),15],
-   ["Text signals",Math.min(18,r.textPoints||0),18]
+   ["Weekly workload",r.scoreResult?.components?.workload||0,45],
+   ["Copy / paste friction",r.scoreResult?.components?.copy||0,20],
+   ["Repetition level",r.scoreResult?.components?.repetition||0,18],
+   ["Team-size signal",r.scoreResult?.components?.team||0,15],
+   ["Text signals",r.scoreResult?.components?.text||0,18]
  ];
  document.getElementById("scoreBreakdown").innerHTML=scoreParts.map(x=>'<div class="break-row"><div><span>'+x[0]+'</span><b>'+x[1]+' pts</b></div><div class="break-track"><i style="width:'+Math.min(100,x[1]/x[2]*100)+'%"></i></div></div>').join("");
  const monthlyHours=(r.low+r.high)/2;
