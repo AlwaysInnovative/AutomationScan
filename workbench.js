@@ -3,6 +3,29 @@
 var KEY="automationScanWorkbenchV2", E=window.AutomationScanDecisionEngine||{};
 var bound=false;
 var state={profile:{},processes:[],applications:[],selection:[],candidates:[],economics:{},governance:[],roadmap:[],requirements:[],capabilities:[],vendorResponses:[],pocResults:[],evidence:[]};
+function downloadEvidenceTemplate(){var rows=[
+["Section","Business Question","Field","Allowed Values","Required","Example","Your Answer"],
+["Application Portfolio","Which applications run the business?","Application","","Yes","ERP",""],
+["Application Portfolio","Who owns it?","Department","","No","Finance",""],
+["Application Portfolio","What does it cost annually?","Annual Cost","","No","250000",""],
+["Application Portfolio","How many users?","Users","","No","120",""],
+["Application Portfolio","Who is accountable?","Business Owner","","No","CFO",""],
+["Application Portfolio","When does it renew?","Renewal Date","","No","2027-03-31",""],
+["Application Portfolio","How critical is it?","Criticality","Low | Medium | High | Mission critical","No","High",""],
+["Application Portfolio","How many integrations?","Integration Count","","No","8",""],
+["Application Portfolio","What is the contract term?","Contract Term","","No","3 years",""],
+["Spend / Renewal","What supplier spend should be investigated?","Vendor","","Yes","Example Vendor",""],
+["Spend / Renewal","What is the spend category?","Category","","No","SaaS",""],
+["Spend / Renewal","What amount was paid?","Amount","","No","50000",""],
+["Spend / Renewal","What currency applies?","Currency","","No","INR",""],
+["Spend / Renewal","When does it renew?","Renewal Date","","No","2027-03-31",""],
+["Evidence","What supports an important finding?","Evidence Type","User stated | Uploaded | System derived | Sourced | Calculated | Assumption","Yes","Uploaded",""],
+["Evidence","What is the finding or observation?","Claim / evidence","","Yes","Renewal dates need validation",""],
+["Evidence","Where did it come from?","Source","","Yes","Contract / invoice / meeting",""],
+["Evidence","How confident are we?","Confidence","Low | Medium | High","Yes","Medium",""],
+["Evidence","What must happen next?","Next validation","","No","Confirm with owner",""]
+];var ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Evidence Intake");XLSX.writeFile(wb,"AutomationScan-Evidence-Intake.xlsx")}
+function parseEvidenceWorkbook(file){if(!window.XLSX||!file)return;var max=10*1024*1024;if(file.size>max)return alert("Workbook is larger than 10 MB. Please split the intake into smaller files.");var reader=new FileReader();reader.onload=function(e){try{var wb=XLSX.read(e.target.result,{type:"array",cellFormula:false});var imported=0;wb.SheetNames.forEach(function(sn){var rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{defval:""});rows.forEach(function(r){var field=String(r.Field||r.field||"").trim(),ans=String(r["Your Answer"]||r.yourAnswer||"").trim();if(!ans)return;if(field==="Application"){state.applications=state.applications||[];state.applications.push({name:ans,department:String(r.Department||"").trim(),annualCost:Number(r["Annual Cost"])||null,users:Number(r.Users)||null,businessOwner:String(r["Business Owner"]||"").trim(),renewalDate:String(r["Renewal Date"]||"").trim(),criticality:String(r.Criticality||"").trim(),integrationCount:Number(r["Integration Count"])||null,contractTerm:String(r["Contract Term"]||"").trim(),provenance:"Uploaded"});imported++;}else if(field==="Vendor"){upsertEvidence({type:"Uploaded",claim:"Spend / renewal record: "+ans,value:JSON.stringify(r),source:file.name,date:new Date().toISOString().slice(0,10),confidence:"Medium",status:"Needs validation",next:"Reconcile against source invoice or contract",capturedAt:new Date().toISOString()});imported++;}else if(field==="Evidence Type"){upsertEvidence({type:String(ans),claim:String(r["Claim / evidence"]||"").trim(),value:String(r["Your Answer"]||"").trim(),source:String(r.Source||file.name).trim(),date:new Date().toISOString().slice(0,10),confidence:String(r.Confidence||"Low"),status:"Needs validation",next:String(r["Next validation"]||"").trim(),capturedAt:new Date().toISOString()});imported++;}})});save();journeyRender();renderEvidence();alert(imported+" evidence/application records imported.");}catch(err){alert("Could not read this workbook. Check that it uses the AutomationScan Evidence Intake template.");}};reader.readAsArrayBuffer(file)}
 function evidenceKey(x){return [x.type||"",x.claim||"",x.source||""].join("|").toLowerCase();}
 function upsertEvidence(x){var k=evidenceKey(x);if(!k)return;var i=state.evidence.findIndex(function(e){return evidenceKey(e)===k});if(i<0)state.evidence.push(x);else state.evidence[i]=Object.assign({},state.evidence[i],x);}
 function evidenceSummary(){var items=Array.isArray(state.evidence)?state.evidence:[],counts={};items.forEach(function(x){var t=x.type||"User stated";counts[t]=(counts[t]||0)+1});var validated=items.filter(function(x){return /validated|confirmed|high/i.test(String(x.status||""))}).length;var gaps=items.filter(function(x){return /needs|pending|validate|assumption/i.test(String(x.status||""))||x.type==="Assumption"}).length;return {total:items.length,counts:counts,validated:validated,gaps:gaps};}
@@ -294,7 +317,8 @@ var excelInput=$("workbenchExcelImport");if(excelInput)excelInput.onchange=funct
  $("addVendorResponse").onclick=function(){var candidate=val("vCandidate").trim(),req=val("vReq").trim(),response=val("vResponse").trim();if(!candidate||!req||!response)return alert("Enter candidate, requirement ID and the recorded response.");state.vendorResponses.push({candidate:candidate,req:req,status:val("vStatus"),evidence:val("vEvidence"),response:response,dependency:val("vDependency").trim()});markCompleted("compare");renderCompare()};$("clearVendorResponses").onclick=function(){state.vendorResponses=[];save();renderCompare()};
  $("addGovern").onclick=function(){state.governance.push({req:val("gReq"),cap:val("gCap"),evidence:val("gEvidence"),gate:val("gGate"),ai:val("gAi"),risk:val("gRisk")});markCompleted("govern");renderGov()};
  $("addRoadmap").onclick=function(){state.roadmap.push({horizon:val("rHorizon"),workstream:val("rWorkstream"),owner:val("rOwner"),gate:val("rGate"),dependency:val("rDependency"),value:val("rValue")});markCompleted("roadmap");renderRoadmap()};
- $("addEvidence").onclick=function(){var claim=val("eClaim").trim(),source=val("eSource").trim(),type=val("eType")||"User stated";if(!claim||!source)return alert("Enter the claim and its source.");upsertEvidence({type:type,claim:claim,value:val("eValue").trim(),source:source,date:val("eDate"),reviewer:val("eReviewer").trim(),confidence:val("eConfidence")||"Low",status:val("eStatus")||"Needs validation",next:val("eNext").trim(),capturedAt:new Date().toISOString()});save();markCompleted("evidence");renderEvidence()};
+ if($("downloadEvidenceTemplate"))$("downloadEvidenceTemplate").onclick=downloadEvidenceTemplate;if($("evidenceWorkbook"))$("evidenceWorkbook").addEventListener("change",function(){if(this.files&&this.files[0])parseEvidenceWorkbook(this.files[0]);this.value="";});
+$("addEvidence").onclick=function(){var claim=val("eClaim").trim(),source=val("eSource").trim(),type=val("eType")||"User stated";if(!claim||!source)return alert("Enter the claim and its source.");upsertEvidence({type:type,claim:claim,value:val("eValue").trim(),source:source,date:val("eDate"),reviewer:val("eReviewer").trim(),confidence:val("eConfidence")||"Low",status:val("eStatus")||"Needs validation",next:val("eNext").trim(),capturedAt:new Date().toISOString()});save();markCompleted("evidence");renderEvidence()};
  $("exportJson").onclick=exportJson;$("printReport").onclick=function(){report();window.print()};$("resetAll").onclick=function(){if(confirm("Reset the local workbench?")){localStorage.removeItem(KEY);location.reload()}};
  load();
   try{
