@@ -343,3 +343,6 @@ footer{background:var(--navy);color:#b8c7c7;padding:50px 0 22px}.footer-grid{dis
 
 /* Accessible dynamic industry/pain checkboxes */
 .capability-check input[type="checkbox"]{display:inline-block!important;position:static!important;opacity:1!important;visibility:visible!important;width:auto!important;height:auto!important;margin:3px 8px 0 0!important;clip:auto!important;clip-path:none!important;}
+
+/* Dynamic Navigator choice controls: keep native inputs interactable */
+.capability-checks input[type="checkbox"]{display:inline-block!important;position:static!important;opacity:1!important;visibility:visible!important;width:auto!important;height:auto!important;margin:3px 8px 0 0!important;clip:auto!important;clip-path:none!important;}
