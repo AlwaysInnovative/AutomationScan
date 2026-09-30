@@ -173,6 +173,32 @@ async function loadJourneys(){try{var r=await fetch("api/journeys");if(!r.ok)thr
 function bind(){
  if(bound)return;
  bound=true;
+ document.querySelectorAll(".wb-nav").forEach(function(nav){
+   if(nav.dataset.bound==="1")return;
+   nav.dataset.bound="1";
+   nav.addEventListener("click",function(ev){
+     var b=ev.target.closest("button[data-tab]");
+     if(!b||b.hidden)return;
+     ev.preventDefault();
+     document.querySelectorAll(".wb-nav button").forEach(function(x){x.classList.remove("active")});
+     b.classList.add("active");
+     document.querySelectorAll(".wb-panel").forEach(function(x){x.classList.remove("active")});
+     var panel=$("tab-"+b.dataset.tab);
+     if(panel)panel.classList.add("active");
+     var st=state.journeyTemplate&&state.journeyTemplate.stages||[];
+     var ix=st.findIndex(function(s){return s.section===b.dataset.tab});
+     if(ix>=0){
+       state.journeyStage=ix;
+       save();
+       journeyRender();
+     }
+     if(b.dataset.tab==="report")report();
+     renderJourneyPanelCue();
+     var hub=document.getElementById("journeyHub");
+     if(hub&&window.innerWidth<900)window.scrollTo({top:hub.offsetTop-20,behavior:"smooth"});
+   });
+ });
+
  var industryField=$("wbIndustry"); if(industryField && industryField.tagName==="SELECT" && !industryField.options.length){industryField.innerHTML="<option value=\"\">Enter or choose an industry</option>";}
  document.querySelectorAll("[data-tab]").forEach(function(b){b.onclick=function(){document.querySelectorAll(".wb-nav button").forEach(function(x){x.classList.remove("active")});b.classList.add("active");document.querySelectorAll(".wb-panel").forEach(function(x){x.classList.remove("active")});var panel=$("tab-"+b.dataset.tab);if(panel)panel.classList.add("active");if(b.dataset.tab==="report")report();if(!state._preserveJourneyStage&&state.journeyTemplate){var st=state.journeyTemplate.stages||[],ix=st.findIndex(function(s){return s.section===b.dataset.tab});if(ix>=0){state.journeyStage=ix;save();journeyRender()}}state._preserveJourneyStage=false;}});
  $("journeySelect").onchange=function(){var j=(window.AutomationScanJourneys||[]).find(function(x){return x.id===this.value},this);if(!j)return;state.journeyId=j.id;state.journeyTemplate=j;state.journeyStage=0;save();journeyRender();journeyActivate((j.stages||[])[0].section,true);track("journey_switched",{journey:j.id})};$("journeyNext").onclick=function(){var j=state.journeyTemplate;if(!j)return;var st=j.stages||[],i=Number(state.journeyStage||0);if(i<st.length-1){state.journeyStage=i+1;save();journeyActivate(st[i+1].section,true);journeyRender()}else journeyActivate("report")};$("journeyStartOver").onclick=function(){state.journeyStage=0;save();journeyActivate((state.journeyTemplate?.stages||[])[0]?.section||"profile",true);journeyRender();window.scrollTo({top:document.getElementById("journeyHub").offsetTop-20,behavior:"smooth"})}; $("cloudSave").onclick=cloudSave;$("cloudLoad").onclick=cloudLoad;
