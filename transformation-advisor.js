@@ -65,8 +65,8 @@ function selectedIndustry(){
 function renderIndustryQuestions(){
  var p=selectedIndustry(),processBox=el("industryProcesses"),painBox=el("industryPainOptions"),intro=el("industryIntro");
  if(intro)intro.textContent=p.intro||"Choose relevant processes and describe your own operating context.";
- if(processBox)processBox.innerHTML=(p.processes||[]).map(function(x,i){return '<label class="capability-check"><input type="checkbox" name="processes" value="'+esc(x[0])+'"><span><b>'+esc(x[0])+'</b><small>'+esc(x[1])+'</small></span></label>'}).join("")||"<p>Describe your custom processes in the field below.</p>";
- if(painBox)painBox.innerHTML=(p.pain_points||[]).map(function(x){return '<label class="capability-check"><input type="checkbox" name="painSignals" value="'+esc(x)+'"><span>'+esc(x)+'</span></label>'}).join("");
+ if(processBox)processBox.innerHTML=(p.processes||[]).map(function(x,i){return '<label class="capability-check"><input type="checkbox" name="processes" value="'+esc(x[0])+'" style="display:inline-block!important;visibility:visible!important;opacity:1!important;width:auto!important;height:auto!important;"><span><b>'+esc(x[0])+'</b><small>'+esc(x[1])+'</small></span></label>'}).join("")||"<p>Describe your custom processes in the field below.</p>";
+ if(painBox)painBox.innerHTML=(p.pain_points||[]).map(function(x){return '<label class="capability-check"><input type="checkbox" name="painSignals" value="'+esc(x)+'" style="display:inline-block!important;visibility:visible!important;opacity:1!important;width:auto!important;height:auto!important;"><span>'+esc(x)+'</span></label>'}).join("");
 }
 async function loadIndustryProfiles(){
  try{
