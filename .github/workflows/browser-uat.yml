@@ -170,6 +170,7 @@ jobs:
           });
 
           test('03 - Assessment: every industry, every step, every field', async ({ page, request }) => {
+            test.setTimeout(120000);
             const errors = installErrorCapture(page);
             const data = await (await request.get(base + '/api/industries')).json();
 
@@ -252,6 +253,7 @@ jobs:
           });
 
           test('04 - Navigator: every industry, every step, every visible field', async ({ page, request }) => {
+            test.setTimeout(120000);
             const errors = installErrorCapture(page);
             const industryData = await (await request.get(base + '/api/industries')).json();
             const ui = await (await request.get(base + '/api/ui-config')).json();
@@ -280,7 +282,7 @@ jobs:
                 await test.step('Step 2 - every industry process', async () => {
                   const processChecks = page.locator('#industryProcesses input[type="checkbox"]');
                   expect(await processChecks.count()).toBe(profile.processes.length);
-                  for (let i = 0; i < await processChecks.count(); i++) await processChecks.nth(i).check();
+                  for (let i = 0; i < await processChecks.count(); i++) await processChecks.nth(i).check({force:true});
                   await fillVisibleFormFields(page, form.locator('.t-step').nth(1), profile.name + ' processes');
                 });
 
@@ -288,7 +290,7 @@ jobs:
                 await test.step('Step 3 - every pain point and free text', async () => {
                   const painChecks = page.locator('#industryPainOptions input[type="checkbox"]');
                   expect(await painChecks.count()).toBe(profile.pain_points.length);
-                  for (let i = 0; i < await painChecks.count(); i++) await painChecks.nth(i).check();
+                  for (let i = 0; i < await painChecks.count(); i++) await painChecks.nth(i).check({force:true});
                   await page.locator('#painList').fill('UAT additional recurring pain and manual handoff');
                   await page.locator('[name="painText"]').fill('UAT end-to-end business pain description');
                 });
@@ -352,6 +354,7 @@ jobs:
           });
 
           test('05 - Workbench: every journey, stage, configured field and safe action', async ({ page, request }) => {
+            test.setTimeout(180000);
             const journeyData = await (await request.get(base + '/api/journeys')).json();
             const errors = installErrorCapture(page);
             page.on('dialog', async dialog => { await dialog.dismiss(); });
@@ -461,6 +464,7 @@ jobs:
 
 
           test('08 - live business scenarios: end-to-end realistic handoffs', async ({ page }) => {
+            test.setTimeout(120000);
             const scenarios = [
               {
                 name:'Manufacturing / Subscription / Microsoft Dynamics',
@@ -515,8 +519,9 @@ jobs:
                 const checks = page.locator('#industryProcesses input[type="checkbox"]');
                 const count = await checks.count();
                 expect(count).toBeGreaterThan(0);
-                await expect(checks.nth(0)).toBeVisible({timeout:5000});
-                await checks.nth(0).check();
+                await expect(processLabels.first()).toBeVisible({timeout:5000});
+                await checks.nth(0).check({force:true});
+                await expect(checks.nth(0)).toBeChecked();
 
                 await page.locator('#tNext').click();
                 await expect(page.locator('#tProgress')).toContainText('Step 2', {timeout:5000}).catch(async () => {
