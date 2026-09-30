@@ -204,7 +204,7 @@ window.enableAnalytics=function(){
         <div id="industryPainQuestions" class="industry-pain-questions"></div><label>Anything else that causes friction?<textarea name="pain" rows="4" maxlength="800" placeholder="Describe a recurring problem, delay, error or hand-off in your own words."></textarea></label>
         <label>Main goal<select name="goal"></select></label>
         <label>Email for your report <small>(optional)</small><input type="email" name="emailAddress" autocomplete="email" placeholder="you@company.com"></label>
-        <label class="consent-row"><input type="checkbox" name="consent" value="yes">I agree to receive my AutomationScan report and occasional product updates. <a href="privacy.html">Privacy</a></label>
+        <label class="consent-row"><input type="checkbox" name="reportConsent" value="yes">I agree that AutomationScan may email me the report I requested. <a href="privacy.html">Privacy</a></label><label class="consent-row"><input type="checkbox" name="marketingConsent" value="yes">Optional: send me occasional AutomationScan product updates.</label>
         <p class="form-note">You can complete the assessment without an email. Never enter confidential customer or financial information.</p>
       </fieldset>
 
@@ -226,7 +226,7 @@ window.enableAnalytics=function(){
     </div>
     <div class="resultbox">
       <div class="score"><small>OPPORTUNITY SIGNAL</small><strong id="score">0</strong><span>/100</span><b id="label"></b></div>
-      <div class="result-summary"><span class="report-kicker">AUTOMATIONSCAN ASSESSMENT</span><h3>Estimated work worth investigating</h3><p class="big-range" id="range">0-0 hours/month</p><p class="fine">Directional estimate based on your answers. Validate the real process and economics before investing.</p></div>
+      <div class="result-summary"><span class="report-kicker">AUTOMATIONSCAN ASSESSMENT</span><h3>Estimated work worth investigating</h3><p class="big-range hidden" id="range"></p><p class="fine">Directional estimate based on your answers. Validate the real process and economics before investing.</p></div>
     </div>
     <div class="report-meta" id="reportMeta"></div>
     <div id="opportunities" class="opportunities"></div>
