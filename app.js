@@ -83,12 +83,13 @@ function calc(){
  const copy={Rarely:0,Sometimes:5,Often:12,Constantly:20}[form.elements.copyPaste.value]||0;
  const rep={Low:0,Medium:6,High:12,"Very high":18}[form.elements.repetition.value]||0;
  const emp=n("employees");
- let score=Math.round(Math.min(100,12+Math.min(45,total*1.6)+copy+rep+Math.min(15,emp/8)));
- if(!total)score=Math.min(score,42);
  const pain=((form.elements.pain.value||"")+" "+ind.painChoices.join(" ")).toLowerCase();
  const signals=[["copy|paste|re-enter|retype",6],["excel|spreadsheet|csv",5],["email|inbox|follow-up|remind",5],["invoice|bill|payment|receipt",5],["crm|lead|pipeline",5],["schedule|appointment|calendar|booking",5],["support|ticket|faq|question",5],["report|dashboard|monthly|weekly",5]];
  let textPoints=0;signals.forEach(([rx,p])=>{if(new RegExp(rx).test(pain))textPoints+=p});
- score=Math.min(100,score+Math.min(18,textPoints));
+ const scoreResult=window.AutomationScanDecisionEngine&&window.AutomationScanDecisionEngine.automationOpportunity
+   ?window.AutomationScanDecisionEngine.automationOpportunity({hours:h,copy:copy*5,repetition:rep*5,teamSignal:Math.min(100,emp/8),textSignal:Math.min(100,textPoints*5)})
+   :{score:0,components:{}};
+ let score=scoreResult.score;
  const monthly=Math.min(total,total*.45+copy/8+rep/8+textPoints/8)*4.33;
  const low=Math.max(2,Math.round(monthly*.65)),high=Math.max(low+2,Math.round(monthly*1.15));
  const tools=[...form.querySelectorAll('input[name="tools"]:checked')].map(x=>x.value);
