@@ -34,6 +34,14 @@ function shortlist(ctx){
    var d=candidateScore(c,ctx);d.name=c.name;d.meta=c;return d;
  }).sort(function(a,b){return b.score-a.score;});
 }
+
+function automationOpportunity(input,config){
+ var cfg=config||{},h=input&&input.hours||{},total=Object.keys(h).reduce(function(s,k){return s+(Number(h[k])||0)},0);
+ var copy=Math.max(0,Math.min(100,Number(input&&input.copy)||0)),repetition=Math.max(0,Math.min(100,Number(input&&input.repetition)||0)),team=Math.max(0,Math.min(100,Number(input&&input.teamSignal)||0)),text=Math.max(0,Math.min(100,Number(input&&input.textSignal)||0));
+ var workloadCap=Number(cfg.workloadCap)||45,workloadScale=Number(cfg.workloadScale)||1.6;
+ var score=Math.round(Math.min(100,Math.min(workloadCap,total*workloadScale)+copy*.2+repetition*.18+team*.15+text*.18));
+ return {score:score,total:total,components:{workload:Math.min(workloadCap,Math.round(total*workloadScale)),copy:Math.round(copy*.2),repetition:Math.round(repetition*.18),team:Math.round(team*.15),text:Math.round(text*.18)}};
+}
 function weightedScore(rows,weights){
  var total=0,w=0;(rows||[]).forEach(function(r){var x=Math.max(0,Math.min(100,Number(r.score)||0)),wt=Number(weights&&weights[r.key])||1;total+=x*wt;w+=wt;});return w?Math.round(total/w):0;
 }
@@ -100,5 +108,5 @@ function poc(ctx,short){
  "Record observed result, gap, owner and decision before treating the test as validated."
 ]};});
 }
-window.AutomationScanDecisionEngine={shortlist:shortlist,weightedScore:weightedScore,tco:tco,npv:npv,maturity:maturity,portfolio:portfolio,evidence:evidence,rfp:rfp,poc:poc};
+window.AutomationScanDecisionEngine={shortlist:shortlist,automationOpportunity:automationOpportunity,weightedScore:weightedScore,tco:tco,npv:npv,maturity:maturity,portfolio:portfolio,evidence:evidence,rfp:rfp,poc:poc};
 })();
