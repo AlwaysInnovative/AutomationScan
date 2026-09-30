@@ -37,7 +37,12 @@
 <header class="site-header"><div class="wrap nav"><a class="brand" href="./"></a><nav aria-label="Primary"></nav><a class="btn btn-light" href="contact.html">Contact</a></div></header>
 <section class="hero-small"><div class="wrap"><p class="eyebrow eyebrow-light">TRANSFORMATION WORKBENCH</p><h1>From assessment to <em>evidence-backed action.</em></h1><p>Build a reusable transformation dossier across processes, applications, vendor investigation, economics, RFP/POC, governance and roadmap. Every material item can be labelled by provenance and confidence so assumptions do not masquerade as evidence.</p></div></section>
 <main class="workbench"><div class="wrap"><section class="wb-journey" id="journeyHub"><div class="wb-journey-top"><div><p class="eyebrow">YOUR TRANSFORMATION WORKSPACE</p><h2 id="journeyTitle">Choose where you want to start</h2><p id="journeySummary">AutomationScan will use information you have already entered, preserve your work, and guide you to the next useful step.</p></div><label class="journey-switch">Switch journey<select id="journeySelect"></select></label></div><div id="journeyContext" class="wb-journey-context"></div><div id="evidenceStrength" class="wb-evidence-strength" aria-live="polite"></div>
-<div class="wb-data-tools">
+<div class="wb-data-tools" id="evidenceIntake">
+  <div><strong>Bring your evidence</strong><span>Start with an application portfolio or spend / renewal register. The browser validates the structure before anything is added to the Workbench.</span></div>
+  <button type="button" class="wb-btn wb-secondary" id="downloadEvidenceTemplate">Download evidence template</button>
+  <label class="wb-file-btn">Upload evidence workbook<input type="file" id="evidenceWorkbook" accept=".xlsx,.xls" hidden></label>
+  <span>Expected fields: Application, Department, Annual Cost, Users, Business Owner, Renewal Date, Criticality, Integration Count, Contract Term. Spend files may use Vendor, Category, Amount, Currency, Renewal Date.</span>
+</div><div class="wb-data-tools">
   <div><strong>Bulk data entry</strong><span>Download one complete Excel workbook containing every Workbench section and field. Fill the Your Answer column, then upload the same workbook once. Use the Application Portfolio and Evidence sections for structured source-backed inputs.</span></div>
   <button type="button" class="wb-btn wb-light" id="downloadExcelTemplate">Download complete Excel workbook</button>
   <label class="wb-file-btn">Upload completed workbook<input type="file" id="workbenchExcelImport" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden></label>
@@ -235,5 +240,5 @@
 </section></div></main>
 <footer><div class="wrap footer-grid"><div><a class="brand" href="./"></a><p>Evidence-led transformation discovery.</p></div><div><b>Explore</b></div><div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="about.html">About & Methodology</a><a href="contact.html">Contact</a></div></div><div class="wrap footer-bottom">© 2026 AutomationScan · Directional decision support.</div></footer>
 <script src="ui-config.js?v=20260929-8"></script><script src="decision-engine.js?v=20260928-2"></script><script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="workbench.js?v=20260930-7"></script>
+<script src="workbench.js?v=20261001-8"></script>
 </body></html>
