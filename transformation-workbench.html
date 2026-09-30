@@ -30,7 +30,13 @@
 <body>
 <header class="site-header"><div class="wrap nav"><a class="brand" href="./"></a><nav aria-label="Primary"></nav><a class="btn btn-light" href="contact.html">Contact</a></div></header>
 <section class="hero-small"><div class="wrap"><p class="eyebrow eyebrow-light">TRANSFORMATION WORKBENCH</p><h1>From assessment to <em>evidence-backed action.</em></h1><p>Build a reusable transformation dossier across processes, applications, vendor investigation, economics, RFP/POC, governance and roadmap. Data is stored in this browser unless you export it.</p></div></section>
-<main class="workbench"><div class="wrap"><section class="wb-journey" id="journeyHub"><div class="wb-journey-top"><div><p class="eyebrow">YOUR TRANSFORMATION WORKSPACE</p><h2 id="journeyTitle">Choose where you want to start</h2><p id="journeySummary">AutomationScan will use information you have already entered, preserve your work, and guide you to the next useful step.</p></div><label class="journey-switch">Switch journey<select id="journeySelect"></select></label></div><div id="journeyContext" class="wb-journey-context"></div><div id="journeyStages" class="wb-stages"></div><div class="wb-journey-actions"><button class="wb-btn wb-primary" id="journeyNext">Start / continue</button><button class="wb-btn wb-light" id="journeyStartOver">Start this journey with current data</button></div></section></div><div class="wrap wb-grid">
+<main class="workbench"><div class="wrap"><section class="wb-journey" id="journeyHub"><div class="wb-journey-top"><div><p class="eyebrow">YOUR TRANSFORMATION WORKSPACE</p><h2 id="journeyTitle">Choose where you want to start</h2><p id="journeySummary">AutomationScan will use information you have already entered, preserve your work, and guide you to the next useful step.</p></div><label class="journey-switch">Switch journey<select id="journeySelect"></select></label></div><div id="journeyContext" class="wb-journey-context"></div>
+<div class="wb-data-tools">
+  <div><strong>Bulk data entry</strong><span>Download the exact fields for the Workbench, fill them offline, then import them back into the matching sections.</span></div>
+  <button type="button" class="wb-btn wb-light" id="downloadCsvTemplate">Download all-section CSV template</button>
+  <label class="wb-file-btn">Import completed CSV<input type="file" id="workbenchCsvImport" accept=".csv,text/csv" hidden></label>
+  <span id="csvStatus" class="wb-note" aria-live="polite"></span>
+</div><div id="journeyStages" class="wb-stages"></div><div class="wb-journey-actions"><button class="wb-btn wb-primary" id="journeyNext">Start / continue</button><button class="wb-btn wb-light" id="journeyStartOver">Start this journey with current data</button></div></section></div><div class="wrap wb-grid">
 <aside class="wb-nav" aria-label="Workbench sections"></aside>
 <section class="wb-main">
 <article class="wb-panel active" id="tab-profile">
@@ -219,5 +225,5 @@
 </article>
 </section></div></main>
 <footer><div class="wrap footer-grid"><div><a class="brand" href="./"></a><p>Evidence-led transformation discovery.</p></div><div><b>Explore</b></div><div><b>Trust</b></div></div><div class="wrap footer-bottom">© 2026 AutomationScan · Directional decision support.</div></footer>
-<script src="ui-config.js?v=20260929-8"></script><script src="decision-engine.js?v=20260928-2"></script><script src="workbench.js?v=20260930-2"></script>
+<script src="ui-config.js?v=20260929-8"></script><script src="decision-engine.js?v=20260928-2"></script><script src="workbench.js?v=20260930-3"></script>
 </body></html>
