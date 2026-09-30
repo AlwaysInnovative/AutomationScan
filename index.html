@@ -19,7 +19,7 @@
 <meta name="twitter:image" content="https://automation-scan-neon.vercel.app/og-image.svg">
 <title>AutomationScan | Business Automation & Transformation Market Fit</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./site.css?v=20260927-4">
+<link rel="stylesheet" href="./site.css?v=20261001-1">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://images.unsplash.com">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"A free browser-based business automation assessment that helps organizations identify repetitive work and prioritize opportunities for process automation.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"AutomationScan","url":"https://automation-scan-neon.vercel.app/"}}</script>
@@ -68,14 +68,14 @@ window.enableAnalytics=function(){
     </div>
     <aside class="hero-panel" aria-label="Example report preview">
       <div class="panel-top"><span>ASSESSMENT SNAPSHOT</span><b>ILLUSTRATIVE</b></div>
-      <div class="score-preview"><strong>72</strong><span>/100</span></div>
-      <p class="panel-title">Repetition is showing up across several recurring workflows.</p>
+      <div class="evidence-preview"><div><strong>INPUTS</strong><span>User-stated</span></div><div><strong>OUTPUT</strong><span>Investigation brief</span></div></div>
+      <p class="panel-title">Start with the evidence you have — then see what still needs validation.</p>
       <div class="mini-bars">
         <div><span>Invoices / payments</span><i style="width:84%"></i></div>
         <div><span>Email / follow-ups</span><i style="width:67%"></i></div>
         <div><span>Reporting</span><i style="width:52%"></i></div>
       </div>
-      <div class="panel-note"><span class="dot"></span> Directional signal - not a promise of savings</div>
+      <div class="panel-note"><span class="dot"></span> No fabricated benchmark or guaranteed savings claim</div>
     </aside>
   </div>
 </section>
@@ -225,8 +225,8 @@ window.enableAnalytics=function(){
       <div class="result-actions"><button id="downloadPdf" class="btn btn-copper">Download PDF</button></div>
     </div>
     <div class="resultbox">
-      <div class="score"><small>OPPORTUNITY SIGNAL</small><strong id="score">0</strong><span>/100</span><b id="label"></b></div>
-      <div class="result-summary"><span class="report-kicker">AUTOMATIONSCAN ASSESSMENT</span><h3>Estimated work worth investigating</h3><p class="big-range hidden" id="range"></p><p class="fine">Directional estimate based on your answers. Validate the real process and economics before investing.</p></div>
+      <div class="score"><small>DECISION INPUTS</small><strong id="evidenceCoverage">0%</strong><span>covered</span><b id="label">Needs validation</b></div>
+      <div class="result-summary"><span class="report-kicker">AUTOMATIONSCAN ASSESSMENT</span><h3>Estimated work worth investigating</h3><p class="big-range hidden" id="range"></p><p class="fine">The assessment is a discovery signal based on what you entered. It is not external evidence and should not be treated as a savings commitment.</p></div>
     </div>
     <div class="report-meta" id="reportMeta"></div>
     <div id="opportunities" class="opportunities"></div>
@@ -240,7 +240,7 @@ window.enableAnalytics=function(){
     </section>
     <section class="analysis-dashboard" id="analysisDashboard" aria-label="Detailed analysis">
       <div class="analysis-head">
-        <div><p class="eyebrow">DETAILED ANALYSIS</p><h3>Where the opportunity is concentrated</h3><p>Percentages show each category's share of the weekly hours you entered. They are diagnostic signals, not guaranteed savings.</p></div>
+        <div><p class="eyebrow">DETAILED ANALYSIS</p><h3>Where the opportunity is concentrated</h3><p>Percentages show each category's share of the weekly hours you entered. Treat the model as a prompt for validation, not as external evidence.</p></div>
       </div>
       <div class="analysis-grid">
         <div class="analysis-card">
@@ -248,7 +248,7 @@ window.enableAnalytics=function(){
           <div id="workloadChart" class="bar-chart" aria-label="Workload distribution chart"></div>
         </div>
         <div class="analysis-card">
-          <div class="analysis-card-head"><strong>Opportunity score breakdown</strong><span id="scoreCoverage">0%</span></div>
+          <div class="analysis-card-head"><strong>Directional model trace</strong><span id="scoreCoverage">0% input coverage</span></div>
           <div id="scoreBreakdown" class="score-breakdown"></div>
         </div>
       </div>
