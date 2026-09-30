@@ -13,23 +13,63 @@ function markVisited(section){state.sectionStatus=state.sectionStatus||{};var x=
 function markCompleted(section){state.sectionStatus=state.sectionStatus||{};state.sectionStatus[section]={visitedAt:(state.sectionStatus[section]||{}).visitedAt||new Date().toISOString(),completedAt:new Date().toISOString()};save()}
 function sectionStatus(section){var x=(state.sectionStatus||{})[section]||{};return x.completedAt?"COMPLETED":x.visitedAt?"VISITED":"NOT STARTED"}
 function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||"null");if(x){state=Object.assign(state,x);state.profile=state.profile||{};["processes","applications","selection","candidates","governance","roadmap","requirements","capabilities","vendorResponses","pocResults","evidence"].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[]});state.economics=state.economics||{}}}catch(e){state={profile:{},processes:[],applications:[],selection:[],candidates:[],economics:{},governance:[],roadmap:[],requirements:[],capabilities:[],vendorResponses:[],pocResults:[],evidence:[]}}}
-function csvEscape(v){v=v==null?"":String(v);return /[",\\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
-function downloadWorkbenchCsvTemplate(section){
- var rows=[["section","field","type","required","value"]];
- document.querySelectorAll('.wb-panel').forEach(function(panel){
-   var sec=(panel.id||"").replace(/^tab-/,""); if(section&&sec!==section)return;
-   panel.querySelectorAll('input,select,textarea').forEach(function(el){
-     if(!el.name&&!el.id)return;
-     var field=el.name||el.id; var type=el.type||el.tagName.toLowerCase();
-     rows.push([sec,field,type,el.required?"yes":"no",""]);
-   });
- });
- var csv=rows.map(function(r){return r.map(csvEscape).join(",")}).join("\n");
- var blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=section?("AutomationScan-"+section+"-template.csv"):"AutomationScan-Workbench-master-template.csv";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);
+function fieldBusinessMeta(el,section){
+ var label=el.closest("label"),txt=label?label.textContent.replace(/\s+/g," ").trim():"";
+ var name=el.name||el.id||"",example=el.getAttribute("placeholder")||"";
+ if(!example&&el.tagName==="SELECT"){var o=el.options&&el.options[1];example=o?o.textContent.trim():"Select an option"}
+ var allowed=el.tagName==="SELECT"?[].slice.call(el.options||[]).filter(function(o){return o.value}).map(function(o){return o.textContent.trim()}).join(" | "):el.type==="checkbox"?"Yes | No":"";
+ return {question:txt.replace(example,"").trim(),allowed:allowed,example:example||"Enter the business value"};
 }
-function parseCsvLine(line){var out=[],cur="",q=false;for(var i=0;i<line.length;i++){var ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q}else if(ch===","&&!q){out.push(cur);cur=""}else cur+=ch}out.push(cur);return out}
-function importWorkbenchCsv(file){
- return file.text().then(function(txt){var lines=txt.replace(/^\\uFEFF/,"").split(/\\r?\\n/).filter(Boolean),rows=lines.map(parseCsvLine),head=rows.shift().map(function(x){return x.trim().toLowerCase()});var si=head.indexOf("section"),fi=head.indexOf("field"),vi=head.indexOf("your answer");if(vi<0)vi=head.indexOf("value");if(fi<0||vi<0)throw new Error("CSV must contain Field and Your Answer columns.");rows.forEach(function(r){var sec=si>=0?r[si]:"",field=r[fi],value=r[vi]||"",panel=document.getElementById("tab-"+sec),el=null;if(panel)el=panel.querySelector("[name='"+CSS.escape(field)+"'],#"+CSS.escape(field));if(!el)el=document.querySelector("[name='"+CSS.escape(field)+"'],#"+CSS.escape(field)+"");if(el){if(el.type==="checkbox")el.checked=/^(true|yes|1)$/i.test(value);else el.value=value;el.dispatchEvent(new Event("change",{bubbles:true}));markVisited(sec)}});save();renderAll&&renderAll();alert("CSV imported. Review the populated sections, then save each section or continue to the report.");});
+function workbookRowsForPanel(panel){
+ var sec=(panel.id||"").replace(/^tab-/,""),rows=[];
+ panel.querySelectorAll('input:not([type="hidden"]),select,textarea').forEach(function(el){
+   if(!el.name&&!el.id)return;
+   var m=fieldBusinessMeta(el,sec);
+   rows.push(["Section","Business Question","Field","Allowed Values","Required","Example","Your Answer"].map(function(h){return h}));
+   rows.push([sec,m.question,el.name||el.id,m.allowed,el.required?"Yes":"No",m.example,""]);
+ });
+ return rows;
+}
+function downloadWorkbenchWorkbook(){
+ if(!window.XLSX)throw new Error("Workbook engine is unavailable");
+ var wb=XLSX.utils.book_new();
+ var intro=[["AutomationScan — Workbench Data Entry"],["Complete this workbook once. Each sheet represents a Workbench section."],["Instructions"],["1. Fill only the 'Your Answer' column."],["2. Keep the Field and Section columns unchanged."],["3. Do not rename sheets."],["4. Save the workbook and upload it once in AutomationScan."],["5. AutomationScan will populate the matching fields, mark sections as VISITED, and let you review/save them."],["6. A section becomes COMPLETED only after its form is saved."],[""],["Sheets included"],["Profile","Processes","Applications","Capabilities","Selection","Economics","RFP / POC","Portfolio","Readiness","Governance","Roadmap","Requirements","Compare","Evidence","Dossier"]];
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(intro),"Instructions");
+ document.querySelectorAll(".wb-panel").forEach(function(panel){
+   var sec=(panel.id||"").replace(/^tab-/,""),rows=[["Section","Business Question","Field","Allowed Values","Required","Example","Your Answer"]];
+   panel.querySelectorAll('input:not([type="hidden"]),select,textarea').forEach(function(el){
+     if(!el.name&&!el.id)return;var m=fieldBusinessMeta(el,sec);
+     rows.push([sec,m.question,el.name||el.id,m.allowed,el.required?"Yes":"No",m.example,""]);
+   });
+   var label=(document.querySelector('.wb-nav button[data-tab="'+sec+'"] .wb-nav-label')||{}).textContent||sec;
+   label=label.trim().slice(0,31)||sec;
+   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),label.replace(/[\\/?*\[\]:]/g," ").trim());
+ });
+ XLSX.writeFile(wb,"AutomationScan-Workbench-Complete.xlsx");
+}
+function importWorkbenchWorkbook(file){
+ if(!window.XLSX) return Promise.reject(new Error("Workbook engine is unavailable"));
+ return file.arrayBuffer().then(function(buf){
+   var wb=XLSX.read(buf,{type:"array"}),updated=0,unknown=[];
+   wb.SheetNames.forEach(function(sheet){
+     if(sheet==="Instructions")return;
+     var rows=XLSX.utils.sheet_to_json(wb.Sheets[sheet],{defval:""});
+     rows.forEach(function(row){
+       var sec=String(row.Section||"").trim(),field=String(row.Field||"").trim(),value=row["Your Answer"];
+       if(!field)return;
+       var panel=document.getElementById("tab-"+sec),el=null;
+       if(panel)el=panel.querySelector("[name='"+CSS.escape(field)+"'],#"+CSS.escape(field));
+       if(!el)el=document.querySelector("[name='"+CSS.escape(field)+"'],#"+CSS.escape(field));
+       if(!el){unknown.push(sec+"."+field);return}
+       if(value===undefined||value==="")return;
+       if(el.type==="checkbox")el.checked=/^(true|yes|1|y)$/i.test(String(value));
+       else el.value=String(value);
+       el.dispatchEvent(new Event("change",{bubbles:true}));markVisited(sec);updated++;
+     });
+   });
+   save(); if(typeof renderAll==="function")renderAll();
+   return {updated,unknown};
+ });
 }
 function cloudId(){if(!state.cloudId){if(window.crypto&&crypto.randomUUID)state.cloudId=crypto.randomUUID();else state.cloudId="as-"+Date.now()+"-"+Math.random().toString(36).slice(2)}return state.cloudId}
 async function cloudSave(){var s=$("cloudStatus");s.textContent="Saving cloud copy…";try{var id=cloudId(),body={id:id,state:state};if(state.cloudToken)body.token=state.cloudToken;var r=await fetch("api/workbench?id="+encodeURIComponent(id),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}),d=await r.json();if(!r.ok)throw new Error(d.error||"save_failed");state.cloudToken=d.accessToken||state.cloudToken;state.cloudExpiresAt=d.expiresAt||state.cloudExpiresAt;save();s.textContent="Cloud copy saved. Assessment ID: "+id+" · Access token retained in this browser for 30 days."}catch(e){s.textContent="Cloud save unavailable: "+e.message}}
@@ -229,8 +269,8 @@ function bind(){
 
  var industryField=$("wbIndustry"); if(industryField && industryField.tagName==="SELECT" && !industryField.options.length){industryField.innerHTML="<option value=\"\">Enter or choose an industry</option>";}
   $("journeySelect").onchange=function(){var j=(window.AutomationScanJourneys||[]).find(function(x){return x.id===this.value},this);if(!j)return;state.journeyId=j.id;state.journeyTemplate=j;state.journeyStage=0;save();journeyRender();journeyActivate((j.stages||[])[0].section,true);track("journey_switched",{journey:j.id})};$("journeyNext").onclick=function(){var j=state.journeyTemplate;if(!j)return;var st=j.stages||[],i=Number(state.journeyStage||0);if(i<st.length-1){state.journeyStage=i+1;save();journeyActivate(st[i+1].section,true);journeyRender()}else journeyActivate("report")};$("journeyStartOver").onclick=function(){state.journeyStage=0;save();journeyActivate((state.journeyTemplate?.stages||[])[0]?.section||"profile",true);journeyRender();window.scrollTo({top:document.getElementById("journeyHub").offsetTop-20,behavior:"smooth"})}; $("cloudSave").onclick=cloudSave;$("cloudLoad").onclick=cloudLoad;
-var csvDownload=$("downloadCsvTemplate");if(csvDownload)csvDownload.onclick=function(){var active=document.querySelector(".wb-panel.active");var sec=active?(active.id||"").replace(/^tab-/,""):"";downloadWorkbenchCsvTemplate(sec);var s=$("csvStatus");if(s)s.textContent="Current form template downloaded. Fill the Value column, save as CSV, then import it here."};
-var csvInput=$("workbenchCsvImport");if(csvInput)csvInput.onchange=function(){var f=csvInput.files&&csvInput.files[0];if(!f)return;var s=$("csvStatus");if(s)s.textContent="Importing "+f.name+"…";importWorkbenchCsv(f).then(function(){if(s)s.textContent="CSV imported. Review the populated sections and save each section before submitting the report.";}).catch(function(e){if(s)s.textContent="CSV import failed: "+e.message;});csvInput.value=""};
+var excelDownload=$("downloadExcelTemplate");if(excelDownload)excelDownload.onclick=function(){try{downloadWorkbenchWorkbook();$("excelStatus").textContent="Complete workbook downloaded. Fill Your Answer on each sheet, save it, then upload it once."}catch(e){$("excelStatus").textContent="Download failed: "+e.message}};
+var excelInput=$("workbenchExcelImport");if(excelInput)excelInput.onchange=function(){var f=excelInput.files&&excelInput.files[0];if(!f)return;var s=$("excelStatus");s.textContent="Reading "+f.name+"…";importWorkbenchWorkbook(f).then(function(r){s.textContent=r.updated+" field(s) populated across the Workbench. Review and save the relevant sections before generating the report."+((r.unknown||[]).length?" "+r.unknown.length+" field(s) were not found.":"")}).catch(function(e){s.textContent="Workbook import failed: "+e.message});excelInput.value=""};
  $("saveProfile").onclick=function(){state.profile={industry:val("wbIndustry").trim(),current:val("wbCurrent"),businessModel:val("wbBusiness"),scale:val("wbScale"),revenueModel:val("wbRevenue"),fulfilmentModel:val("wbFulfilment"),deliveryModel:val("wbDelivery"),regulatoryIntensity:val("wbRegulatory"),appetite:val("wbAppetite"),horizon:val("wbHorizon"),goals:val("wbGoals"),pain:val("wbPain"),integration:val("wbIntegration"),custom:val("wbCustom"),erpSpend:val("wbErpSpend")};save();markCompleted("profile");renderProfileOut();track("workbench_profile_saved")};
  $("loadProfile").onclick=function(){var p=state.profile;var map={industry:"wbIndustry",current:"wbCurrent",businessModel:"wbBusiness",scale:"wbScale",revenueModel:"wbRevenue",fulfilmentModel:"wbFulfilment",deliveryModel:"wbDelivery",regulatoryIntensity:"wbRegulatory",appetite:"wbAppetite",horizon:"wbHorizon",goals:"wbGoals",pain:"wbPain",integration:"wbIntegration",custom:"wbCustom",erpSpend:"wbErpSpend"};Object.keys(map).forEach(function(k){set(map[k],p[k])});renderProfileOut()};
  $("addProcess").onclick=function(){var x={name:val("pName").trim(),volume:Math.max(0,Number(val("pVolume"))||0),minutes:Math.max(0,Number(val("pMinutes"))||0),exceptions:Math.min(100,Math.max(0,Number(val("pExceptions"))||0)),errors:Math.min(100,Math.max(0,Number(val("pErrors"))||0)),human:val("pHuman"),notes:val("pNotes")};if(!x.name)return alert("Enter a process name.");x.treatment=x.human==="High"?"Keep human / simplify":"Automate / simplify";if(x.exceptions>=20||x.errors>=10)x.treatment="Simplify / standardise first";state.processes.push(x);save();markCompleted("process");renderProcesses()};
