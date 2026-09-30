@@ -258,6 +258,7 @@ function bind(){
      var ix=st.findIndex(function(s){return s.section===b.dataset.tab});
      if(ix>=0){
        state.journeyStage=ix;
+       markVisited(b.dataset.tab);
        save();
        journeyRender();
      }
