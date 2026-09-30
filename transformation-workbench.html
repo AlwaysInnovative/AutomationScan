@@ -67,10 +67,10 @@
 <p class="eyebrow">PROCESS INTELLIGENCE</p><h2>Process health & treatment</h2><p>Add processes and quantify effort, exceptions and errors. The workbench converts the inputs into a deterministic treatment lens.</p>
 <div class="wb-form">
 <label>Process name<input id="pName" placeholder="Order management"></label>
-<label>Monthly volume<input id="pVolume" type="number" min="0" value="1000"></label>
-<label>Minutes per transaction<input id="pMinutes" type="number" min="0" value="10"></label>
-<label>Exception rate %<input id="pExceptions" type="number" min="0" max="100" value="5"></label>
-<label>Error / rework rate %<input id="pErrors" type="number" min="0" max="100" value="2"></label>
+<label>Monthly volume<input id="pVolume" type="number" min="0"></label>
+<label>Minutes per transaction<input id="pMinutes" type="number" min="0"></label>
+<label>Exception rate %<input id="pExceptions" type="number" min="0" max="100"></label>
+<label>Error / rework rate %<input id="pErrors" type="number" min="0" max="100"></label>
 <label>Human judgement required?<select id="pHuman"></select></label>
 <label>Process notes<textarea id="pNotes" placeholder="Controls, bottlenecks, systems, approvals..."></textarea></label>
 </div>
@@ -82,7 +82,7 @@
 <p class="eyebrow">APPLICATION PORTFOLIO</p><h2>Application inventory & rationalisation</h2><p>Build a simple application portfolio without requiring a connector. Import CSV later when the inventory is available.</p>
 <div class="wb-form">
 <label>Application<input id="aName" placeholder="CRM / ERP / WMS / custom app"></label>
-<label>Annual cost<input id="aCost" type="number" min="0" value="0"></label>
+<label>Annual cost<input id="aCost" type="number" min="0"></label>
 <label>Business value<select id="aValue"></select></label>
 <label>Technical health<select id="aTech"></select></label>
 <label>Usage<select id="aUsage"></select></label>
@@ -99,8 +99,8 @@
 <div class="wb-form">
 <label>Capability<input id="cName" placeholder="e.g. Demand planning"></label>
 <label>Business criticality<select id="cCriticality"></select></label>
-<label>Current maturity %<input id="cCurrent" type="number" min="0" max="100" value="50"></label>
-<label>Target maturity %<input id="cTarget" type="number" min="0" max="100" value="80"></label>
+<label>Current maturity %<input id="cCurrent" type="number" min="0" max="100"></label>
+<label>Target maturity %<input id="cTarget" type="number" min="0" max="100"></label>
 <label>Current application<input id="cApp" placeholder="Linked application"></label>
 <label>Requirement ID<input id="cReq" placeholder="REQ-001"></label>
 <label>Evidence status<select id="cEvidence"></select></label>
@@ -121,7 +121,7 @@
 <article class="wb-panel" id="tab-economics">
 <p class="eyebrow">ECONOMICS</p><h2>Editable TCO & business case</h2><p>All figures are user-entered assumptions. No embedded benchmark is silently inserted.</p>
 <div class="wb-form">
-<label>Years<input id="tYears" type="number" min="1" value="5"></label>
+<label>Years<input id="tYears" type="number" min="1"></label>
 <label>Current annual licence/subscription<input id="tCurrentLicence" type="number" min="0" value="0"></label>
 <label>Current annual support<input id="tCurrentSupport" type="number" min="0" value="0"></label>
 <label>Current annual infrastructure<input id="tCurrentInfra" type="number" min="0" value="0"></label>
@@ -131,9 +131,9 @@
 <label>Future annual infrastructure<input id="tFutureInfra" type="number" min="0" value="0"></label>
 <label>Implementation<input id="tImplementation" type="number" min="0" value="0"></label>
 
-<label>Migration & data<input id="tMigration" type="number" min="0" value="0"></label><label>Integration<input id="tIntegration" type="number" min="0" value="0"></label><label>Testing / cutover<input id="tTesting" type="number" min="0" value="0"></label><label>Change & training<input id="tChange" type="number" min="0" value="0"></label><label>Coexistence<input id="tCoexistence" type="number" min="0" value="0"></label><label>Decommissioning<input id="tDecommissioning" type="number" min="0" value="0"></label><label>Contingency %<input id="tContingency" type="number" min="0" max="100" value="0"></label><label>Annual inflation %<input id="tInflation" type="number" min="0" max="100" value="0"></label><label>Discount rate %<input id="tDiscount" type="number" min="0" max="100" value="0"></label>
-<label>Expected annual value<input id="tValue" type="number" min="0" value="0"></label>
-<label>Value realisation %<input id="tRealisation" type="number" min="0" max="100" value="100"></label>
+<label>Migration & data<input id="tMigration" type="number" min="0" value="0"></label><label>Integration<input id="tIntegration" type="number" min="0" value="0"></label><label>Testing / cutover<input id="tTesting" type="number" min="0" value="0"></label><label>Change & training<input id="tChange" type="number" min="0" value="0"></label><label>Coexistence<input id="tCoexistence" type="number" min="0" value="0"></label><label>Decommissioning<input id="tDecommissioning" type="number" min="0" value="0"></label><label>Contingency %<input id="tContingency" type="number" min="0" max="100"></label><label>Annual inflation %<input id="tInflation" type="number" min="0" max="100"></label><label>Discount rate %<input id="tDiscount" type="number" min="0" max="100"></label>
+<label>Expected annual value<input id="tValue" type="number" min="0"></label>
+<label>Value realisation %<input id="tRealisation" type="number" min="0" max="100"></label>
 </div>
 <div class="wb-actions"><button class="wb-btn wb-primary" id="calcEconomics">Calculate</button></div><div id="economicsOut"></div>
 </article>
@@ -155,7 +155,7 @@
 <label>Evidence status<select id="pocEvidence"></select></label>
 <label>Decision note<textarea id="pocDecision"></textarea></label>
 </div><div class="wb-actions"><button class="wb-btn wb-primary" id="addPoc">Add POC result</button></div><div id="pocOut"></div>
-<h3>Migration readiness</h3><div class="wb-form"><label>Data readiness %<input id="mData" type="number" min="0" max="100" value="50"></label><label>Integration readiness %<input id="mIntegration" type="number" min="0" max="100" value="50"></label><label>Customisation readiness %<input id="mCustom" type="number" min="0" max="100" value="50"></label><label>People/change readiness %<input id="mPeople" type="number" min="0" max="100" value="50"></label><label>Security/control readiness %<input id="mSecurity" type="number" min="0" max="100" value="50"></label><label>Testing/cutover readiness %<input id="mTesting" type="number" min="0" max="100" value="50"></label></div><button class="wb-btn wb-secondary" id="scoreMigration">Calculate readiness</button><div id="migrationOut"></div>
+<h3>Migration readiness</h3><div class="wb-form"><label>Data readiness %<input id="mData" type="number" min="0" max="100"></label><label>Integration readiness %<input id="mIntegration" type="number" min="0" max="100"></label><label>Customisation readiness %<input id="mCustom" type="number" min="0" max="100"></label><label>People/change readiness %<input id="mPeople" type="number" min="0" max="100"></label><label>Security/control readiness %<input id="mSecurity" type="number" min="0" max="100"></label><label>Testing/cutover readiness %<input id="mTesting" type="number" min="0" max="100"></label></div><button class="wb-btn wb-secondary" id="scoreMigration">Calculate readiness</button><div id="migrationOut"></div>
 </article>
 <article class="wb-panel" id="tab-govern">
 <p class="eyebrow">GOVERN</p><h2>Compliance, AI controls & risk</h2><p>Connect a consideration to a requirement, capability, evidence and validation gate. Add risks that must be owned before a decision.</p>
@@ -199,7 +199,7 @@
 <article class="wb-panel" id="tab-compare">
 <p class="eyebrow">VENDOR RESPONSE</p><h2>Vendor response comparison</h2><p>Paste or import structured response text. AutomationScan extracts requirement IDs, response status and evidence notes for side-by-side review. This is a comparison aid, not an autonomous procurement decision.</p>
 <div class="wb-form">
-<label>Candidate<select id="vCandidate"></select></label>
+<label>Candidate<input id="vCandidate" placeholder="Candidate name"></label>
 <label>Requirement ID<input id="vReq" placeholder="REQ-001"></label>
 <label>Response status<select id="vStatus"></select></label>
 <label>Evidence status<select id="vEvidence"></select></label>
