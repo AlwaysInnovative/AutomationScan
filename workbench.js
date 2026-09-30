@@ -125,41 +125,47 @@ function renderJourneyPanelCue(){
  cue.innerHTML='<span class="wb-step-cue-number">'+String(i+1).padStart(2,'0')+' / '+String(st.length).padStart(2,'0')+'</span><div><strong>Step '+(i+1)+' of '+st.length+': '+esc(st[i]?st[i].label:'Current step')+'</strong><small>'+stateText+(st[i+1]?' · Next: '+esc(next):' · This is the final stage')+'</small></div>';
  panel.insertBefore(cue,panel.firstChild);
 }
+function canonicalWorkbenchStages(){
+ var out=[];
+ document.querySelectorAll(".wb-nav button[data-tab]").forEach(function(btn){
+   out.push({section:btn.dataset.tab,label:btn.textContent.replace(/^\\d+\\.\\s*/,"").trim()});
+ });
+ return out;
+}
 function syncJourneyNav(){
- var stages=(state.journeyTemplate&&state.journeyTemplate.stages)||[],allowed=stages.map(function(s){return s.section;});
- document.querySelectorAll(".wb-nav button").forEach(function(b){
-   var ix=allowed.indexOf(b.dataset.tab);
-   b.hidden=allowed.length>0&&ix<0;
-   if(ix>=0){
-     b.dataset.journeyIndex=ix;
-     b.classList.toggle("active",ix===Number(state.journeyStage||0));
-     b.classList.toggle("done",ix<Number(state.journeyStage||0));
-     b.setAttribute("aria-current",ix===Number(state.journeyStage||0)?"step":"false");
-     var label=b.querySelector(".wb-nav-label")||b;
-     if(!b.querySelector(".wb-nav-number")){
-       var txt=label.textContent.trim();
-       label.innerHTML='<span class="wb-nav-number">'+String(ix+1).padStart(2,"0")+'</span><span class="wb-nav-label">'+esc(txt)+'</span>';
-     }else{
-       b.querySelector(".wb-nav-number").textContent=String(ix+1).padStart(2,"0");
-     }
-     b.title=ix===Number(state.journeyStage||0)?"Current step":ix<Number(state.journeyStage||0)?"Completed step":"Next step";
-   }
+ var all=canonicalWorkbenchStages(),st=(state.journeyTemplate&&state.journeyTemplate.stages)||[],allowed=st.map(function(s){return s.section}),current=st[Number(state.journeyStage||0)]?.section||"profile";
+ document.querySelectorAll(".wb-nav button[data-tab]").forEach(function(b){
+   var ix=all.findIndex(function(x){return x.section===b.dataset.tab});
+   b.hidden=false;
+   b.dataset.canonicalIndex=ix;
+   b.classList.toggle("active",b.dataset.tab===current);
+   b.classList.toggle("done",ix>=0&&ix<all.findIndex(function(x){return x.section===current}));
+   b.setAttribute("aria-current",b.dataset.tab===current?"step":"false");
+   var old=b.querySelector(".wb-nav-number"),label=b.querySelector(".wb-nav-label");
+   if(!old){var txt=b.textContent.replace(/^\\d+\\.\\s*/,"").trim();b.innerHTML='<span class="wb-nav-number">'+String(ix+1).padStart(2,"0")+'</span><span class="wb-nav-label">'+esc(txt)+'</span>';}
+   else old.textContent=String(ix+1).padStart(2,"0");
+   b.title=allowed.includes(b.dataset.tab)?(b.dataset.tab===current?"Current journey step":"Part of this journey"):"Available work area";
  });
 }
 function journeyRender(){
  var j=state.journeyTemplate;if(!j||!$("journeyTitle"))return;
- var st=j.stages||[],i=Number(state.journeyStage||0);
+ var st=j.stages||[],i=Number(state.journeyStage||0),all=canonicalWorkbenchStages(),current=st[i]?st[i].section:"profile";
  $("journeyTitle").textContent=j.name;
  $("journeySummary").textContent=(j.summary||"")+" "+(j.objective_prompt||"");
  var c=journeyContext();
  $("journeyContext").innerHTML=c.map(function(x){return'<span class="wb-context-pill">'+esc(x)+'</span>'}).join("")||'<span class="wb-context-pill">No previous context — start with Profile</span>';
- var stageName=st[i]?st[i].label:"Profile";
- var nextName=st[i+1]?st[i+1].label:"Review dossier";
- $("journeyStages").innerHTML='<div class="wb-path-intro"><strong>Follow this path from left to right.</strong><span>The journey controls which work areas you see. Switching journey changes the recommended path, not your saved information.</span></div>'+st.map(function(s,n){return'<button type="button" aria-current="'+(n===i?'step':'false')+'" class="wb-stage '+(n===i?'active ':'')+(n<i?'done ':'')+(n>i?'upcoming':'')+'" data-journey-index="'+n+'"><span class="wb-stage-number">'+String(n+1).padStart(2,"0")+'</span><strong>'+esc(s.label)+'</strong><small>'+esc(s.why||"")+'</small><em>'+(n===i?"YOU ARE HERE":n<i?"COMPLETED":n===i+1?"NEXT":"LATER")+'</em></button>'}).join("");
- document.querySelectorAll("[data-journey-index]").forEach(function(b){b.onclick=function(){state.journeyStage=Number(b.dataset.journeyIndex);save();journeyActivate(st[state.journeyStage].section,true);journeyRender();window.scrollTo({top:document.getElementById("journeyHub").offsetTop-20,behavior:"smooth"})}});
+ $("journeyStages").innerHTML='<div class="wb-path-intro"><strong>01–15 is the Workbench order.</strong><span>Your selected journey highlights the stages to work through. The left menu and these cards always use the same order.</span></div>'+all.map(function(s,n){
+   var ri=st.findIndex(function(x){return x.section===s.section}),recommended=ri>=0,isCurrent=s.section===current;
+   return '<button type="button" aria-current="'+(isCurrent?'step':'false')+'" class="wb-stage '+(isCurrent?'active ':'')+(recommended?'recommended ':'available')+'" data-canonical-section="'+esc(s.section)+'"><span class="wb-stage-number">'+String(n+1).padStart(2,"0")+'</span><strong>'+esc(s.label)+'</strong><small>'+(recommended?(st[ri].why||"Included in this journey"):"Available work area")+'</small><em>'+(isCurrent?"YOU ARE HERE":recommended?(ri<i?"COMPLETED":ri===i+1?"NEXT":"IN JOURNEY"):"AVAILABLE")+'</em></button>';
+ }).join("");
+ document.querySelectorAll("[data-canonical-section]").forEach(function(btn){btn.onclick=function(){
+   var ix=st.findIndex(function(x){return x.section===btn.dataset.canonicalSection});
+   if(ix<0){journeyActivate(btn.dataset.canonicalSection,true);return;}
+   state.journeyStage=ix;save();journeyActivate(btn.dataset.canonicalSection,true);journeyRender();window.scrollTo({top:document.getElementById("journeyHub").offsetTop-20,behavior:"smooth"});
+ }});
  syncJourneyNav();
- $("journeyNext").textContent=i>=st.length-1?"Review dossier":"Continue to "+nextName;
- $("journeyNext").setAttribute("aria-label",i>=st.length-1?"Review dossier":"Continue to "+nextName);
+ $("journeyNext").textContent=i>=st.length-1?"Review dossier":"Continue to "+(st[i+1]?st[i+1].label:"next stage");
+ $("journeyNext").setAttribute("aria-label",i>=st.length-1?"Review dossier":"Continue to "+(st[i+1]?st[i+1].label:"next stage"));
 }
 function journeyScore(j){
  var p=state.profile||{},r=j.context_rules||{},score=Number(r.priority)||0,hay=[String(p.industry||""),String(p.businessModel||""),String(p.current||""),String(p.revenueModel||"")].map(function(x){return x.toLowerCase()});
