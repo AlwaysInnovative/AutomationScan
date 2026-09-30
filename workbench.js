@@ -197,7 +197,7 @@ function syncJourneyNav(){
  var st=(state.journeyTemplate&&state.journeyTemplate.stages)||[],allowed=st.map(function(s){return s.section}),current=st[Number(state.journeyStage||0)]?.section||allowed[0]||"profile";
  document.querySelectorAll(".wb-nav button[data-tab]").forEach(function(b){
    var ix=allowed.indexOf(b.dataset.tab);
-   b.hidden=ix<0;
+   b.hidden=ix<0;b.style.display=ix<0?"none":"block";
    b.dataset.journeyIndex=ix;
    b.classList.toggle("active",b.dataset.tab===current);
    b.classList.toggle("done",ix>=0&&ix<allowed.indexOf(current));
