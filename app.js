@@ -145,11 +145,13 @@ function renderResult(){
  const {r,top}=buildReport();
  const profile=r.industryProfile||dynamicIndustryProfile(r.industry); const suggestionMap=profile.suggestions||{}; const detailed=top.map(([name,h])=>{const key={"Data entry":"dataEntry","Email / follow-ups":"email","Transactions":"transactions","Customer support":"support","Scheduling":"scheduling","Reporting":"reporting","Documents / admin":"documents","Sales admin / CRM":"salesAdmin"}[name];return {name,h,suggestion:suggestionMap[key]||"Map the current workflow, automate the repeatable steps and retain human review for exceptions."};});
  renderAnalysis(r,top);
- document.getElementById("score").textContent=r.score;
- document.getElementById("label").textContent=r.label;
+ var evidenceCoverage=Math.max(0,Math.min(100,Math.round((r.coverage||0))));
+ document.getElementById("score").textContent=evidenceCoverage;
+ var evidenceNode=document.getElementById("evidenceCoverage"); if(evidenceNode)evidenceNode.textContent=evidenceCoverage+"%";
+ var labelNode=document.getElementById("label"); if(labelNode)labelNode.textContent=evidenceCoverage<60?"More evidence needed":evidenceCoverage<85?"Good starting coverage":"Broad input coverage";
  document.getElementById("range").textContent=r.low+"-"+r.high+" hours/month";
  document.getElementById("sub").textContent="Based on your "+r.industry+" business inputs.";
- document.getElementById("reportMeta").textContent="Input coverage: "+r.coverage+"% · Goal: "+r.goal+" · Tools selected: "+r.tools.length;
+ document.getElementById("reportMeta").textContent="Input coverage: "+r.coverage+"% · Evidence status: user-stated inputs · Goal: "+r.goal+" · Tools selected: "+r.tools.length;
  document.getElementById("scanSummary").value=JSON.stringify({score:r.score,label:r.label,estimatedHours:r.low+"-"+r.high+"/month",industry:r.industry,goal:r.goal,topOpportunities:top.map(x=>x[0]),coverage:r.coverage});
  document.getElementById("opportunities").innerHTML=top.length?detailed.map((x,i)=>'<article class="opp"><span class="tag">PRIORITY '+(i+1)+'</span><h3>'+escapeHtml(x.name)+'</h3><p><strong>'+x.h+' hrs/week</strong> entered · <b>'+Math.round(x.h/Math.max(r.total,0.01)*100)+'%</b> of entered workload.</p><p class="suggestion"><strong>Suggested workflow:</strong> '+escapeHtml(x.suggestion)+'</p></article>').join(""):'<article class="opp"><span class="tag">START HERE</span><h3>Measure recurring work</h3><p>Track one week of repeat admin and run the assessment again.</p></article>';
  const detail=document.getElementById("reportDetails");
@@ -176,7 +178,7 @@ async function generateReport(){
     const report=document.getElementById("results");
     if(!report) throw new Error("Report container was not found.");
     sessionStorage.setItem("automationScanReportHtml",report.innerHTML);
-    try{const result=calc();const opportunities=Object.entries(result.h).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,6);sessionStorage.setItem("automationScanAssessment",JSON.stringify({industry:result.industry,goal:result.goal,score:result.score,coverage:result.coverage,workload:result.h,selectedPainPoints:result.selectedPainPoints,topOpportunities:opportunities.map(x=>({name:x[0],hours:x[1]})),tools:result.tools,source:"automation-assessment",savedAt:new Date().toISOString()}));}catch(e){console.warn("Assessment handoff save failed",e)}
+    try{const result=calc();const opportunities=Object.entries(result.h).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,6);sessionStorage.setItem("automationScanAssessment",JSON.stringify({industry:result.industry,goal:result.goal,score:result.score,decisionSignalInternal:result.score,coverage:result.coverage,evidenceStatus:"User stated inputs only",workload:result.h,selectedPainPoints:result.selectedPainPoints,topOpportunities:opportunities.map(x=>({name:x[0],hours:x[1]})),tools:result.tools,source:"automation-assessment",savedAt:new Date().toISOString()}));}catch(e){console.warn("Assessment handoff save failed",e)}
     sessionStorage.setItem("automationScanReportGenerated","1");
     const leadResult=calc();
     const leadTop=Object.entries(leadResult.h).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,6);
