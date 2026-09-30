@@ -40,7 +40,7 @@ function automationOpportunity(input,config){
  var copy=Math.max(0,Math.min(100,Number(input&&input.copy)||0)),repetition=Math.max(0,Math.min(100,Number(input&&input.repetition)||0)),team=Math.max(0,Math.min(100,Number(input&&input.teamSignal)||0)),text=Math.max(0,Math.min(100,Number(input&&input.textSignal)||0));
  var workloadCap=Number(cfg.workloadCap)||45,workloadScale=Number(cfg.workloadScale)||1.6;
  var score=Math.round(Math.min(100,Math.min(workloadCap,total*workloadScale)+copy*.2+repetition*.18+team*.15+text*.18));
- return {score:score,total:total,components:{workload:Math.min(workloadCap,Math.round(total*workloadScale)),copy:Math.round(copy*.2),repetition:Math.round(repetition*.18),team:Math.round(team*.15),text:Math.round(text*.18)}};
+ return {score:score,total:total,components:{workload:Math.min(workloadCap,Math.round(total*workloadScale)),copy:Math.round(copy*copyScale),repetition:Math.round(repetition*repetitionScale),team:Math.round(team*teamScale),text:Math.round(text*textScale)}};
 }
 function weightedScore(rows,weights){
  var total=0,w=0;(rows||[]).forEach(function(r){var x=Math.max(0,Math.min(100,Number(r.score)||0)),wt=Number(weights&&weights[r.key])||1;total+=x*wt;w+=wt;});return w?Math.round(total/w):0;
