@@ -175,6 +175,7 @@ jobs:
 
             for (const profile of data.profiles) {
               await test.step('Assessment scenario: ' + profile.name, async () => {
+                await page.evaluate(() => { sessionStorage.clear(); });
                 await page.goto(base + '/', {waitUntil:'networkidle'});
                 const form = page.locator('#scanForm');
                 await expect(form).toBeVisible();
