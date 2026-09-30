@@ -15,6 +15,7 @@ if(location.pathname.endsWith("/index.html")||location.pathname==="/"){
     sessionStorage.removeItem("automationScanAssessment");
     sessionStorage.removeItem("automationScanReportHtml");
     sessionStorage.removeItem("automationScanReportGenerated");
+    sessionStorage.removeItem("automationScanCurrentIndustry");
   }catch(e){}
 }
 const leadSource=captureLeadSource();
@@ -64,7 +65,7 @@ async function loadIndustryProfiles(){
   renderIndustryQuestionnaire();
  }catch(e){console.error("Industry questionnaire configuration unavailable",e);const q=document.getElementById("industryQuestions");if(q)q.innerHTML='<p class="form-note">Industry questions could not be loaded. Refresh the page or contact support.</p>';}
 }
-form.elements.industry?.addEventListener("change",renderIndustryQuestionnaire);
+form.elements.industry?.addEventListener("change",function(){renderIndustryQuestionnaire();try{sessionStorage.setItem("automationScanCurrentIndustry",this.value||"")}catch(e){}});
 var industryProfilesReady=false, industryProfilesLoading=false;
 async function ensureIndustryProfiles(){
  if(industryProfilesReady||industryProfilesLoading)return;
@@ -164,6 +165,7 @@ function renderResult(){
 async function generateReport(){
   try{
     if(!form){throw new Error("Assessment form was not found.");}
+    try{var currentIndustry=sessionStorage.getItem("automationScanCurrentIndustry");if(currentIndustry&&form.elements.industry.querySelector('option[value="'+CSS.escape(currentIndustry)+'"]'))form.elements.industry.value=currentIndustry;}catch(e){}
     if(!valid()) return;
     track("report_generated",{industry:form.elements.industry?.value||"unknown"});
     renderResult();
