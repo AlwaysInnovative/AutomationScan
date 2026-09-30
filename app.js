@@ -212,10 +212,10 @@ const pdfButton=document.getElementById("downloadPdf"); if(pdfButton) pdfButton.
 const printButton=document.getElementById("print"); if(printButton) printButton.addEventListener("click",()=>window.print());
 
 async function submitLeadIfConsented(r,top){
- const email=form.elements.emailAddress?.value?.trim(),consent=form.elements.consent?.checked;
+ const email=form.elements.emailAddress?.value?.trim(),consent=form.elements.reportConsent?.checked;
  if(!email||!consent)return;
  try{
-  const res=await fetch((window.AUTOMATIONSCAN_API_BASE||"")+"/api/lead",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,consent:true,source:leadSource,report:{score:r.score,label:r.label,low:r.low,high:r.high,industry:r.industry,goal:r.goal,top:top.slice(0,3).map(x=>x[0]),coverage:r.coverage,selectedPainPoints:r.selectedPainPoints}})});
+  const res=await fetch((window.AUTOMATIONSCAN_API_BASE||"")+"/api/lead",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,consent:true,source:leadSource,report:{score:r.score,label:r.label,low:r.low,high:r.high,industry:r.industry,goal:r.goal,top:top.slice(0,3).map(x=>x[0]),coverage:r.coverage,selectedPainPoints:r.selectedPainPoints,marketingConsent:!!form.elements.marketingConsent?.checked}})});
   document.getElementById("saveStatus").textContent=res.ok?"Report generated; email request submitted.":"Report generated locally; email delivery is not configured yet.";
  }catch{document.getElementById("saveStatus").textContent="Report generated locally."}
 }
