@@ -1,0 +1,19 @@
+name: AutomationScan public UAT
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  public-uat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm init -y
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - run: node .github/uat/public-surface.mjs
+        env:
+          BASE_URL: https://automation-scan-neon.vercel.app
