@@ -194,19 +194,19 @@ function canonicalWorkbenchStages(){
  return out;
 }
 function syncJourneyNav(){
- var all=canonicalWorkbenchStages(),st=(state.journeyTemplate&&state.journeyTemplate.stages)||[],allowed=st.map(function(s){return s.section}),current=st[Number(state.journeyStage||0)]?.section||"profile";
+ var st=(state.journeyTemplate&&state.journeyTemplate.stages)||[],allowed=st.map(function(s){return s.section}),current=st[Number(state.journeyStage||0)]?.section||allowed[0]||"profile";
  document.querySelectorAll(".wb-nav button[data-tab]").forEach(function(b){
-   var ix=all.findIndex(function(x){return x.section===b.dataset.tab});
-   b.hidden=false;
-   b.dataset.canonicalIndex=ix;
+   var ix=allowed.indexOf(b.dataset.tab);
+   b.hidden=ix<0;
+   b.dataset.journeyIndex=ix;
    b.classList.toggle("active",b.dataset.tab===current);
-   b.classList.toggle("done",ix>=0&&ix<all.findIndex(function(x){return x.section===current}));
+   b.classList.toggle("done",ix>=0&&ix<allowed.indexOf(current));
    b.setAttribute("aria-current",b.dataset.tab===current?"step":"false");
    var old=b.querySelector(".wb-nav-number"),label=b.querySelector(".wb-nav-label");
    if(!old){var txt=b.textContent.replace(/^\\d+\\.\\s*/,"").trim();b.innerHTML='<span class="wb-nav-number">'+String(ix+1).padStart(2,"0")+'</span><span class="wb-nav-label">'+esc(txt)+'</span>';}
    else old.textContent=String(ix+1).padStart(2,"0");
-   b.title=allowed.includes(b.dataset.tab)?(b.dataset.tab===current?"Current journey step":"Part of this journey"):"Available work area";
-   var stText=sectionStatus(b.dataset.tab);b.setAttribute("data-status",stText.toLowerCase().replace(/ /g,"-"));
+   b.title=ix>=0?(b.dataset.tab===current?"Current journey step":"Open journey step"):"";
+   b.setAttribute("data-status",sectionStatus(b.dataset.tab).toLowerCase().replace(/ /g,"-"));
  });
 }
 function journeyRender(){
@@ -279,14 +279,14 @@ var excelInput=$("workbenchExcelImport");if(excelInput)excelInput.onchange=funct
  $("importApps").onclick=function(){$("appFile").click()};$("appFile").onchange=function(){if(this.files[0])importApps(this.files[0])};
  $("addCandidate").onclick=function(){var name=val("candName").trim();if(!name)return alert("Enter a candidate name.");if(state.candidates.some(function(x){return norm(x.name)===norm(name)}))return alert("That candidate already exists.");state.candidates.push({name:name,capabilities:val("candCapabilities").trim(),notes:val("candNotes").trim()});save();renderCandidates();set("candName","");set("candCapabilities","");set("candNotes","")};
  $("clearCandidates").onclick=function(){state.candidates=[];state.selection=[];save();renderCandidates();$("selectOut").innerHTML=""};
- $("runSelection").onclick=function(){renderSelection();save();track("workbench_selection_run")};$("scorePortfolio").onclick=function(){renderPortfolio()};$("addPoc").onclick=function(){var candidate=val("pocCandidate").trim(),scenario=val("pocScenario").trim();if(!candidate||!scenario)return alert("Enter a POC candidate and critical scenario.");state.pocResults.push({candidate:candidate,scenario:scenario,expected:val("pocExpected").trim(),observed:val("pocObserved").trim(),evidence:val("pocEvidence"),decision:val("pocDecision").trim()});save();renderPoc()};$("scoreMigration").onclick=scoreMigration;$("runTraceability").onclick=function(){traceRequirements()};
- $("calcEconomics").onclick=function(){calcEconomics();scenarioEconomics()};
- $("generateRfp").onclick=function(){renderExecute("rfp")};$("generatePoc").onclick=function(){renderExecute("poc")};
- $("addCapability").onclick=function(){var name=val("cName").trim();if(!name)return alert("Enter a capability name.");state.capabilities.push({name:name,criticality:val("cCriticality"),current:Math.min(100,Math.max(0,Number(val("cCurrent"))||0)),target:Math.min(100,Math.max(0,Number(val("cTarget"))||0)),app:val("cApp").trim(),req:val("cReq").trim(),evidence:val("cEvidence"),gap:val("cGap").trim()});save();renderCapabilities()};$("addRequirement").onclick=function(){var text=val("qText").trim();if(!text)return alert("Enter the requirement.");var n=state.requirements.length+1;state.requirements.push({id:"REQ-"+String(n).padStart(3,"0"),text:text,type:val("qType"),priority:val("qPriority"),process:val("qProcess").trim(),acceptance:val("qAcceptance").trim(),gate:val("qGate").trim()});save();renderRequirements()};$("exportRequirements").onclick=exportRequirements;
- $("addVendorResponse").onclick=function(){var candidate=val("vCandidate").trim(),req=val("vReq").trim(),response=val("vResponse").trim();if(!candidate||!req||!response)return alert("Enter candidate, requirement ID and the recorded response.");state.vendorResponses.push({candidate:candidate,req:req,status:val("vStatus"),evidence:val("vEvidence"),response:response,dependency:val("vDependency").trim()});save();renderCompare()};$("clearVendorResponses").onclick=function(){state.vendorResponses=[];save();renderCompare()};
- $("addGovern").onclick=function(){state.governance.push({req:val("gReq"),cap:val("gCap"),evidence:val("gEvidence"),gate:val("gGate"),ai:val("gAi"),risk:val("gRisk")});save();renderGov()};
- $("addRoadmap").onclick=function(){state.roadmap.push({horizon:val("rHorizon"),workstream:val("rWorkstream"),owner:val("rOwner"),gate:val("rGate"),dependency:val("rDependency"),value:val("rValue")});save();renderRoadmap()};
- $("addEvidence").onclick=function(){var claim=val("eClaim").trim(),source=val("eSource").trim();if(!claim||!source)return alert("Enter the claim and its source.");state.evidence.push({claim:claim,source:source,date:val("eDate"),reviewer:val("eReviewer").trim(),status:val("eStatus"),next:val("eNext").trim()});save();renderEvidence()};
+ $("runSelection").onclick=function(){renderSelection();markCompleted("select");track("workbench_selection_run")};$("scorePortfolio").onclick=function(){renderPortfolio();markCompleted("portfolio")};$("addPoc").onclick=function(){var candidate=val("pocCandidate").trim(),scenario=val("pocScenario").trim();if(!candidate||!scenario)return alert("Enter a POC candidate and critical scenario.");state.pocResults.push({candidate:candidate,scenario:scenario,expected:val("pocExpected").trim(),observed:val("pocObserved").trim(),evidence:val("pocEvidence"),decision:val("pocDecision").trim()});markCompleted("poc");renderPoc()};$("scoreMigration").onclick=function(){scoreMigration();markCompleted("poc")};$("runTraceability").onclick=function(){traceRequirements()};
+ $("calcEconomics").onclick=function(){calcEconomics();scenarioEconomics();markCompleted("economics")};
+ $("generateRfp").onclick=function(){renderExecute("rfp");markCompleted("execute")};$("generatePoc").onclick=function(){renderExecute("poc");markCompleted("execute")};
+ $("addCapability").onclick=function(){var name=val("cName").trim();if(!name)return alert("Enter a capability name.");state.capabilities.push({name:name,criticality:val("cCriticality"),current:Math.min(100,Math.max(0,Number(val("cCurrent"))||0)),target:Math.min(100,Math.max(0,Number(val("cTarget"))||0)),app:val("cApp").trim(),req:val("cReq").trim(),evidence:val("cEvidence"),gap:val("cGap").trim()});markCompleted("capabilities");renderCapabilities()};$("addRequirement").onclick=function(){var text=val("qText").trim();if(!text)return alert("Enter the requirement.");var n=state.requirements.length+1;state.requirements.push({id:"REQ-"+String(n).padStart(3,"0"),text:text,type:val("qType"),priority:val("qPriority"),process:val("qProcess").trim(),acceptance:val("qAcceptance").trim(),gate:val("qGate").trim()});markCompleted("requirements");renderRequirements()};$("exportRequirements").onclick=exportRequirements;
+ $("addVendorResponse").onclick=function(){var candidate=val("vCandidate").trim(),req=val("vReq").trim(),response=val("vResponse").trim();if(!candidate||!req||!response)return alert("Enter candidate, requirement ID and the recorded response.");state.vendorResponses.push({candidate:candidate,req:req,status:val("vStatus"),evidence:val("vEvidence"),response:response,dependency:val("vDependency").trim()});markCompleted("compare");renderCompare()};$("clearVendorResponses").onclick=function(){state.vendorResponses=[];save();renderCompare()};
+ $("addGovern").onclick=function(){state.governance.push({req:val("gReq"),cap:val("gCap"),evidence:val("gEvidence"),gate:val("gGate"),ai:val("gAi"),risk:val("gRisk")});markCompleted("govern");renderGov()};
+ $("addRoadmap").onclick=function(){state.roadmap.push({horizon:val("rHorizon"),workstream:val("rWorkstream"),owner:val("rOwner"),gate:val("rGate"),dependency:val("rDependency"),value:val("rValue")});markCompleted("roadmap");renderRoadmap()};
+ $("addEvidence").onclick=function(){var claim=val("eClaim").trim(),source=val("eSource").trim();if(!claim||!source)return alert("Enter the claim and its source.");state.evidence.push({claim:claim,source:source,date:val("eDate"),reviewer:val("eReviewer").trim(),status:val("eStatus"),next:val("eNext").trim()});markCompleted("evidence");renderEvidence()};
  $("exportJson").onclick=exportJson;$("printReport").onclick=function(){report();window.print()};$("resetAll").onclick=function(){if(confirm("Reset the local workbench?")){localStorage.removeItem(KEY);location.reload()}};
  load();
   try{
@@ -309,9 +309,9 @@ var excelInput=$("workbenchExcelImport");if(excelInput)excelInput.onchange=funct
       }
     }
   }catch(e){console.warn("Upstream assessment import skipped",e)}
-  loadJourneys();
   var savedProfile=state.profile||{};[["industry","wbIndustry"],["current","wbCurrent"],["businessModel","wbBusiness"],["scale","wbScale"],["revenueModel","wbRevenue"],["fulfilmentModel","wbFulfilment"],["deliveryModel","wbDelivery"],["regulatoryIntensity","wbRegulatory"],["appetite","wbAppetite"],["horizon","wbHorizon"],["goals","wbGoals"],["pain","wbPain"],["integration","wbIntegration"],["custom","wbCustom"],["customProcesses","wbCustomProcesses"],["erpSpend","wbErpSpend"]].forEach(function(pair){if($(pair[1])&&savedProfile[pair[0]]!=null)set(pair[1],savedProfile[pair[0]])});
   renderProfileOut();renderProcesses();renderApps();renderCandidates();renderCapabilities();renderGov();renderRoadmap();renderRequirements();renderCompare();renderPortfolio();renderPoc();renderEvidence();report();
+  loadJourneys();
 }
 document.addEventListener("automationScanUIReady",bind);if(window.AutomationScanUI&&window.AutomationScanUI.ready&&typeof window.AutomationScanUI.ready.then==="function")window.AutomationScanUI.ready.then(bind);
 if(window.AutomationScanUI&&window.AutomationScanUI.ready&&typeof window.AutomationScanUI.ready.then==="function")window.AutomationScanUI.ready.then(bind);
