@@ -257,7 +257,8 @@ jobs:
 
             for (const profile of industryData.profiles) {
               await test.step('Navigator scenario: ' + profile.name, async () => {
-                await page.goto(base + '/transformation-advisor.html', {waitUntil:'networkidle'});
+                await page.goto(base + '/transformation-advisor.html', {waitUntil:'domcontentloaded'});
+                await page.waitForSelector('#transformForm', {state:'visible', timeout:15000});
                 const form = page.locator('#transformForm');
                 await expect(form).toBeVisible();
 
@@ -353,7 +354,8 @@ jobs:
             const errors = installErrorCapture(page);
             page.on('dialog', async dialog => { await dialog.dismiss(); });
 
-            const wbResponse = await page.goto(base + '/transformation-workbench.html', {waitUntil:'networkidle'});
+            const wbResponse = await page.goto(base + '/transformation-workbench.html', {waitUntil:'domcontentloaded'});
+            await page.waitForSelector('#wbGoals', {state:'visible', timeout:15000});
             expect(wbResponse.status()).toBe(200);
             expect(page.url()).toContain('transformation-workbench.html');
             await page.waitForSelector('#wbGoals', {state:'visible', timeout:15000});
