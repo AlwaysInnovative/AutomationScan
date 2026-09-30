@@ -291,7 +291,7 @@ var excelInput=$("workbenchExcelImport");if(excelInput)excelInput.onchange=funct
  $("exportJson").onclick=exportJson;$("printReport").onclick=function(){report();window.print()};$("resetAll").onclick=function(){if(confirm("Reset the local workbench?")){localStorage.removeItem(KEY);location.reload()}};
  load();
   try{
-    if(!state._upstreamImported){
+    {
       var raw=sessionStorage.getItem("automationscan_transform");
       if(raw){
         var a=JSON.parse(raw);
