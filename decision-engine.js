@@ -27,7 +27,7 @@ function candidateScore(c,ctx){
  if(capHits.length)explanation.push(capHits.length+" capability matches");
  if(evidence.length)explanation.push(evidence.length+" linked evidence item(s)");
  if(!explanation.length)explanation.push("No recorded fit evidence yet");
- return {score:Math.min(100,score),processHits:processHits,requirementHits:reqHits,capabilityHits:capHits,evidenceCount:evidence.length,gaps:gaps,explanation:explanation};
+ var fitState=evidence.length&&reqHits.length?"Evidence-linked fit":(reqHits.length||processHits.length?"Potential fit":"Insufficient evidence");return {score:Math.min(100,score),fitState:fitState,processHits:processHits,requirementHits:reqHits,capabilityHits:capHits,evidenceCount:evidence.length,gaps:gaps,explanation:explanation};
 }
 function shortlist(ctx){
  return (ctx.candidates||[]).map(function(c){
