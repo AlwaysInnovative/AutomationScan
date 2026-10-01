@@ -93,7 +93,7 @@ function importWorkbenchWorkbook(file){
        el.dispatchEvent(new Event("change",{bubbles:true}));markVisited(sec);updated++;
      });
    });
-   save(); if(typeof renderAll==="function")renderAll();
+   save(); if(typeof renderAll==="function")renderAll(); journeyRender(); if(typeof renderEvidence==="function")renderEvidence();
    return {updated,unknown};
  });
 }
