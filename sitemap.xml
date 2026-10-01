@@ -27,4 +27,4 @@
   <url><loc>https://automation-scan-neon.vercel.app/tools/erp-compliance-checker.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://automation-scan-neon.vercel.app/tools/automation-opportunity-scanner.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://automation-scan-neon.vercel.app/transformation-workbench.html</loc></url>
-</urlset>
+<url><loc>https://automation-scan-neon.vercel.app/guides/erp-transformation-readiness.html</loc></url><url><loc>https://automation-scan-neon.vercel.app/guides/application-portfolio-rationalization.html</loc></url><url><loc>https://automation-scan-neon.vercel.app/guides/ai-readiness-data-governance.html</loc></url></urlset>
