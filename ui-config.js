@@ -33,10 +33,8 @@ async function load(){
       const a=document.createElement("a");a.href=item.href;a.textContent=item.label;a.dataset.navKey=item.key;navEl.appendChild(a);
     });
   }
-  const contact=document.querySelector("header .nav-link-contact");
-  if(contact&&Array.isArray(nav)){
-    const item=nav.find(function(x){return x.key==="contact";});
-    if(item){contact.href=item.href;contact.textContent=item.label;}
+  if(Array.isArray(nav)&&navEl){
+    document.querySelectorAll("header .nav-link-contact").forEach(function(el){el.remove();});
   }
   const footer=cfg.navigation&&cfg.navigation.footer;
   if(footer){
