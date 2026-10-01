@@ -229,7 +229,7 @@
 <label>Status<select id="eStatus"></select></label>
 <label>Next validation<input id="eNext" placeholder="Scripted demo / reference / POC"></label>
 </div>
-<div class="wb-actions"><button class="wb-btn wb-primary" id="addEvidence">Add evidence item</button></div><div class="wb-note">Recommended intake order: application inventory → spend / renewal records → process metrics → vendor evidence → POC results. If you only have estimates, mark them as User stated or Assumption.</div><div id="evidenceFindings" class="wb-output"></div><div id="evidenceOut"></div>
+<div class="wb-actions"><button class="wb-btn wb-primary" id="addEvidence">Add evidence item</button></div><div class="wb-note">Recommended intake order: application inventory → spend / renewal records → process metrics → vendor evidence → POC results. If you only have estimates, mark them as User stated or Assumption.</div><div id="evidenceFindings" class="wb-output"></div><section id="feedbackPanel" class="wb-card"><h3>Recommendation feedback</h3><p>After using this brief, record whether the findings were useful. This improves traceability without changing the underlying evidence.</p><label><span>Outcome</span><select id="recommendationFeedback"><option value="">Choose</option><option value="useful">Useful</option><option value="partly">Partly useful</option><option value="not-useful">Not useful</option></select></label><label><span>What changed?</span><textarea id="feedbackNote" maxlength="2000" placeholder="Optional validation result"></textarea></label><button type="button" id="saveFeedback" class="btn btn-copper">Save feedback</button><span id="feedbackStatus" role="status"></span></section><div id="evidenceOut"></div>
 </article>
 
 <article class="wb-panel" id="tab-report">
@@ -240,5 +240,5 @@
 </section></div></main>
 <footer><div class="wrap footer-grid"><div><a class="brand" href="./"></a><p>Evidence-led transformation discovery.</p></div><div><b>Explore</b></div><div><b>Trust</b><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="about.html">About & Methodology</a><a href="contact.html">Contact</a></div></div><div class="wrap footer-bottom">© 2026 AutomationScan · Directional decision support.</div></footer>
 <script src="ui-config.js?v=20260929-8"></script><script src="decision-engine.js?v=20260928-2"></script><script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="workbench.js?v=20261001-11"></script>
+<script src="workbench.js?v=20261001-12"></script>
 </body></html>
