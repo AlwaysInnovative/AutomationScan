@@ -13,15 +13,15 @@ function populate(select,options){
 }
 async function load(){
  try{
-  const r=await fetch("api/ui-config",{cache:"no-store"});
+  const r=await fetch("/api/ui-config",{cache:"no-store"});
   if(!r.ok)throw new Error("ui config "+r.status);
   const data=await r.json(),cfg=data.config||{};
   window.AutomationScanUI.config=cfg;
   const brand=cfg.brand||{};
   document.querySelectorAll("header .brand,footer .brand").forEach(function(a){
-    if(brand.href)a.href=brand.href;
+    if(brand.href)a.href=brand.href.startsWith("/")?brand.href:"/"+brand.href.replace(/^\.\//,"");
     a.innerHTML="";
-    const img=document.createElement("img");img.src=brand.logo||"favicon.svg";img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
+    const img=document.createElement("img");img.src=brand.logo||"/favicon.svg";img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
     const span=document.createElement("span");span.textContent=brand.label||"AutomationScan";span.className="brand-label";a.appendChild(span);
     a.setAttribute("aria-label",brand.alt||"AutomationScan");
   });
