@@ -346,3 +346,5 @@ footer{background:var(--navy);color:#b8c7c7;padding:50px 0 22px}.footer-grid{dis
 
 /* Dynamic Navigator choice controls: keep native inputs interactable */
 .capability-check input[type="checkbox"],.capability-checks input[type="checkbox"]{display:inline-block!important;position:static!important;opacity:1!important;visibility:visible!important;width:auto!important;height:auto!important;margin:3px 8px 0 0!important;clip:auto!important;clip-path:none!important;}
+
+.hero-decision-panel .decision-preview{display:grid;gap:0.25rem;margin:1.25rem 0}.hero-decision-panel .decision-row{display:flex;justify-content:space-between;gap:1rem;padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.12)}.hero-decision-panel .decision-row span{opacity:.78}.hero-decision-panel .decision-row strong{font-weight:700}.hero-decision-panel .panel-note{margin-top:1.2rem}.hero-decision-panel .dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;margin-right:.45rem;background:currentColor}
