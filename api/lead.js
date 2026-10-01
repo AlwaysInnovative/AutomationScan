@@ -92,8 +92,8 @@ export default async function handler(req, res) {
     const source = body.source || {};
     const summary =
       "Industry: " + String(report.industry || "Unknown") +
-      " | Signal: " + Number(report.score || 0) + "/100" +
-      " | Estimated: " + String(report.low || 0) + "-" + String(report.high || 0) + " hrs/month" +
+      " | Evidence coverage: " + String(report.coverage ?? "Not available") +
+      " | Estimated investigation range: " + String(report.low || "not supplied") + "-" + String(report.high || "not supplied") + " hrs/month" +
       " | Goal: " + String(report.goal || "Not specified") +
       " | Source: " + String(source.utm_source || "direct") + "/" + String(source.utm_medium || "(none)");
 
@@ -154,7 +154,7 @@ export default async function handler(req, res) {
 
     const idempotencyKey =
       "automationscan:" + email + ":" +
-      Number(report.score || 0) + ":" +
+      String(report.coverage ?? "na") + ":" +
       String(report.industry || "unknown");
 
     const reportEmail = await resendSend({
@@ -168,7 +168,7 @@ export default async function handler(req, res) {
         "\n\nOpen AutomationScan: https://automation-scan-neon.vercel.app/",
       tags: [
         { name: "source", value: "automationscan" },
-        { name: "score", value: String(Number(report.score || 0)) }
+        { name: "coverage", value: String(report.coverage ?? "na") }
       ],
       idempotencyKey
     });
