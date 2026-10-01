@@ -10,7 +10,7 @@ function renderReport(){
  var reqs=processes.map(function(p,i){return{id:"REQ-"+String(i+1).padStart(3,"0"),text:p,type:"Business",priority:i<3?"Must":"Should",process:p,acceptance:"Demonstrate the process using the customer's real scenario",gate:"Evidence / POC"}});
  var caps=processes.map(function(p){return{name:p,current:0,target:100}});
  var cands=candidates.map(function(name){return{name:name,capabilities:"",notes:"Customer-entered candidate; source and scope must be validated."}});
- var ctx={industry:industry,businessModel:value("businessModel"),current:value("current"),processes:processes,requirements:reqs,capabilities:caps,candidates:cands,evidence:[]};
+ var ctx={industry:industry,country:value("country"),businessModel:value("businessModel"),current:value("current"),processes:processes,requirements:reqs,capabilities:caps,candidates:cands,evidence:[]};
  var scores=[],maturity={score:0,name:"Not enough data"};
  try{
    if(window.AutomationScanDecisionEngine){
@@ -62,8 +62,13 @@ function renderReport(){
  if(el("tGoals"))el("tGoals").innerHTML=goals.map(function(x){return"<span>"+esc(x)+"</span>"}).join("")||"No goals selected";
  if(el("decisionPack"))el("decisionPack").innerHTML="<p>Use the Workbench to persist requirements, evidence, candidate responses, POC results, migration readiness and customer-specific economics.</p>";
  var results=el("transformResults");if(results){results.classList.remove("hidden");results.hidden=false;results.style.display="block";results.scrollIntoView({behavior:"smooth"});window.__automationScanReportReady=true}
- var data={industry:industry,businessModel:value("businessModel"),current:value("current"),processes:processes,pains:pains,candidates:candidates,goals:goals,savedAt:new Date().toISOString()};try{sessionStorage.setItem("automationscan_transform",JSON.stringify(data))}catch(e){}
+ var data={industry:industry,country:value("country"),businessModel:value("businessModel"),current:value("current"),processes:processes,pains:pains,candidates:candidates,goals:goals,savedAt:new Date().toISOString()};try{sessionStorage.setItem("automationscan_transform",JSON.stringify(data))}catch(e){}
 }
+
+var countryProfiles=[];
+function selectedCountry(){var v=value("country");return countryProfiles.find(function(x){return x.country_code===v})||null;}
+async function loadCountryProfiles(){try{var response=await fetch("/api/countries",{cache:"no-store"});if(!response.ok)throw new Error("country_api_"+response.status);var data=await response.json();countryProfiles=Array.isArray(data.countries)?data.countries:[];var select=el("country");if(select){var current=select.value;select.innerHTML='<option value="">Choose country</option>'+countryProfiles.map(function(p){return '<option value="'+esc(p.country_code)+'">'+esc(p.country_name)+'</option>'}).join("");if(current)select.value=current;}}catch(e){console.warn("Country localisation unavailable",e);}}
+async function loadLocalizedScenario(){var country=value("country"),industry=value("industry");if(!country||!industry)return;try{var response=await fetch("/api/industry-scenario?industry="+encodeURIComponent(industry.toLowerCase().replace(/\\s+/g,"_"))+"&country="+encodeURIComponent(country),{cache:"no-store"});if(!response.ok)return;var data=await response.json(),s=data.scenario;if(!s)return;var p=selectedCountry();var intro=el("industryIntro");if(intro){var text=(s.intro||"")+" Currency: "+((p&&p.currency_code)||"Validate locally")+". Validate tax, invoicing, data protection and operating requirements for the actual legal entity.";intro.textContent=text;}var box=el("industryProcesses");if(box&&Array.isArray(s.process_additions))s.process_additions.forEach(function(x){if(!Array.isArray(x)||!x[0])return;var exists=[].slice.call(box.querySelectorAll('input[name="processes"]')).some(function(i){return i.value===x[0]});if(!exists){var label=document.createElement("label");label.className="capability-check";var input=document.createElement("input");input.type="checkbox";input.name="processes";input.value=x[0];var span=document.createElement("span");span.innerHTML="<b>"+esc(x[0])+"</b><small>"+esc(x[1]||"Country-localised process")+"</small>";label.appendChild(input);label.appendChild(span);box.appendChild(label);}});var pain=el("industryPainOptions");if(pain&&Array.isArray(s.local_pain_points))s.local_pain_points.forEach(function(x){var label=document.createElement("label");label.className="capability-check";var input=document.createElement("input");input.type="checkbox";input.name="painSignals";input.value=x;var span=document.createElement("span");span.textContent=x;label.appendChild(input);label.appendChild(span);pain.appendChild(label);});}catch(e){console.warn("Industry-country scenario unavailable",e);}}
 function selectedIndustry(){
  var term=value("industry").toLowerCase();
  return industryProfiles.find(function(p){return p.name.toLowerCase()===term||(p.aliases||[]).some(function(a){return String(a).toLowerCase()===term})})||industryProfiles.find(function(p){return p.id==="generic"})||{name:"Other / custom",intro:"Describe the processes and controls specific to your business.",processes:[],pain_points:[]};
@@ -82,14 +87,15 @@ async function loadIndustryProfiles(){
   renderIndustryQuestions();
  }catch(e){console.error("Industry questionnaires unavailable",e);if(el("industryIntro"))el("industryIntro").textContent="Industry questionnaire data could not load. Refresh or contact support before continuing.";}
 }
-el("industry")&&el("industry").addEventListener("change",renderIndustryQuestions);
+el("industry")&&el("industry").addEventListener("change",function(){renderIndustryQuestions();loadLocalizedScenario();});
+el("country")&&el("country").addEventListener("change",loadLocalizedScenario);
 var industryProfilesReady=false, industryProfilesLoading=false;
 async function ensureIndustryProfiles(){
  if(industryProfilesReady||industryProfilesLoading)return;
  industryProfilesLoading=true;
  try{await loadIndustryProfiles();industryProfilesReady=true;}finally{industryProfilesLoading=false;}
 }
-document.addEventListener("automationScanUIReady",ensureIndustryProfiles);
+document.addEventListener("automationScanUIReady",function(){loadCountryProfiles();ensureIndustryProfiles();});
 if(window.AutomationScanUI&&window.AutomationScanUI.ready&&typeof window.AutomationScanUI.ready.then==="function")window.AutomationScanUI.ready.then(ensureIndustryProfiles);
 else if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ensureIndustryProfiles);
 if(next)next.onclick=function(){if(valid())showStep((window._advisorStep||0)+1)};if(back)back.onclick=function(){showStep((window._advisorStep||0)-1)};if(form)form.addEventListener("submit",function(e){e.preventDefault();if(!valid())return;try{renderReport();if(window.trackEvent)window.trackEvent("transformation_report_generated",{industry:value("industry")})}catch(err){console.error(err);alert("AutomationScan could not generate the report. Please refresh and try again.")}});if(generate)generate.onclick=function(){try{renderReport();if(window.trackEvent)window.trackEvent("transformation_report_generated",{industry:value("industry")})}catch(err){console.error(err);alert("AutomationScan could not generate the report. Please refresh and try again.")}};
