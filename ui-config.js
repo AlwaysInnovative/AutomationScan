@@ -17,6 +17,14 @@ async function load(){
   if(!r.ok)throw new Error("ui config "+r.status);
   const data=await r.json(),cfg=data.config||{};
   window.AutomationScanUI.config=cfg;
+  const brand=cfg.brand||{};
+  document.querySelectorAll("header .brand,footer .brand").forEach(function(a){
+    if(brand.href)a.href=brand.href;
+    a.innerHTML="";
+    const img=document.createElement("img");img.src=brand.logo||"favicon.svg";img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
+    const span=document.createElement("span");span.textContent=brand.label||"AutomationScan";span.className="brand-label";a.appendChild(span);
+    a.setAttribute("aria-label",brand.alt||"AutomationScan");
+  });
   if(cfg.navigation&&Array.isArray(cfg.navigation.workbenchSections)){
     document.querySelectorAll(".wb-nav").forEach(function(box){
       box.innerHTML="";
