@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-var form=document.getElementById("transformForm"),steps=[].slice.call(document.querySelectorAll(".t-step")),next=document.getElementById("tNext"),back=document.getElementById("tBack"),generate=document.getElementById("tGenerate"),industryProfiles=[],currentScenario=null;
+var form=document.getElementById("transformForm"),steps=[].slice.call(document.querySelectorAll(".t-step")),next=document.getElementById("tNext"),back=document.getElementById("tBack"),generate=document.getElementById("tGenerate"),industryProfiles=[],currentScenario=null,currentScoringProfile=null;
 function el(id){return document.getElementById(id)} function value(n){var x=form&&form.querySelector('[name="'+n+'"]');return x?x.value.trim():""} function esc(v){return String(v==null?"":v).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function list(n){return value(n).split(/[\n,;]+/).map(function(x){return x.trim()}).filter(Boolean)}
 function showStep(n){n=Math.max(0,Math.min(steps.length-1,n));steps.forEach(function(s,i){s.classList.toggle("active",i===n)});if(el("tProgress"))el("tProgress").textContent="Step "+(n+1)+" of "+steps.length;if(el("tProgressBar"))el("tProgressBar").style.width=((n+1)/steps.length*100)+"%";if(back)back.hidden=n===0;if(next)next.hidden=n===steps.length-1;if(generate)generate.hidden=n!==steps.length-1;window._advisorStep=n}
