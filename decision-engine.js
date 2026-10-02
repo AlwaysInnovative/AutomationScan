@@ -7,6 +7,7 @@ function overlap(a,b){
  return Array.from(new Set(aa));
 }
 function candidateScore(c,ctx){
+ var ec=ctx.engineConfig&&ctx.engineConfig.candidate||{}, processCap=Number(ec.processCap)||25, evidenceCap=Number(ec.evidenceCap)||10, capabilityCap=Number(ec.capabilityCap)||20, requirementCap=Number(ec.requirementCap)||35, processWeight=Number(ec.processWeight)||5, evidenceWeight=Number(ec.evidenceWeight)||5, capabilityWeight=Number(ec.capabilityWeight)||5, requirementWeight=Number(ec.requirementWeight)||7;
  var text=[c.name,c.scope,c.capabilities,c.notes].join(" ");
  var reqs=(ctx.requirements||[]).map(function(x){return x.text||x.name||x;});
  var procs=ctx.processes||[];
@@ -16,10 +17,10 @@ function candidateScore(c,ctx){
  var capHits=caps.map(function(p){return overlap(p.name||p,text).length? (p.name||p):null;}).filter(Boolean);
  var evidence=(ctx.evidence||[]).filter(function(e){return norm(e.claim).indexOf(norm(c.name))>=0;});
  var score=0;
- score+=Math.min(35,reqHits.length*7);
- score+=Math.min(25,processHits.length*5);
- score+=Math.min(20,capHits.length*5);
- score+=Math.min(10,evidence.length*5);
+ score+=Math.min(requirementCap,reqHits.length*requirementWeight);
+ score+=Math.min(processCap,processHits.length*processWeight);
+ score+=Math.min(capabilityCap,capHits.length*capabilityWeight);
+ score+=Math.min(evidenceCap,evidence.length*evidenceWeight);
  var gaps=Math.max(0,reqs.length-reqHits.length);
  var explanation=[];
  if(reqHits.length)explanation.push(reqHits.length+" requirement matches");
@@ -38,8 +39,8 @@ function shortlist(ctx){
 function automationOpportunity(input,config){
  var cfg=config||{},h=input&&input.hours||{},total=Object.keys(h).reduce(function(s,k){return s+(Number(h[k])||0)},0);
  var copy=Math.max(0,Math.min(100,Number(input&&input.copy)||0)),repetition=Math.max(0,Math.min(100,Number(input&&input.repetition)||0)),team=Math.max(0,Math.min(100,Number(input&&input.teamSignal)||0)),text=Math.max(0,Math.min(100,Number(input&&input.textSignal)||0));
- var workloadCap=Number(cfg.workloadCap)||45,workloadScale=Number(cfg.workloadScale)||1.6;
- var score=Math.round(Math.min(100,Math.min(workloadCap,total*workloadScale)+copy*.2+repetition*.18+team*.15+text*.18));
+ var workloadCap=Number(cfg.workloadCap)||45,workloadScale=Number(cfg.workloadScale)||1.6,copyScale=Number(cfg.copyScale)||.2,repetitionScale=Number(cfg.repetitionScale)||.18,teamScale=Number(cfg.teamScale)||.15,textScale=Number(cfg.textScale)||.18;
+ var score=Math.round(Math.min(100,Math.min(workloadCap,total*workloadScale)+copy*copyScale+repetition*repetitionScale+team*teamScale+text*textScale));
  return {score:score,total:total,components:{workload:Math.min(workloadCap,Math.round(total*workloadScale)),copy:Math.round(copy*copyScale),repetition:Math.round(repetition*repetitionScale),team:Math.round(team*teamScale),text:Math.round(text*textScale)}};
 }
 function weightedScore(rows,weights){
