@@ -125,8 +125,18 @@ function renderCapabilities(){renderList("capabilityOut",state.capabilities,["Ca
 function renderRequirements(){renderList("requirementsOut",state.requirements,["ID","Requirement","Type","Priority","Process","Acceptance","Gate"],function(x){return[esc(x.id),esc(x.text),esc(x.type),esc(x.priority),esc(x.process),esc(x.acceptance),esc(x.gate)]})}
 function renderCompare(){renderList("compareOut",state.vendorResponses,["Candidate","Requirement","Status","Evidence","Response","Dependencies"],function(x){return[esc(x.candidate),esc(x.req),'<span class="wb-tag">'+esc(x.status)+'</span>','<span class="wb-tag">'+esc(x.evidence)+'</span>',esc(x.response),esc(x.dependency)]})}
 function exportRequirements(){var rows=[["ID","Requirement","Type","Priority","Process","Acceptance","Gate"]].concat(state.requirements.map(function(x){return[x.id,x.text,x.type,x.priority,x.process,x.acceptance,x.gate]}));var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||"").replace(/"/g,'""')+'"'}).join(",")}).join("\n");var b=new Blob([csv],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="automationscan-requirements.csv";a.click();URL.revokeObjectURL(a.href)}
-function renderPortfolio(){
+async function loadWorkbenchScoringProfile(){
+ try{
+  var p=state.profile||{},industry=String(p.industry||"").trim().toLowerCase().replace(/\s+/g,"_"),q=new URLSearchParams({industry:industry,country:String(p.country||"").trim(),journey:String(state.journeyId||"").trim(),businessModel:String(p.businessModel||"").trim()});
+  var r=await fetch("/api/scoring-profile?"+q.toString(),{cache:"no-store"});if(!r.ok)throw new Error("scoring_profile_"+r.status);
+  var d=await r.json(),profile=d.profile||null;
+  if(profile&&profile.rules){window.AutomationScanUI=window.AutomationScanUI||{};window.AutomationScanUI.config=window.AutomationScanUI.config||{};window.AutomationScanUI.config.decisionEngine=profile.rules;state.profile.scoringProfile=profile.profile_key;save();}
+  return profile;
+ }catch(e){console.warn("Workbench scoring profile unavailable; retaining base configuration",e);return null;}
+}
+async function renderPortfolio(){
  var out=$("portfolioOut");if(!state.applications.length){out.innerHTML="<div class='wb-note'>Add or import applications first.</div>";return}
+ await loadWorkbenchScoringProfile();
  var p=state.profile||{},ctx={applications:state.applications,engineConfig:(window.AutomationScanUI.config&&window.AutomationScanUI.config.decisionEngine)||{},industry:p.industry,country:p.country,businessModel:p.businessModel,current:p.current};
  var rows=E.portfolio?E.portfolio(ctx):[];
  state.applications=state.applications.map(function(a){var r=rows.filter(function(x){return x.application===a})[0];return r?Object.assign({},a,{portfolioRisk:r.risk,portfolioHealth:r.state}):a});
