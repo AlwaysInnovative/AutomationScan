@@ -64,7 +64,13 @@ function npv(cashflows,rate){
 function maturity(ctx){
  var dimensions=(ctx.capabilities||[]).map(function(x){return Number(x.current)||0;}).filter(function(x){return isFinite(x);});
  var score=dimensions.length?Math.round(dimensions.reduce(function(a,b){return a+b},0)/dimensions.length):0;
- return {score:score,name:score<25?"Fragmented":score<45?"Standardising":score<65?"Integrated":score<82?"Optimised":"Intelligent / Adaptive"};
+ var cfg=(ctx.engineConfig&&ctx.engineConfig.maturity)||{},bands=Array.isArray(cfg.bands)?cfg.bands.slice().sort(function(a,b){return Number(a.below)-Number(b.below);}):[];
+ var name="Not enough data";
+ if(bands.length){
+   for(var i=0;i<bands.length;i++){if(score<Number(bands[i].below)){name=bands[i].name||name;break;}}
+   if(name==="Not enough data"&&bands[bands.length-1])name=bands[bands.length-1].name||name;
+ }
+ return {score:score,name:name};
 }
 function portfolio(ctx){
  return (ctx.applications||[]).map(function(a){
