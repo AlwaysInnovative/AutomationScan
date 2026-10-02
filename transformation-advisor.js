@@ -10,7 +10,7 @@ function renderReport(){
  var reqs=processes.map(function(p,i){return{id:"REQ-"+String(i+1).padStart(3,"0"),text:p,type:"Business",priority:i<3?"Must":"Should",process:p,acceptance:"Demonstrate the process using the customer's real scenario",gate:"Evidence / POC"}});
  var caps=processes.map(function(p){return{name:p,current:0,target:100}});
  var cands=candidates.map(function(name){return{name:name,capabilities:"",notes:"Customer-entered candidate; source and scope must be validated."}});
- var ctx={industry:industry,country:value("country"),businessModel:value("businessModel"),current:value("current"),processes:processes,requirements:reqs,capabilities:caps,candidates:cands,evidence:[],scenario:currentScenario||null,decisionQuestions:(currentScenario&&currentScenario.decision_questions)||[],evidenceRequirements:(currentScenario&&currentScenario.evidence_requirements)||[],customProcess:value("customProcess")||"",customProcesses:value("customProcesses")||""};
+ var ctx={industry:industry,country:value("country"),businessModel:value("businessModel"),current:value("current"),processes:processes,requirements:reqs,capabilities:caps,candidates:cands,evidence:[],scenario:currentScenario||null,decisionQuestions:(currentScenario&&currentScenario.decision_questions)||[],evidenceRequirements:(currentScenario&&currentScenario.evidence_requirements)||[],customProcess:value("customProcess")||"",customProcesses:value("customProcesses")||"",engineConfig:(window.AutomationScanUI&&window.AutomationScanUI.config&&window.AutomationScanUI.config.decisionEngine)||{}};
  var scores=[],maturity={score:0,name:"Not enough data"};
  try{
    if(window.AutomationScanDecisionEngine){
@@ -24,7 +24,7 @@ function renderReport(){
    {key:"painSignals",score:Math.min(100,pains.length*20),weight:1},
    {key:"desiredOutcomes",score:Math.min(100,goals.length*20),weight:1}
  ];
- var score=window.AutomationScanDecisionEngine&&window.AutomationScanDecisionEngine.weightedScore?window.AutomationScanDecisionEngine.weightedScore(signalInputs,{businessContext:1,processScope:1,painSignals:1,desiredOutcomes:1}):0;
+ var score=window.AutomationScanDecisionEngine&&window.AutomationScanDecisionEngine.weightedScore?window.AutomationScanDecisionEngine.weightedScore(signalInputs,(ctx.engineConfig.discovery&&ctx.engineConfig.discovery.weights)||{}):0;
  var interpretation=score===0?"Insufficient customer evidence":score<40?"Early discovery — add more customer evidence":score<70?"Discovery signal — validate the recorded business evidence":"Discovery signal — proceed to evidence-led validation";
  if(el("tResultTitle"))el("tResultTitle").textContent="Customer-defined transformation assessment";
  if(el("tResultSub"))el("tResultSub").textContent="A practical summary of your business situation, the areas worth investigating first, and the questions to take into your next technology or process discussion.";
