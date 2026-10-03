@@ -1,0 +1,41 @@
+name: Production Acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/production-acceptance.js'
+      - '.github/workflows/production-acceptance.yml'
+      - '*.html'
+      - '*.js'
+      - 'api/**'
+  workflow_dispatch:
+
+jobs:
+  production-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save playwright@1.57.0
+          npx playwright install --with-deps chromium
+      - name: Run production customer acceptance
+        run: node scripts/production-acceptance.js
+      - name: Upload acceptance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-acceptance-${{ github.sha }}
+          path: |
+            test-artifacts/**
+            acceptance-summary.json
+            acceptance-report.html
+          if-no-files-found: warn
