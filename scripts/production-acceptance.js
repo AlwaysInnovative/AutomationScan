@@ -36,7 +36,7 @@ async function stage(p,sec,industry){
  const probe=await b.newPage();
  const jr=await probe.request.get(BASE+"/api/journeys");if(!jr.ok())throw Error("journeys API failed");
  const journeys=(await jr.json()).journeys||[];result.journeys=journeys.length;if(journeys.length!==8)throw Error("Expected 8 journeys");
- for(const [iid,industry] of industries)for(const country of countries){
+ const selectedIndustry=process.env.ACCEPTANCE_INDUSTRY; const selectedCountry=process.env.ACCEPTANCE_COUNTRY; const matrix=industries.filter(x=>!selectedIndustry||x[0]===selectedIndustry).flatMap(x=>countries.filter(c=>!selectedCountry||c===selectedCountry).map(c=>[x[0],x[1],c]));\n for(const [iid,industry,country] of matrix){
    const p=await b.newPage();const errs=[];p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
    try{
     const sr=await p.request.get(BASE+"/api/industry-scenario?industry="+iid+"&country="+country);
