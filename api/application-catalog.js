@@ -9,6 +9,6 @@ module.exports=async function(req,res){
   var q="?industry_id=eq."+encodeURIComponent(industry)+"&active=eq.true&select=id,vendor,solution,scope,capabilities,source_refs,version&order=vendor.asc,solution.asc";
   var r=await fetch(url+"/rest/v1/application_catalog"+q,{headers:{apikey:key,Authorization:"Bearer "+key}});
   if(!r.ok)return res.status(502).json({error:"application_catalog_unavailable"});
-  var rows=await r.json();return res.status(200).json({industry:industry,applications:Array.isArray(rows)?rows:[]});
+  var rows=await r.json();return res.status(200).json({industry:industry,applications:Array.isArray(rows)?rows:[],count:Array.isArray(rows)?rows.length:0});
  }catch(e){return res.status(500).json({error:"application_catalog_error"});}
 };
