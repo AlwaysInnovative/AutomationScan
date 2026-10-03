@@ -9,6 +9,10 @@ module.exports=async function(req,res){
   const qs="?industry_id=eq."+encodeURIComponent(industry)+"&country_code=eq."+encodeURIComponent(country)+"&active=eq.true&select=*";
   const r=await fetch(url+"/rest/v1/industry_country_scenarios"+qs,{headers:{apikey:key,Authorization:"Bearer "+key}});
   if(!r.ok)return res.status(502).json({error:"country_scenario_unavailable"});
-  const rows=await r.json();return res.status(200).json({scenario:rows[0]||null});
+  const rows=await r.json();
+  const aq="?industry_id=eq."+encodeURIComponent(industry)+"&active=eq.true&select=id,vendor,solution,scope,capabilities,source_refs,version&order=vendor.asc,solution.asc";
+  const ar=await fetch(url+"/rest/v1/application_catalog"+aq,{headers:{apikey:key,Authorization:"Bearer "+key}});
+  const applications=ar.ok?await ar.json():[];
+  return res.status(200).json({scenario:rows[0]||null,applications:Array.isArray(applications)?applications:[]});
  }catch(e){return res.status(500).json({error:"country_scenario_error"});}
 };
