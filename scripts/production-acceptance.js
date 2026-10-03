@@ -45,7 +45,7 @@ async function stage(p,sec,industry){
  if(!industries.length||!countries.length||!journeys.length)throw Error("Production inventory is empty");
  result.expected.industryCountry=industries.length*countries.length;
  result.expected.journeyCases=result.expected.industryCountry*journeys.length;
- result.expected.stageExecutions=journeys.reduce((n,j)=>n+(j.stages||[]).length,0)*industries.length*countries.length;
+ result.expected.stageExecutions=journeys.reduce((n,j)=>n+(j.stages||[]).filter(st=>st.section!=="report").length,0)*industries.length*countries.length;
  result.expected.resumeCases=result.expected.journeyCases;
  result.expected.pdfCases=result.expected.journeyCases;
  result.expected.navigatorCases=result.expected.industryCountry;
