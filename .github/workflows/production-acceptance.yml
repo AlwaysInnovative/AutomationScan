@@ -15,8 +15,57 @@ on:
 
 jobs:
   production-acceptance:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { industry: retail, country: AE }
+          - { industry: retail, country: DE }
+          - { industry: retail, country: GB }
+          - { industry: retail, country: IN }
+          - { industry: retail, country: SG }
+          - { industry: retail, country: US }
+          - { industry: manufacturing, country: AE }
+          - { industry: manufacturing, country: DE }
+          - { industry: manufacturing, country: GB }
+          - { industry: manufacturing, country: IN }
+          - { industry: manufacturing, country: SG }
+          - { industry: manufacturing, country: US }
+          - { industry: healthcare, country: AE }
+          - { industry: healthcare, country: DE }
+          - { industry: healthcare, country: GB }
+          - { industry: healthcare, country: IN }
+          - { industry: healthcare, country: SG }
+          - { industry: healthcare, country: US }
+          - { industry: financial_services, country: AE }
+          - { industry: financial_services, country: DE }
+          - { industry: financial_services, country: GB }
+          - { industry: financial_services, country: IN }
+          - { industry: financial_services, country: SG }
+          - { industry: financial_services, country: US }
+          - { industry: professional_services, country: AE }
+          - { industry: professional_services, country: DE }
+          - { industry: professional_services, country: GB }
+          - { industry: professional_services, country: IN }
+          - { industry: professional_services, country: SG }
+          - { industry: professional_services, country: US }
+          - { industry: logistics, country: AE }
+          - { industry: logistics, country: DE }
+          - { industry: logistics, country: GB }
+          - { industry: logistics, country: IN }
+          - { industry: logistics, country: SG }
+          - { industry: logistics, country: US }
+          - { industry: generic, country: AE }
+          - { industry: generic, country: DE }
+          - { industry: generic, country: GB }
+          - { industry: generic, country: IN }
+          - { industry: generic, country: SG }
+          - { industry: generic, country: US }
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    env:
+      ACCEPTANCE_INDUSTRY: ${{ matrix.industry }}
+      ACCEPTANCE_COUNTRY: ${{ matrix.country }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
