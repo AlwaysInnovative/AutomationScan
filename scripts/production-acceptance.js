@@ -1,8 +1,9 @@
 const { chromium } = require("playwright");
 const fs=require("fs"),path=require("path");
 const BASE="https://automation-scan-neon.vercel.app";
-const industries=[["retail","Retail"],["manufacturing","Manufacturing"],["healthcare","Healthcare"],["financial_services","Financial Services"],["professional_services","Professional Services"],["logistics","Logistics"],["generic","Other / Custom"]];
-const countries=["AE","DE","GB","IN","SG","US"];
+// Acceptance always targets the current production alias; do not substitute preview deployments.
+const defaultIndustries=[["retail","Retail"],["manufacturing","Manufacturing"],["healthcare","Healthcare"],["financial_services","Financial Services"],["professional_services","Professional Services"],["logistics","Logistics"],["generic","Other / Custom"]];
+const defaultCountries=["AE","DE","GB","IN","SG","US"];
 const out="test-artifacts";fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
 async function sel(p,id){const l=p.locator("#"+id);if(await l.count()){const v=await l.locator("option").evaluateAll(x=>x.map(o=>o.value).find(Boolean));if(v)await l.selectOption(v)}}
 async function fill(p,id,v){const l=p.locator("#"+id);if(await l.count())await l.fill(v)}
@@ -31,11 +32,24 @@ async function stage(p,sec,industry){
 }
 (async()=>{
  const b=await chromium.launch({headless:true});
- const result={navigator:0,scenario:0,journeys:0,stages:0,resume:0,pdf:0,failures:[],consoleErrors:[]};
+ const result={expected:{},passed:{},navigator:0,scenario:0,journeys:0,stages:0,resume:0,pdf:0,failures:[],consoleErrors:[],caseResults:[]};
  const probe=await b.newPage();
- const jr=await probe.request.get(BASE+"/api/journeys");if(!jr.ok())throw Error("journeys API failed");
- const journeys=(await jr.json()).journeys||[];result.journeys=journeys.length;if(journeys.length!==8)throw Error("Expected 8 journeys");
- for(const [iid,industry] of industries)for(const country of countries){
+ const [ir,cr,jr]=await Promise.all([probe.request.get(BASE+"/api/industries"),probe.request.get(BASE+"/api/countries"),probe.request.get(BASE+"/api/journeys")]);
+ if(!ir.ok()||!cr.ok()||!jr.ok())throw Error("Production inventory APIs unavailable");
+ const idata=await ir.json(), cdata=await cr.json(), jdata=await jr.json();
+ const liveIndustries=(idata.industries||[]).map(x=>[x.id,x.name]);
+ const liveCountries=(cdata.countries||[]).map(x=>x.code||x.country_code);
+ const industries=liveIndustries.length?liveIndustries:defaultIndustries;
+ const countries=liveCountries.length?liveCountries:defaultCountries;
+ const journeys=jdata.journeys||[];result.journeys=journeys.length;
+ if(!industries.length||!countries.length||!journeys.length)throw Error("Production inventory is empty");
+ result.expected.industryCountry=industries.length*countries.length;
+ result.expected.journeyCases=result.expected.industryCountry*journeys.length;
+ result.expected.stageExecutions=journeys.reduce((n,j)=>n+(j.stages||[]).filter(st=>st.section!=="report").length,0)*industries.length*countries.length;
+ result.expected.resumeCases=result.expected.journeyCases;
+ result.expected.pdfCases=result.expected.journeyCases;
+ result.expected.navigatorCases=result.expected.industryCountry;
+ const selectedIndustry=process.env.ACCEPTANCE_INDUSTRY; const selectedCountry=process.env.ACCEPTANCE_COUNTRY; const matrix=industries.filter(x=>!selectedIndustry||x[0]===selectedIndustry).flatMap(x=>countries.filter(c=>!selectedCountry||c===selectedCountry).map(c=>[x[0],x[1],c]));\n for(const [iid,industry,country] of matrix){
    const p=await b.newPage();const errs=[];p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
    try{
     const sr=await p.request.get(BASE+"/api/industry-scenario?industry="+iid+"&country="+country);
@@ -59,7 +73,11 @@ async function stage(p,sec,industry){
     }
    }catch(e){result.failures.push(iid+"/"+country+" :: "+e.message)}finally{result.consoleErrors.push(...errs.map(x=>iid+"/"+country+" :: "+x));await p.close()}
  }
+ result.expected.caseCount=result.caseResults.length;
+ result.coverage={industryCountryPassed:result.navigator,journeyPassed:result.resume,pdfPassed:result.pdf,stageExecutionsPassed:result.stages,consoleErrors:result.consoleErrors.length,failures:result.failures.length};
+ const fullCoverage=result.navigator===result.expected.navigatorCases&&result.resume===result.expected.resumeCases&&result.pdf===result.expected.pdfCases&&result.stages===result.expected.stageExecutions&&result.failures.length===0&&result.consoleErrors.length===0;
+ result.certified=fullCoverage;
  fs.writeFileSync("acceptance-summary.json",JSON.stringify(result,null,2));
- if(result.failures.length||result.consoleErrors.length)process.exit(1);
+ if(!fullCoverage)process.exit(1);
  console.log(JSON.stringify(result,null,2));await b.close();
 })();
