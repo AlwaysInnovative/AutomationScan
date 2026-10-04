@@ -1,5 +1,6 @@
 name: Production Acceptance
 # Full production certification matrix - no coverage reduction.
+# Final live-production certification execution.
 
 on:
   pull_request:
