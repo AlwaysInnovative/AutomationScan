@@ -54,7 +54,7 @@ async function stage(p,sec,industry){
  result.expected.pdfCases=result.expected.journeyCases;
  result.expected.navigatorCases=matrix.length;
  for(const [iid,industry,country] of matrix){
-   const p=await b.newPage();const errs=[];p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
+   const p=await b.newPage();const errs=[],pageErrors=[],requestErrors=[];p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});p.on("pageerror",e=>pageErrors.push(e.message));p.on("requestfailed",r=>requestErrors.push(r.url()+" :: "+(r.failure()?.errorText||"request_failed")));
    try{
     const sr=await p.request.get(BASE+"/api/industry-scenario?industry="+iid+"&country="+country);
     if(!sr.ok())throw Error("scenario API "+iid+"/"+country+" "+sr.status());
@@ -90,7 +90,7 @@ async function stage(p,sec,industry){
       await p.locator('[data-canonical-section="report"]').click();const txt=(await p.locator("#wbReport").innerText()).trim();if(txt.length<500)throw Error("short dossier "+j.id);const pdf=path.join(out,iid+"_"+country+"_"+j.id+".pdf");await p.pdf({path:pdf,format:"A4",printBackground:true});if(fs.statSync(pdf).size<5000)throw Error("bad PDF "+j.id);result.pdf++;
       await p.reload({waitUntil:"domcontentloaded",timeout:60000});await p.waitForFunction(()=>window.AutomationScanJourneys?.length>=8,{timeout:30000});await p.selectOption("#journeySelect",j.id);result.resume++;
     }
-   }catch(e){result.failures.push(iid+"/"+country+" :: "+e.message)}finally{result.consoleErrors.push(...errs.map(x=>iid+"/"+country+" :: "+x));await p.close()}
+   }catch(e){result.failures.push(iid+"/"+country+" :: "+e.message)}finally{result.consoleErrors.push(...errs.map(x=>iid+"/"+country+" :: console :: "+x));result.consoleErrors.push(...pageErrors.map(x=>iid+"/"+country+" :: pageerror :: "+x));result.consoleErrors.push(...requestErrors.map(x=>iid+"/"+country+" :: request :: "+x));await p.close()}
  }
  result.expected.caseCount=result.caseResults.length;
  result.coverage={industryCountryPassed:result.navigator,journeyPassed:result.resume,pdfPassed:result.pdf,stageExecutionsPassed:result.stages,consoleErrors:result.consoleErrors.length,failures:result.failures.length};
