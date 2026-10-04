@@ -2,6 +2,7 @@ const { chromium } = require("playwright");
 const fs=require("fs"),path=require("path");
 const BASE="https://automation-scan-neon.vercel.app";
 // Acceptance always targets the current production alias; do not substitute preview deployments.
+// Production certification run: execute the complete live-configured matrix.
 const defaultIndustries=[["retail","Retail"],["manufacturing","Manufacturing"],["healthcare","Healthcare"],["financial_services","Financial Services"],["professional_services","Professional Services"],["logistics","Logistics"],["generic","Other / Custom"]];
 const defaultCountries=["AE","DE","GB","IN","SG","US"];
 const out="test-artifacts";fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
