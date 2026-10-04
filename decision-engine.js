@@ -3,7 +3,8 @@
 function norm(v){return String(v||"").toLowerCase().trim();}
 function words(v){return norm(v).split(/[^a-z0-9]+/).filter(function(x){return x.length>2;});}
 function overlap(a,b){
- var aa=words(a).filter(function(x){return b.some(function(y){return x===y;});});
+ var bb=Array.isArray(b)?b.map(function(x){return norm(x);}):words(b);
+ var aa=words(a).filter(function(x){return bb.some(function(y){return x===y;});});
  return Array.from(new Set(aa));
 }
 function candidateScore(c,ctx){
