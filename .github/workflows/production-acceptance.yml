@@ -1,4 +1,5 @@
 name: Production Acceptance
+# Full production certification matrix - no coverage reduction.
 
 on:
   pull_request:
