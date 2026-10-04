@@ -60,8 +60,16 @@ async function stage(p,sec,industry){
     const sd=await sr.json();if(!sd.scenario||!sd.applications?.length)throw Error("missing scenario/catalogue "+iid+"/"+country);result.scenario++;
     await p.goto(BASE+"/transformation-advisor.html",{waitUntil:"domcontentloaded",timeout:60000});await p.waitForTimeout(1000);
     await p.locator("#industry").selectOption({label:industry});await p.locator("#country").selectOption(country);await p.waitForTimeout(800);
-    for(let n=0;n<await p.locator('input[name="processes"]').count();n++)await p.locator('input[name="processes"]').nth(n).check();
-    for(let n=0;n<Math.min(2,await p.locator('input[name="painSignals"]').count());n++)await p.locator('input[name="painSignals"]').nth(n).check();
+    for(const id of ["businessModel","current","scale"]){const l=p.locator('[name="'+id+'"]');if(await l.count()){const v=await l.locator("option").evaluateAll(os=>os.map(o=>o.value).find(Boolean));if(v)await l.selectOption(v);}}
+    await p.locator("#tNext").click();await p.waitForTimeout(250);
+    const processLabels=p.locator('#industryProcesses label.capability-check');for(let n=0;n<await processLabels.count();n++)await processLabels.nth(n).click();
+    await p.locator("#tNext").click();await p.waitForTimeout(250);
+    const painLabels=p.locator('#industryPainOptions label.capability-check');for(let n=0;n<Math.min(3,await painLabels.count());n++)await painLabels.nth(n).click();
+    await p.locator('textarea[name="painText"]').fill("Customer has repetitive manual work, exceptions, reconciliation and control concerns that materially affect cycle time.");
+    await p.locator("#tNext").click();await p.waitForTimeout(250);
+    for(const id of ["revenue","employees","erpSpend","custom","integration","revenueModel","fulfilmentModel","deliveryModel","regulatoryIntensity","migration","ecosystem","horizon"]){const l=p.locator('[name="'+id+'"]');if(await l.count()){const v=await l.locator("option").evaluateAll(os=>os.map(o=>o.value).find(Boolean));if(v)await l.selectOption(v);}}
+    await p.locator("#tNext").click();await p.waitForTimeout(250);
+    const goals=p.locator('.goal-cards label, .goal-cards .goal-config-card');if(await goals.count())await goals.first().click();
     await p.locator("#tGenerate").click();await p.locator("#transformResults").waitFor({state:"visible",timeout:30000});
     const cards=await p.locator("#tCandidates .candidate-card").count();if(!cards)throw Error("no recommendations "+iid+"/"+country);result.navigator++;
     for(const j of journeys){
