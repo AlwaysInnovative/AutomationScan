@@ -1,5 +1,6 @@
 name: Production Acceptance
 # Full production certification matrix - no coverage reduction.
+# Final certification pass 2 after production catalogue fallback.
 
 on:
   pull_request:
