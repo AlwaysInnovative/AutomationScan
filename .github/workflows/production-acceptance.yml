@@ -1,5 +1,6 @@
 name: Production Acceptance
 # Full production certification matrix - no coverage reduction.
+# Final certification v4 after decision-engine overlap fix.
 
 on:
   pull_request:
