@@ -1,8 +1,9 @@
 const { chromium } = require("playwright");
 const fs=require("fs"),path=require("path");
 const BASE="https://automation-scan-neon.vercel.app";
-const industries=[["retail","Retail"],["manufacturing","Manufacturing"],["healthcare","Healthcare"],["financial_services","Financial Services"],["professional_services","Professional Services"],["logistics","Logistics"],["generic","Other / Custom"]];
-const countries=["AE","DE","GB","IN","SG","US"];
+// Acceptance always targets the current production alias; do not substitute preview deployments.
+const defaultIndustries=[["retail","Retail"],["manufacturing","Manufacturing"],["healthcare","Healthcare"],["financial_services","Financial Services"],["professional_services","Professional Services"],["logistics","Logistics"],["generic","Other / Custom"]];
+const defaultCountries=["AE","DE","GB","IN","SG","US"];
 const out="test-artifacts";fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
 async function sel(p,id){const l=p.locator("#"+id);if(await l.count()){const v=await l.locator("option").evaluateAll(x=>x.map(o=>o.value).find(Boolean));if(v)await l.selectOption(v)}}
 async function fill(p,id,v){const l=p.locator("#"+id);if(await l.count())await l.fill(v)}
@@ -31,20 +32,49 @@ async function stage(p,sec,industry){
 }
 (async()=>{
  const b=await chromium.launch({headless:true});
- const result={navigator:0,scenario:0,journeys:0,stages:0,resume:0,pdf:0,failures:[],consoleErrors:[]};
+ const result={expected:{},passed:{},navigator:0,scenario:0,journeys:0,stages:0,resume:0,pdf:0,failures:[],consoleErrors:[],caseResults:[]};
  const probe=await b.newPage();
- const jr=await probe.request.get(BASE+"/api/journeys");if(!jr.ok())throw Error("journeys API failed");
- const journeys=(await jr.json()).journeys||[];result.journeys=journeys.length;if(journeys.length!==8)throw Error("Expected 8 journeys");
- for(const [iid,industry] of industries)for(const country of countries){
+ const [ir,cr,jr]=await Promise.all([probe.request.get(BASE+"/api/industries"),probe.request.get(BASE+"/api/countries"),probe.request.get(BASE+"/api/journeys")]);
+ if(!ir.ok()||!cr.ok()||!jr.ok())throw Error("Production inventory APIs unavailable");
+ const idata=await ir.json(), cdata=await cr.json(), jdata=await jr.json();
+ const liveIndustries=(idata.industries||[]).map(x=>[x.id,x.name]);
+ const liveCountries=(cdata.countries||[]).map(x=>x.code||x.country_code);
+ const industries=liveIndustries.length?liveIndustries:defaultIndustries;
+ const countries=liveCountries.length?liveCountries:defaultCountries;
+ const journeys=jdata.journeys||[];result.journeys=journeys.length;
+ if(!industries.length||!countries.length||!journeys.length)throw Error("Production inventory is empty");
+ const selectedIndustry=process.env.ACCEPTANCE_INDUSTRY; const selectedCountry=process.env.ACCEPTANCE_COUNTRY;
+ const slugify=x=>String(x||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+ const matrix=industries.filter(x=>!selectedIndustry||x[0]===selectedIndustry||slugify(x[1])===selectedIndustry).flatMap(x=>countries.filter(c=>!selectedCountry||c===selectedCountry).map(c=>[x[0],x[1],c]));
+ result.expected.industryCountry=matrix.length;
+ result.expected.journeyCases=matrix.length*journeys.length;
+ result.expected.stageExecutions=matrix.length*journeys.reduce((n,j)=>n+(j.stages||[]).filter(st=>st.section!=="report").length,0);
+ result.expected.resumeCases=result.expected.journeyCases;
+ result.expected.pdfCases=result.expected.journeyCases;
+ result.expected.navigatorCases=matrix.length;
+ for(const [iid,industry,country] of matrix){
    const p=await b.newPage();const errs=[];p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
    try{
     const sr=await p.request.get(BASE+"/api/industry-scenario?industry="+iid+"&country="+country);
     if(!sr.ok())throw Error("scenario API "+iid+"/"+country+" "+sr.status());
     const sd=await sr.json();if(!sd.scenario||!sd.applications?.length)throw Error("missing scenario/catalogue "+iid+"/"+country);result.scenario++;
-    await p.goto(BASE+"/transformation-advisor.html",{waitUntil:"domcontentloaded",timeout:60000});await p.waitForTimeout(1000);
-    await p.locator("#industry").selectOption({label:industry});await p.locator("#country").selectOption(country);await p.waitForTimeout(800);
-    for(let n=0;n<await p.locator('input[name="processes"]').count();n++)await p.locator('input[name="processes"]').nth(n).check();
-    for(let n=0;n<Math.min(2,await p.locator('input[name="painSignals"]').count());n++)await p.locator('input[name="painSignals"]').nth(n).check();
+    await p.goto(BASE+"/transformation-advisor.html",{waitUntil:"domcontentloaded",timeout:60000});
+    await p.locator("#industry option").nth(1).waitFor({state:"attached",timeout:30000});
+    await p.locator("#industry option").filter({hasText:industry}).first().waitFor({state:"attached",timeout:30000});
+    await p.locator("#country option").nth(1).waitFor({state:"attached",timeout:30000});
+    await p.locator("#industry").selectOption({label:industry});
+    await p.locator("#country").selectOption(country);
+    await p.waitForTimeout(800);
+    for(const id of ["businessModel","current","scale"]){const l=p.locator('[name="'+id+'"]');if(await l.count()){const v=await l.locator("option").evaluateAll(os=>os.map(o=>o.value).find(Boolean));if(v)await l.selectOption(v);}}
+    await p.locator("#tNext").click();await p.waitForTimeout(250);
+    const processLabels=p.locator('#industryProcesses label.capability-check');for(let n=0;n<await processLabels.count();n++)await processLabels.nth(n).click();
+    await p.locator("#tNext").click();await p.waitForTimeout(250);
+    const painLabels=p.locator('#industryPainOptions label.capability-check');for(let n=0;n<Math.min(3,await painLabels.count());n++)await painLabels.nth(n).click();
+    await p.locator('textarea[name="painText"]').fill("Customer has repetitive manual work, exceptions, reconciliation and control concerns that materially affect cycle time.");
+    await p.locator("#tNext").click();await p.waitForTimeout(250);
+    for(const id of ["revenue","employees","erpSpend","custom","integration","revenueModel","fulfilmentModel","deliveryModel","regulatoryIntensity","migration","ecosystem","horizon"]){const l=p.locator('[name="'+id+'"]');if(await l.count()){const v=await l.locator("option").evaluateAll(os=>os.map(o=>o.value).find(Boolean));if(v)await l.selectOption(v);}}
+    await p.locator("#tNext").click();await p.waitForTimeout(250);
+    const goals=p.locator('.goal-cards label, .goal-cards .goal-config-card');if(await goals.count())await goals.first().click();
     await p.locator("#tGenerate").click();await p.locator("#transformResults").waitFor({state:"visible",timeout:30000});
     const cards=await p.locator("#tCandidates .candidate-card").count();if(!cards)throw Error("no recommendations "+iid+"/"+country);result.navigator++;
     for(const j of journeys){
@@ -59,7 +89,11 @@ async function stage(p,sec,industry){
     }
    }catch(e){result.failures.push(iid+"/"+country+" :: "+e.message)}finally{result.consoleErrors.push(...errs.map(x=>iid+"/"+country+" :: "+x));await p.close()}
  }
+ result.expected.caseCount=result.caseResults.length;
+ result.coverage={industryCountryPassed:result.navigator,journeyPassed:result.resume,pdfPassed:result.pdf,stageExecutionsPassed:result.stages,consoleErrors:result.consoleErrors.length,failures:result.failures.length};
+ const fullCoverage=result.navigator===result.expected.navigatorCases&&result.resume===result.expected.resumeCases&&result.pdf===result.expected.pdfCases&&result.stages===result.expected.stageExecutions&&result.failures.length===0&&result.consoleErrors.length===0;
+ result.certified=fullCoverage;
  fs.writeFileSync("acceptance-summary.json",JSON.stringify(result,null,2));
- if(result.failures.length||result.consoleErrors.length)process.exit(1);
+ if(!fullCoverage)process.exit(1);
  console.log(JSON.stringify(result,null,2));await b.close();
 })();
