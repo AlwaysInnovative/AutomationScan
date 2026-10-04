@@ -49,7 +49,8 @@ async function stage(p,sec,industry){
  result.expected.resumeCases=result.expected.journeyCases;
  result.expected.pdfCases=result.expected.journeyCases;
  result.expected.navigatorCases=result.expected.industryCountry;
- const selectedIndustry=process.env.ACCEPTANCE_INDUSTRY; const selectedCountry=process.env.ACCEPTANCE_COUNTRY; const matrix=industries.filter(x=>!selectedIndustry||x[0]===selectedIndustry).flatMap(x=>countries.filter(c=>!selectedCountry||c===selectedCountry).map(c=>[x[0],x[1],c]));\n for(const [iid,industry,country] of matrix){
+ const selectedIndustry=process.env.ACCEPTANCE_INDUSTRY; const selectedCountry=process.env.ACCEPTANCE_COUNTRY; const matrix=industries.filter(x=>!selectedIndustry||x[0]===selectedIndustry).flatMap(x=>countries.filter(c=>!selectedCountry||c===selectedCountry).map(c=>[x[0],x[1],c]));
+ for(const [iid,industry,country] of matrix){
    const p=await b.newPage();const errs=[];p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
    try{
     const sr=await p.request.get(BASE+"/api/industry-scenario?industry="+iid+"&country="+country);
