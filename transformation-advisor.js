@@ -19,10 +19,17 @@ async function loadScoringProfile(){
 }
 async function loadApplicationCatalog(){
  if(currentApplications.length)return currentApplications;
+ try{await loadLocalizedScenario();if(currentApplications.length)return currentApplications;}catch(e){console.warn("Application catalogue event load unavailable",e);}
  try{
-  await loadLocalizedScenario();
+  var industryId=(selectedIndustry()||{}).id||value("industry").toLowerCase().replace(/\s+/g,"_"),country=value("country");
+  if(!industryId||!country)return [];
+  var response=await fetch("/api/industry-scenario?industry="+encodeURIComponent(industryId)+"&country="+encodeURIComponent(country),{cache:"no-store"});
+  if(!response.ok)throw new Error("catalogue_api_"+response.status);
+  var data=await response.json();
+  currentApplications=Array.isArray(data.applications)?data.applications:[];
+  if(data.scenario)currentScenario=data.scenario;
   return currentApplications;
- }catch(e){console.warn("Application catalogue unavailable",e);return [];}
+ }catch(e){console.error("Application catalogue unavailable",e);return [];}
 }
 async function renderReport(){
  var industry=value("industry"),processes=[].slice.call(form.querySelectorAll('[name="processes"]:checked')).map(function(x){return x.value}),pains=list("painList").concat([].slice.call(form.querySelectorAll('[name="painSignals"]:checked')).map(function(x){return x.value})),candidates=list("candidateList"),goals=[].slice.call(form.querySelectorAll('[name="goal"]:checked')).map(function(x){return x.value});
