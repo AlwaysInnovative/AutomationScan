@@ -47,7 +47,17 @@ async function renderReport(){
      scores=window.AutomationScanDecisionEngine.shortlist(ctx)||[];
      maturity=window.AutomationScanDecisionEngine.maturity(ctx)||maturity;
    }
- }catch(engineError){console.warn("Decision engine fallback",engineError);}
+ }catch(engineError){
+   console.error("Decision engine failed",engineError);
+   var engineMessage=engineError&&engineError.message?engineError.message:"Unknown decision-engine error";
+   if(el("transformResults"))el("transformResults").classList.remove("hidden");
+   if(el("tCandidates"))el("tCandidates").innerHTML="<p class='attention-empty'><b>Recommendation engine unavailable.</b> The catalogue was loaded, but the decision engine could not evaluate it. Refresh and retry; do not treat this report as a recommendation.</p>";
+   throw new Error("Decision engine failed: "+engineMessage);
+ }
+ if(!scores.length&&catalogueCandidates.length){
+   console.error("Decision engine returned no recommendations for a non-empty catalogue");
+   throw new Error("Decision engine returned no recommendations for a non-empty catalogue");
+ }
  var signalInputs=[
    {key:"businessContext",score:(value("businessModel")?100:0)+(value("current")?100:0),weight:1},
    {key:"processScope",score:Math.min(100,processes.length*20),weight:1},
