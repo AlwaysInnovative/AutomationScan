@@ -43,13 +43,15 @@ async function stage(p,sec,industry){
  const countries=liveCountries.length?liveCountries:defaultCountries;
  const journeys=jdata.journeys||[];result.journeys=journeys.length;
  if(!industries.length||!countries.length||!journeys.length)throw Error("Production inventory is empty");
- result.expected.industryCountry=industries.length*countries.length;
- result.expected.journeyCases=result.expected.industryCountry*journeys.length;
- result.expected.stageExecutions=journeys.reduce((n,j)=>n+(j.stages||[]).filter(st=>st.section!=="report").length,0)*industries.length*countries.length;
+ const selectedIndustry=process.env.ACCEPTANCE_INDUSTRY; const selectedCountry=process.env.ACCEPTANCE_COUNTRY;
+ const slugify=x=>String(x||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+ const matrix=industries.filter(x=>!selectedIndustry||x[0]===selectedIndustry||slugify(x[1])===selectedIndustry).flatMap(x=>countries.filter(c=>!selectedCountry||c===selectedCountry).map(c=>[x[0],x[1],c]));
+ result.expected.industryCountry=matrix.length;
+ result.expected.journeyCases=matrix.length*journeys.length;
+ result.expected.stageExecutions=matrix.length*journeys.reduce((n,j)=>n+(j.stages||[]).filter(st=>st.section!=="report").length,0);
  result.expected.resumeCases=result.expected.journeyCases;
  result.expected.pdfCases=result.expected.journeyCases;
- result.expected.navigatorCases=result.expected.industryCountry;
- const selectedIndustry=process.env.ACCEPTANCE_INDUSTRY; const selectedCountry=process.env.ACCEPTANCE_COUNTRY; const matrix=industries.filter(x=>!selectedIndustry||x[0]===selectedIndustry).flatMap(x=>countries.filter(c=>!selectedCountry||c===selectedCountry).map(c=>[x[0],x[1],c]));
+ result.expected.navigatorCases=matrix.length;
  for(const [iid,industry,country] of matrix){
    const p=await b.newPage();const errs=[];p.on("console",m=>{if(m.type()==="error")errs.push(m.text())});
    try{
