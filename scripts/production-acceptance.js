@@ -61,9 +61,11 @@ async function stage(p,sec,industry){
     const sd=await sr.json();if(!sd.scenario||!sd.applications?.length)throw Error("missing scenario/catalogue "+iid+"/"+country);result.scenario++;
     await p.goto(BASE+"/transformation-advisor.html",{waitUntil:"domcontentloaded",timeout:60000});
     await p.locator("#industry option").nth(1).waitFor({state:"attached",timeout:30000});
-    await p.locator("#industry option").filter({hasText:industry}).first().waitFor({state:"attached",timeout:30000});
+    const industryOption=p.locator("#industry option").filter({hasText:industry}).first();
+    await industryOption.waitFor({state:"attached",timeout:30000});
+    const industryValue=await industryOption.getAttribute("value");if(!industryValue)throw Error("Industry option has no value: "+industry);
     await p.locator("#country option").nth(1).waitFor({state:"attached",timeout:30000});
-    await p.locator("#industry").selectOption({label:industry});
+    await p.locator("#industry").selectOption({value:industryValue});
     await p.locator("#country").selectOption(country);
     await p.waitForTimeout(800);
     for(const id of ["businessModel","current","scale"]){const l=p.locator('[name="'+id+'"]');if(await l.count()){const v=await l.locator("option").evaluateAll(os=>os.map(o=>o.value).find(Boolean));if(v)await l.selectOption(v);}}
