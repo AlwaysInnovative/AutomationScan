@@ -58,11 +58,12 @@ async function renderReport(){
    console.error("Decision engine returned no recommendations for a non-empty catalogue");
    throw new Error("Decision engine returned no recommendations for a non-empty catalogue");
  }
+ var discoveryWeights=(ctx.engineConfig.discovery&&ctx.engineConfig.discovery.weights)||{};
  var signalInputs=[
-   {key:"businessContext",score:(value("businessModel")?100:0)+(value("current")?100:0),weight:1},
-   {key:"processScope",score:Math.min(100,processes.length*20),weight:1},
-   {key:"painSignals",score:Math.min(100,pains.length*20),weight:1},
-   {key:"desiredOutcomes",score:Math.min(100,goals.length*20),weight:1}
+   {key:"businessContext",score:(value("businessModel")?100:0)+(value("current")?100:0),weight:Number(discoveryWeights.businessContext)||0},
+   {key:"processScope",score:Math.min(100,processes.length*20),weight:Number(discoveryWeights.processScope)||0},
+   {key:"painSignals",score:Math.min(100,pains.length*20),weight:Number(discoveryWeights.painSignals)||0},
+   {key:"desiredOutcomes",score:Math.min(100,goals.length*20),weight:Number(discoveryWeights.desiredOutcomes)||0}
  ];
  var score=window.AutomationScanDecisionEngine&&window.AutomationScanDecisionEngine.weightedScore?window.AutomationScanDecisionEngine.weightedScore(signalInputs,(ctx.engineConfig.discovery&&ctx.engineConfig.discovery.weights)||{}):0;
  var interpretation=score===0?"Insufficient customer evidence":score<40?"Early discovery — add more customer evidence":score<70?"Discovery signal — validate the recorded business evidence":"Discovery signal — proceed to evidence-led validation";
@@ -87,7 +88,7 @@ async function renderReport(){
  if(el("tEvidence")){var ev=(currentScenario&&Array.isArray(currentScenario.evidence_requirements)?currentScenario.evidence_requirements:[]).concat(["Requirement acceptance evidence","Scripted demonstration","Real exception test","Integration/API proof","Security/control review","Migration/data rehearsal","Customer reference where material"]);el("tEvidence").innerHTML=ev.filter(Boolean).map(function(x){return"<li>"+esc(x)+"</li>"}).join("");}
  if(el("tQuestions")){var qs=(currentScenario&&Array.isArray(currentScenario.decision_questions)?currentScenario.decision_questions:[]).concat(["What evidence proves each Must requirement?","Which requirements are configuration, extension, custom or specialist?","What data and integration constraints can block the path?","What costs and benefits are supported by customer evidence?"]);el("tQuestions").innerHTML="<ul>"+Array.from(new Set(qs.filter(Boolean))).map(function(q){return"<li>"+esc(q)+"</li>"}).join("")+"</ul>";}
  if(el("tRoadmap"))el("tRoadmap").innerHTML="<article><b>0–30 days</b><p>Baseline processes, applications, requirements and evidence.</p></article><article><b>31–60 days</b><p>Run comparable demonstrations and resolve critical gaps.</p></article><article><b>61–90 days</b><p>Validate POC, TCO, migration readiness and decision gates.</p></article>";
- if(el("tCandidates"))el("tCandidates").innerHTML=scores.map(function(x){return"<article class='candidate-card'><b>"+esc(x.name)+"</b><p>Business fit signal: "+x.score+"/100 · "+esc((x.explanation||[]).join("; "))+"</p><span>Use customer evidence and a practical proof of concept before deciding.</span></article>"}).join("")||"<p>No matching catalogue or customer candidates were available for this context. Add candidate names or broaden the assessment.</p>";
+ if(el("tCandidates"))el("tCandidates").innerHTML=scores.map(function(x){return"<article class='candidate-card'><b>"+esc(x.name)+"</b><p>Preliminary fit signal: "+x.score+"/100 · Confidence: "+esc(x.confidence||"Low")+" · "+esc((x.explanation||[]).join("; "))+"</p><p>Requirement gaps: "+esc(x.gaps||0)+" · Evidence linked: "+esc(x.evidenceCount||0)+"</p><span>This is a screening signal, not proof of product capability. Validate through customer-specific evidence and a practical proof of concept.</span></article>"}).join("")||"<p>No matching catalogue or customer candidates were available for this context. Add candidate names or broaden the assessment.</p>";
  if(el("tExplore"))el("tExplore").innerHTML=scores.map(function(x){return"<article class='explore-card'><b>"+esc(x.name)+"</b><dl><dt>Recorded matches</dt><dd>"+esc((x.requirementHits||[]).join(" · ")||"None")+"</dd><dt>Evidence</dt><dd>"+x.evidenceCount+"</dd><dt>Gap count</dt><dd>"+x.gaps+"</dd></dl></article>"}).join("");
  if(el("tArchitecture"))el("tArchitecture").innerHTML="<p><b>Current:</b> "+esc(value("current")||"Not specified")+"</p><p><b>Target hypothesis:</b> Derive from customer requirements; do not assume ERP replacement.</p>";
  if(el("tEngineOutputs"))el("tEngineOutputs").innerHTML="<article><b>Dynamic investigation set</b><strong>"+esc(scores.map(function(x){return x.name}).join(" · ")||"None entered")+"</strong><span>Customer-defined only.</span></article><article><b>Evidence posture</b><strong>"+(processes.length?"Requirements defined":"Requirements missing")+"</strong><span>Validate before commitment.</span></article>";
