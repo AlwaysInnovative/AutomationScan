@@ -102,7 +102,7 @@ async function stage(p,sec,industry){
         if(fs.statSync(pdf).size<5000)throw Error("bad PDF "+j.id);
         caseResult.pdf=true;result.pdf++;
         await p.reload({waitUntil:"domcontentloaded",timeout:60000});
-        await p.waitForFunction(()=>window.AutomationScanJourneys?.length>=journeys.length,{timeout:30000});
+        await p.waitForFunction(n=>document.querySelectorAll("#journeySelect option").length>=n,journeys.length,{timeout:30000});
         await p.selectOption("#journeySelect",j.id);
         caseResult.resume=true;result.resume++;
       }catch(e){
