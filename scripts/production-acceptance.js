@@ -79,20 +79,44 @@ async function stage(p,sec,industry){
     await p.locator("#tGenerate").click();await p.locator("#transformResults").waitFor({state:"visible",timeout:30000});
     const cards=await p.locator("#tCandidates .candidate-card").count();if(!cards)throw Error("no recommendations "+iid+"/"+country);result.navigator++;
     for(const j of journeys){
-      await p.goto(BASE+"/transformation-workbench.html",{waitUntil:"domcontentloaded",timeout:60000});await p.waitForFunction(()=>window.AutomationScanJourneys?.length>=8,{timeout:30000});
-      await p.selectOption("#journeySelect",j.id);await p.waitForTimeout(200);
-      for(const st of j.stages||[]){
-        const btn=p.locator('[data-canonical-section="'+st.section+'"]');await btn.waitFor({state:"visible",timeout:10000});await btn.click();await stage(p,st.section,industry);
-        if(st.section!=="report"){const status=await p.locator('.wb-nav button[data-tab="'+st.section+'"]').getAttribute("data-status");if(status!=="completed")throw Error("not completed "+j.id+"/"+st.section);result.stages++}
+      const caseResult={industry:iid,country,journey:j.id,expectedStages:(j.stages||[]).filter(st=>st.section!=="report").length,stagesPassed:0,resume:false,pdf:false,errors:[]};
+      try{
+        await p.goto(BASE+"/transformation-workbench.html",{waitUntil:"domcontentloaded",timeout:60000});
+        await p.waitForFunction(()=>window.AutomationScanJourneys?.length>=journeys.length,{timeout:30000});
+        await p.selectOption("#journeySelect",j.id);await p.waitForTimeout(200);
+        for(const st of j.stages||[]){
+          const btn=p.locator('[data-canonical-section="'+st.section+'"]');await btn.waitFor({state:"visible",timeout:10000});await btn.click();await stage(p,st.section,industry);
+          if(st.section!=="report"){
+            const status=await p.locator('.wb-nav button[data-tab="'+st.section+'"]').getAttribute("data-status");
+            if(status!=="COMPLETED")throw Error("not completed "+j.id+"/"+st.section);
+            caseResult.stagesPassed++;result.stages++;
+          }
+        }
+        await p.locator('[data-canonical-section="report"]').click();
+        const txt=(await p.locator("#wbReport").innerText()).trim();
+        if(txt.length<500)throw Error("short dossier "+j.id);
+        const screenshot=path.join(out,iid+"_"+country+"_"+j.id+"_dossier.png");
+        await p.screenshot({path:screenshot,fullPage:true});
+        const pdf=path.join(out,iid+"_"+country+"_"+j.id+".pdf");
+        await p.pdf({path:pdf,format:"A4",printBackground:true});
+        if(fs.statSync(pdf).size<5000)throw Error("bad PDF "+j.id);
+        caseResult.pdf=true;result.pdf++;
+        await p.reload({waitUntil:"domcontentloaded",timeout:60000});
+        await p.waitForFunction(()=>window.AutomationScanJourneys?.length>=journeys.length,{timeout:30000});
+        await p.selectOption("#journeySelect",j.id);
+        caseResult.resume=true;result.resume++;
+      }catch(e){
+        caseResult.errors.push(e.message);
+        result.failures.push(iid+"/"+country+"/"+j.id+" :: "+e.message);
+      }finally{
+        result.caseResults.push(caseResult);
       }
-      await p.locator('[data-canonical-section="report"]').click();const txt=(await p.locator("#wbReport").innerText()).trim();if(txt.length<500)throw Error("short dossier "+j.id);const pdf=path.join(out,iid+"_"+country+"_"+j.id+".pdf");await p.pdf({path:pdf,format:"A4",printBackground:true});if(fs.statSync(pdf).size<5000)throw Error("bad PDF "+j.id);result.pdf++;
-      await p.reload({waitUntil:"domcontentloaded",timeout:60000});await p.waitForFunction(()=>window.AutomationScanJourneys?.length>=8,{timeout:30000});await p.selectOption("#journeySelect",j.id);result.resume++;
     }
    }catch(e){result.failures.push(iid+"/"+country+" :: "+e.message)}finally{result.consoleErrors.push(...errs.map(x=>iid+"/"+country+" :: "+x));await p.close()}
  }
- result.expected.caseCount=result.caseResults.length;
+ result.expected.caseCount=result.expected.journeyCases;
  result.coverage={industryCountryPassed:result.navigator,journeyPassed:result.resume,pdfPassed:result.pdf,stageExecutionsPassed:result.stages,consoleErrors:result.consoleErrors.length,failures:result.failures.length};
- const fullCoverage=result.navigator===result.expected.navigatorCases&&result.resume===result.expected.resumeCases&&result.pdf===result.expected.pdfCases&&result.stages===result.expected.stageExecutions&&result.failures.length===0&&result.consoleErrors.length===0;
+ const caseCoverage=result.caseResults.length===result.expected.journeyCases&&result.caseResults.every(x=>x.stagesPassed===x.expectedStages&&x.pdf===true&&x.resume===true&&x.errors.length===0); const fullCoverage=result.navigator===result.expected.navigatorCases&&result.resume===result.expected.resumeCases&&result.pdf===result.expected.pdfCases&&result.stages===result.expected.stageExecutions&&caseCoverage&&result.failures.length===0&&result.consoleErrors.length===0;
  result.certified=fullCoverage;
  fs.writeFileSync("acceptance-summary.json",JSON.stringify(result,null,2));
  if(!fullCoverage)process.exit(1);
