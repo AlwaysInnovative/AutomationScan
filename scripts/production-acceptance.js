@@ -35,9 +35,15 @@ async function stage(p,sec,industry){
  const b=await chromium.launch({headless:true});
  const result={expected:{},passed:{},navigator:0,scenario:0,journeys:0,stages:0,resume:0,pdf:0,failures:[],consoleErrors:[],caseResults:[]};
  const probe=await b.newPage();
- const [ir,cr,jr]=await Promise.all([probe.request.get(BASE+"/api/industries"),probe.request.get(BASE+"/api/countries"),probe.request.get(BASE+"/api/journeys")]);
- if(!ir.ok()||!cr.ok()||!jr.ok())throw Error("Production inventory APIs unavailable");
- const idata=await ir.json(), cdata=await cr.json(), jdata=await jr.json();
+ async function getJson(path){
+ for(let attempt=1;attempt<=5;attempt++){
+  try{const r=await probe.request.get(BASE+path,{timeout:30000});if(r.ok())return await r.json();}catch(e){}
+  await new Promise(r=>setTimeout(r,1500*attempt));
+ }
+ throw Error("Production inventory API unavailable: "+path);
+}
+const [idata,cdata,jdata]=await Promise.all([getJson("/api/industries"),getJson("/api/countries"),getJson("/api/journeys")]);
+ 
  const liveIndustries=(idata.industries||[]).map(x=>[x.id,x.name]);
  const liveCountries=(cdata.countries||[]).map(x=>x.code||x.country_code);
  const industries=liveIndustries.length?liveIndustries:defaultIndustries;
@@ -61,7 +67,7 @@ async function stage(p,sec,industry){
     const sd=await sr.json();if(!sd.scenario||!sd.applications?.length)throw Error("missing scenario/catalogue "+iid+"/"+country);result.scenario++;
     await p.goto(BASE+"/transformation-advisor.html",{waitUntil:"domcontentloaded",timeout:60000});
     await p.locator("#industry option").nth(1).waitFor({state:"attached",timeout:30000});
-    await p.locator("#industry option").filter({hasText:industry}).first().waitFor({state:"attached",timeout:30000});
+    await p.waitForFunction(n=>Array.from(document.querySelectorAll("#industry option")).some(o=>o.textContent.trim()===n),industry,{timeout:30000});
     await p.locator("#country option").nth(1).waitFor({state:"attached",timeout:30000});
     await p.locator("#industry").selectOption({label:industry});
     await p.locator("#country").selectOption(country);
@@ -102,7 +108,7 @@ async function stage(p,sec,industry){
         if(fs.statSync(pdf).size<5000)throw Error("bad PDF "+j.id);
         caseResult.pdf=true;result.pdf++;
         await p.reload({waitUntil:"domcontentloaded",timeout:60000});
-        await p.waitForFunction(()=>window.AutomationScanJourneys?.length>=journeys.length,{timeout:30000});
+        await p.waitForFunction(n=>document.querySelectorAll("#journeySelect option").length>=n,journeys.length,{timeout:30000});
         await p.selectOption("#journeySelect",j.id);
         caseResult.resume=true;result.resume++;
       }catch(e){
