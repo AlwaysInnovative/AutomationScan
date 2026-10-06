@@ -125,6 +125,16 @@ function renderCapabilities(){renderList("capabilityOut",state.capabilities,["Ca
 function renderRequirements(){renderList("requirementsOut",state.requirements,["ID","Requirement","Type","Priority","Process","Acceptance","Gate"],function(x){return[esc(x.id),esc(x.text),esc(x.type),esc(x.priority),esc(x.process),esc(x.acceptance),esc(x.gate)]})}
 function renderCompare(){renderList("compareOut",state.vendorResponses,["Candidate","Requirement","Status","Evidence","Response","Dependencies"],function(x){return[esc(x.candidate),esc(x.req),'<span class="wb-tag">'+esc(x.status)+'</span>','<span class="wb-tag">'+esc(x.evidence)+'</span>',esc(x.response),esc(x.dependency)]})}
 function exportRequirements(){var rows=[["ID","Requirement","Type","Priority","Process","Acceptance","Gate"]].concat(state.requirements.map(function(x){return[x.id,x.text,x.type,x.priority,x.process,x.acceptance,x.gate]}));var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||"").replace(/"/g,'""')+'"'}).join(",")}).join("\n");var b=new Blob([csv],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="automationscan-requirements.csv";a.click();URL.revokeObjectURL(a.href)}
+async function loadWorkbenchCountries(){
+ try{
+  var el=$("wbCountry");if(!el)return;
+  var r=await fetch("/api/countries",{cache:"no-store"});if(!r.ok)throw new Error("countries_"+r.status);
+  var d=await r.json(),items=d.countries||[];
+  var current=el.value||((state.profile||{}).country||"");
+  el.innerHTML='<option value="">Select operating country</option>'+items.map(function(x){var code=x.code||x.country_code||"",name=x.name||x.country_name||code;return '<option value="'+esc(code)+'">'+esc(name)+'</option>';}).join("");
+  if(current)el.value=current;
+ }catch(e){console.warn("Workbench countries unavailable",e)}
+}
 async function loadWorkbenchScoringProfile(){
  try{
   var p=state.profile||{},industry=String(p.industry||"").trim().toLowerCase().replace(/\s+/g,"_"),q=new URLSearchParams({industry:industry,country:String(p.country||"").trim(),journey:String(state.journeyId||"").trim(),businessModel:String(p.businessModel||"").trim()});
@@ -364,6 +374,7 @@ $("exportJson").onclick=exportJson;$("printReport").onclick=function(){report();
   }catch(e){console.warn("Upstream assessment import skipped",e)}
   var savedProfile=state.profile||{};[["industry","wbIndustry"],["country","wbCountry"],["current","wbCurrent"],["businessModel","wbBusiness"],["scale","wbScale"],["revenueModel","wbRevenue"],["fulfilmentModel","wbFulfilment"],["deliveryModel","wbDelivery"],["regulatoryIntensity","wbRegulatory"],["appetite","wbAppetite"],["horizon","wbHorizon"],["goals","wbGoals"],["pain","wbPain"],["integration","wbIntegration"],["custom","wbCustom"],["customProcesses","wbCustomProcesses"],["erpSpend","wbErpSpend"]].forEach(function(pair){if($(pair[1])&&savedProfile[pair[0]]!=null)set(pair[1],savedProfile[pair[0]])});
   renderProfileOut();renderProcesses();renderApps();renderCandidates();renderCapabilities();renderGov();renderRoadmap();renderRequirements();renderCompare();renderPortfolio();renderPoc();renderEvidence();report();
+  loadWorkbenchCountries().then(function(){if(state.profile&&state.profile.country)set("wbCountry",state.profile.country);});
   loadJourneys();
 }
 document.addEventListener("automationScanUIReady",bind);if(window.AutomationScanUI&&window.AutomationScanUI.ready&&typeof window.AutomationScanUI.ready.then==="function")window.AutomationScanUI.ready.then(bind);
