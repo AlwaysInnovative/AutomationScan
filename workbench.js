@@ -246,7 +246,7 @@ function renderJourneyPanelCue(){
 function canonicalWorkbenchStages(){
  var out=[];
  document.querySelectorAll(".wb-nav button[data-tab]").forEach(function(btn){
-   out.push({section:btn.dataset.tab,label:btn.textContent.replace(/^\\d+\\.\\s*/,"").trim()});
+   out.push({section:btn.dataset.tab,label:btn.textContent.replace(/^\d+\.\s*/,"").trim()});
  });
  return out;
 }
@@ -260,7 +260,7 @@ function syncJourneyNav(){
    b.classList.toggle("done",ix>=0&&ix<allowed.indexOf(current));
    b.setAttribute("aria-current",b.dataset.tab===current?"step":"false");
    var old=b.querySelector(".wb-nav-number"),label=b.querySelector(".wb-nav-label");
-   if(!old){var txt=b.textContent.replace(/^\\d+\\.\\s*/,"").trim();b.innerHTML='<span class="wb-nav-number">'+String(ix+1).padStart(2,"0")+'</span><span class="wb-nav-label">'+esc(txt)+'</span>';}
+   if(!old){var txt=b.textContent.replace(/^\d+\.\s*/,"").trim();b.innerHTML='<span class="wb-nav-number">'+String(ix+1).padStart(2,"0")+'</span><span class="wb-nav-label">'+esc(txt)+'</span>';}
    else old.textContent=String(ix+1).padStart(2,"0");
    b.title=ix>=0?(b.dataset.tab===current?"Current journey step":"Open journey step"):"";
    b.setAttribute("data-status",sectionStatus(b.dataset.tab).toLowerCase().replace(/ /g,"-"));
