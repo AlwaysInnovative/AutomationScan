@@ -8,28 +8,37 @@ function overlap(a,b){
  return Array.from(new Set(aa));
 }
 function candidateScore(c,ctx){
- var ec=ctx.engineConfig&&ctx.engineConfig.candidate||{}, processCap=Number(ec.processCap)||25, evidenceCap=Number(ec.evidenceCap)||10, capabilityCap=Number(ec.capabilityCap)||20, requirementCap=Number(ec.requirementCap)||35, processWeight=Number(ec.processWeight)||5, evidenceWeight=Number(ec.evidenceWeight)||5, capabilityWeight=Number(ec.capabilityWeight)||5, requirementWeight=Number(ec.requirementWeight)||7;
+ var ec=ctx.engineConfig&&ctx.engineConfig.candidate||{}, processCap=Number(ec.processCap)||25, evidenceCap=Number(ec.evidenceCap)||10, capabilityCap=Number(ec.capabilityCap)||20, requirementCap=Number(ec.requirementCap)||35, processWeight=Number(ec.processWeight)||5, evidenceWeight=Number(ec.evidenceWeight)||5, capabilityWeight=Number(ec.capabilityWeight)||5, requirementWeight=Number(ec.requirementWeight)||7, painWeight=Number(ec.painWeight)||3, questionWeight=Number(ec.questionWeight)||2;
  var text=[c.name,c.scope,c.capabilities,c.notes].join(" ");
  var reqs=(ctx.requirements||[]).map(function(x){return x.text||x.name||x;});
  var procs=ctx.processes||[];
  var caps=ctx.capabilities||[];
+ var pains=ctx.pains||[];
+ var questions=ctx.decisionQuestions||[];
  var reqHits=reqs.map(function(r){return overlap(r,text).length? r:null;}).filter(Boolean);
  var processHits=procs.map(function(p){return overlap(p,text).length? p:null;}).filter(Boolean);
  var capHits=caps.map(function(p){return overlap(p.name||p,text).length? (p.name||p):null;}).filter(Boolean);
  var evidence=(ctx.evidence||[]).filter(function(e){return norm(e.claim).indexOf(norm(c.name))>=0;});
+ var painHits=pains.map(function(p){return overlap(p,text).length?p:null;}).filter(Boolean);
+ var questionHits=questions.map(function(q){return overlap(q,text).length?q:null;}).filter(Boolean);
  var score=0;
  score+=Math.min(requirementCap,reqHits.length*requirementWeight);
  score+=Math.min(processCap,processHits.length*processWeight);
  score+=Math.min(capabilityCap,capHits.length*capabilityWeight);
  score+=Math.min(evidenceCap,evidence.length*evidenceWeight);
+ score+=Math.min(10,painHits.length*painWeight);
+ score+=Math.min(10,questionHits.length*questionWeight);
  var gaps=Math.max(0,reqs.length-reqHits.length);
  var explanation=[];
  if(reqHits.length)explanation.push(reqHits.length+" requirement matches");
  if(processHits.length)explanation.push(processHits.length+" process matches");
  if(capHits.length)explanation.push(capHits.length+" capability matches");
  if(evidence.length)explanation.push(evidence.length+" linked evidence item(s)");
+ if(painHits.length)explanation.push(painHits.length+" customer pain matches");
+ if(questionHits.length)explanation.push(questionHits.length+" scenario decision-question matches");
  if(!explanation.length)explanation.push("No recorded fit evidence yet");
- var fitState=evidence.length&&reqHits.length?"Evidence-linked fit":(reqHits.length||processHits.length?"Potential fit":"Insufficient evidence");return {score:Math.min(100,score),fitState:fitState,processHits:processHits,requirementHits:reqHits,capabilityHits:capHits,evidenceCount:evidence.length,gaps:gaps,explanation:explanation};
+ var fitState=evidence.length&&reqHits.length?"Evidence-linked fit":(reqHits.length||processHits.length?"Potential fit":"Insufficient evidence");var confidence=score>=70&&evidence.length?"High":score>=45?"Medium":"Low";
+ return {score:Math.min(100,score),fitState:fitState,confidence:confidence,processHits:processHits,requirementHits:reqHits,capabilityHits:capHits,painHits:painHits,questionHits:questionHits,evidenceCount:evidence.length,gaps:gaps,explanation:explanation};
 }
 function shortlist(ctx){
  return (ctx.candidates||[]).map(function(c){
