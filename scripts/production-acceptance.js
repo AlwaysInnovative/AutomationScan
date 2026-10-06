@@ -4,7 +4,8 @@ const BASE="https://automation-scan-neon.vercel.app";
 // Acceptance always targets the current production alias; do not substitute preview deployments.
 const defaultIndustries=[["retail","Retail"],["manufacturing","Manufacturing"],["healthcare","Healthcare"],["financial_services","Financial Services"],["professional_services","Professional Services"],["logistics","Logistics"],["generic","Other / Custom"]];
 const defaultCountries=["AE","DE","GB","IN","SG","US"];
-const out="test-artifacts";fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
+const out="test-artifacts";
+// Acceptance matrix runner: every production shard must complete its full journey set.fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
 async function sel(p,id){const l=p.locator("#"+id);if(await l.count()){const v=await l.locator("option").evaluateAll(x=>x.map(o=>o.value).find(Boolean));if(v)await l.selectOption(v)}}
 async function fill(p,id,v){const l=p.locator("#"+id);if(await l.count())await l.fill(v)}
 async function stage(p,sec,industry){
