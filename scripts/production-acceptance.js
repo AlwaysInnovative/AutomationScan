@@ -82,7 +82,7 @@ async function stage(p,sec,industry){
       const caseResult={industry:iid,country,journey:j.id,expectedStages:(j.stages||[]).filter(st=>st.section!=="report").length,stagesPassed:0,resume:false,pdf:false,errors:[]};
       try{
         await p.goto(BASE+"/transformation-workbench.html",{waitUntil:"domcontentloaded",timeout:60000});
-        await p.waitForFunction(()=>window.AutomationScanJourneys?.length>=journeys.length,{timeout:30000});
+        await p.waitForFunction(n=>Array.isArray(window.AutomationScanJourneys)&&window.AutomationScanJourneys.length>=n,journeys.length,{timeout:30000});
         await p.selectOption("#journeySelect",j.id);await p.waitForTimeout(200);
         for(const st of j.stages||[]){
           const btn=p.locator('[data-canonical-section="'+st.section+'"]');await btn.waitFor({state:"visible",timeout:10000});await btn.click();await stage(p,st.section,industry);
