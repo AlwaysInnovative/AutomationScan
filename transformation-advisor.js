@@ -36,10 +36,10 @@ async function renderReport(){
  var reqs=processes.map(function(p,i){return{id:"REQ-"+String(i+1).padStart(3,"0"),text:p,type:"Business",priority:i<3?"Must":"Should",process:p,acceptance:"Demonstrate the process using the customer's real scenario",gate:"Evidence / POC"}});
  var caps=processes.map(function(p){return{name:p,current:0,target:100}});
  var cands=candidates.map(function(name){return{name:name,capabilities:"",notes:"Customer-entered candidate; source and scope must be validated."}});
- var ctx={industry:industry,country:value("country"),businessModel:value("businessModel"),current:value("current"),processes:processes,requirements:reqs,capabilities:caps,candidates:cands,evidence:[],scenario:currentScenario||null,decisionQuestions:(currentScenario&&currentScenario.decision_questions)||[],evidenceRequirements:(currentScenario&&currentScenario.evidence_requirements)||[],customProcess:value("customProcess")||"",customProcesses:value("customProcesses")||"",engineConfig:(window.AutomationScanUI&&window.AutomationScanUI.config&&window.AutomationScanUI.config.decisionEngine)||{}};
+ var ctx={industry:industry,country:value("country"),businessModel:value("businessModel"),current:value("current"),processes:processes,pains:pains,requirements:reqs,capabilities:caps,candidates:cands,evidence:[],scenario:currentScenario||null,decisionQuestions:(currentScenario&&currentScenario.decision_questions)||[],evidenceRequirements:(currentScenario&&currentScenario.evidence_requirements)||[],customProcess:value("customProcess")||"",customProcesses:value("customProcesses")||"",engineConfig:(window.AutomationScanUI&&window.AutomationScanUI.config&&window.AutomationScanUI.config.decisionEngine)||{}};
  var catalog=await loadApplicationCatalog();
  var catalogueCandidates=catalog.map(function(a){return{name:a.vendor+" — "+a.solution,scope:a.scope,capabilities:(a.capabilities||[]).join(" "),notes:"Catalogue candidate; validate current release, localisation, licensing, security, integration and implementation evidence.",source_refs:a.source_refs||[]};});
- var allCandidates=candidates.length?cands:catalogueCandidates;
+ var allCandidates=cands.concat(catalogueCandidates).filter(function(candidate,index,all){var key=String(candidate.name||"").toLowerCase().trim();return key&&all.findIndex(function(other){return String(other.name||"").toLowerCase().trim()===key;})===index;});
  ctx.candidates=allCandidates;
  var scores=[],maturity={score:0,name:"Not enough data"};
  try{
