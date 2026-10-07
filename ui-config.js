@@ -22,7 +22,7 @@ async function load(){
     if(brand.href)a.href=brand.href.startsWith("/")?brand.href:"/"+brand.href.replace(/^\.\//,"");
     a.innerHTML="";
     const img=document.createElement("img");img.src=brand.logo||"/logo.svg";img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
-    const span=document.createElement("span");span.textContent=brand.label||"AutomationScan";span.className="brand-label";a.appendChild(span);
+    if(!brand.logo){const span=document.createElement("span");span.textContent=brand.label||"AutomationScan";span.className="brand-label";a.appendChild(span);}
     a.setAttribute("aria-label",brand.alt||"AutomationScan");
   });
   if(cfg.navigation&&Array.isArray(cfg.navigation.workbenchSections)){
