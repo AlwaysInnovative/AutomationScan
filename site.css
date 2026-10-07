@@ -358,3 +358,9 @@ footer{background:var(--navy);color:#b8c7c7;padding:50px 0 22px}.footer-grid{dis
 .consent-banner{pointer-events:auto!important;z-index:2147483000!important}
 .consent-banner button{pointer-events:auto!important;position:relative;z-index:2147483001!important;cursor:pointer!important;opacity:1!important}
 .report-letterhead img.canonical-report-logo{width:260px;height:auto;display:block}
+
+/* 2026-10-07 brand visibility fix: the configured logo is a full wordmark, not an icon. */
+.site-header .brand{height:58px;display:inline-flex;align-items:center;gap:0}
+.site-header .brand-logo{width:190px!important;height:auto!important;max-height:58px!important;display:block!important;object-fit:contain!important;border-radius:0!important}
+footer .brand-logo{width:190px!important;height:auto!important;max-height:58px!important;display:block!important;object-fit:contain!important;border-radius:0!important}
+@media(max-width:700px){.site-header .brand{height:50px}.site-header .brand-logo,footer .brand-logo{width:165px!important;max-height:50px!important}}
