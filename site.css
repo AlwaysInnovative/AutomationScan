@@ -387,3 +387,11 @@ footer .brand-subtitle{font-size:7px!important;color:#b8c7c7!important}
 /* Remove unused duplicate brand subtitle; retain original caption styling wherever rendered. */
 .site-header .brand-subtitle{display:none!important}
 footer .brand-subtitle{display:none!important}
+
+/* Brand lockup: caption sits immediately below the AutomationScan wordmark. */
+.site-header .brand{gap:0!important;align-items:flex-start!important;justify-content:center!important}
+.site-header .brand-label{margin:0!important;padding:0!important;line-height:.98!important}
+.site-header .brand-subtitle{display:block!important;margin:3px 0 0 0!important;padding:0!important;align-self:flex-start!important;font-size:8px!important;line-height:1!important;letter-spacing:.205em!important;color:#68777d!important;white-space:nowrap!important}
+.site-header .brand-subtitle{transform:none!important}
+footer .brand{gap:0!important;align-items:flex-start!important}
+footer .brand-subtitle{display:block!important;margin:3px 0 0 0!important;padding:0!important;font-size:7px!important;line-height:1!important;letter-spacing:.18em!important;color:#b8c7c7!important;white-space:nowrap!important}
