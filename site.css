@@ -364,3 +364,10 @@ footer{background:var(--navy);color:#b8c7c7;padding:50px 0 22px}.footer-grid{dis
 .site-header .brand-logo{width:190px!important;height:auto!important;max-height:58px!important;display:block!important;object-fit:contain!important;border-radius:0!important}
 footer .brand-logo{width:190px!important;height:auto!important;max-height:58px!important;display:block!important;object-fit:contain!important;border-radius:0!important}
 @media(max-width:700px){.site-header .brand{height:50px}.site-header .brand-logo,footer .brand-logo{width:165px!important;max-height:50px!important}}
+
+/* Text-only AutomationScan wordmark */
+.site-header .brand-logo,footer .brand-logo{display:none!important}
+.site-header .brand-label{display:inline-block!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:26px!important;font-weight:850!important;letter-spacing:-.055em!important;color:#fff!important;line-height:1!important}
+.site-header .brand-label::first-letter{color:#fff}
+footer .brand-label{display:inline-block!important;font-size:22px!important;color:#fff!important}
+@media(max-width:700px){.site-header .brand-label{font-size:23px!important}footer .brand-label{font-size:20px!important}}
