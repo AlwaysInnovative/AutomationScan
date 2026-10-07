@@ -282,7 +282,8 @@ function setupConsent(){
  function apply(v){window.__analyticsConsent=v;if(v==="granted")window.enableAnalytics();banner.hidden=true;try{localStorage.setItem("automationscan_consent",v);localStorage.setItem("as-analytics-consent",v)}catch(e){}track("consent_choice",{choice:v});}
  if(choice==="granted"||choice==="denied"){window.__analyticsConsent=choice;if(choice==="granted")window.enableAnalytics();banner.hidden=true}
  else banner.hidden=false;
- document.getElementById("consentAccept")?.addEventListener("click",()=>apply("granted"));\n  document.getElementById("consentDecline")?.addEventListener("click",()=>apply("denied"));
+ document.getElementById("consentAccept")?.addEventListener("click",()=>apply("granted"));
+  document.getElementById("consentDecline")?.addEventListener("click",()=>apply("denied"));
  document.getElementById("consentReject")?.addEventListener("click",()=>apply("denied"));
 }
 setupConsent(); setupAds(); setupContact();
