@@ -21,8 +21,8 @@ async function load(){
   document.querySelectorAll("header .brand,footer .brand").forEach(function(a){
     if(brand.href)a.href=brand.href.startsWith("/")?brand.href:"/"+brand.href.replace(/^\.\//,"");
     a.innerHTML="";
-    const img=document.createElement("img");img.src=brand.logo||"/logo.svg";img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
-    const span=document.createElement("span");span.textContent=brand.label||"AutomationScan";span.className="brand-label";a.appendChild(span);
+    const img=document.createElement("img");img.src=brand.logo||"/automationscan-logo.png";img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
+    if(!brand.logo){const span=document.createElement("span");span.textContent=brand.label||"AutomationScan";span.className="brand-label";a.appendChild(span);}
     a.setAttribute("aria-label",brand.alt||"AutomationScan");
   });
   if(cfg.navigation&&Array.isArray(cfg.navigation.workbenchSections)){
