@@ -21,7 +21,7 @@ async function load(){
   document.querySelectorAll("header .brand,footer .brand").forEach(function(a){
     if(brand.href)a.href=brand.href.startsWith("/")?brand.href:"/"+brand.href.replace(/^\.\//,"");
     a.innerHTML="";
-    const img=document.createElement("img");img.src=brand.logo||"/automationscan-logo.png";img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
+    const img=document.createElement("img");img.src=(brand.logo||"/automationscan-logo.svg"); if(!/^https?:\/\//i.test(img.src)&&!img.src.startsWith("/"))img.src="/"+img.src;img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
     if(!brand.logo){const span=document.createElement("span");span.textContent=brand.label||"AutomationScan";span.className="brand-label";a.appendChild(span);}
     a.setAttribute("aria-label",brand.alt||"AutomationScan");
   });
