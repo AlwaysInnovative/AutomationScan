@@ -383,3 +383,7 @@ footer .brand-label{display:inline-block!important;font-size:22px!important;colo
 footer .brand-label{font-size:22px!important;color:#fff!important}
 footer .brand-subtitle{font-size:7px!important;color:#b8c7c7!important}
 @media(max-width:700px){.site-header .brand-label{font-size:23px!important}.site-header .brand-subtitle{font-size:7px!important;letter-spacing:.18em!important}}
+
+/* Remove unused duplicate brand subtitle; retain original caption styling wherever rendered. */
+.site-header .brand-subtitle{display:none!important}
+footer .brand-subtitle{display:none!important}
