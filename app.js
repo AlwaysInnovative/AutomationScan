@@ -279,10 +279,10 @@ function setupContact(){
 function setupConsent(){
  const banner=document.getElementById("cookie-consent")||document.getElementById("consentBanner"); if(!banner)return;
  let choice=null; try{choice=localStorage.getItem("automationscan_consent")}catch(e){}
- function apply(v){window.__analyticsConsent=v;if(v==="granted")window.enableAnalytics();banner.hidden=true;try{localStorage.setItem("automationscan_consent",v)}catch(e){}track("consent_choice",{choice:v});}
+ function apply(v){window.__analyticsConsent=v;if(v==="granted")window.enableAnalytics();banner.hidden=true;try{localStorage.setItem("automationscan_consent",v);localStorage.setItem("as-analytics-consent",v)}catch(e){}track("consent_choice",{choice:v});}
  if(choice==="granted"||choice==="denied"){window.__analyticsConsent=choice;if(choice==="granted")window.enableAnalytics();banner.hidden=true}
  else banner.hidden=false;
- document.getElementById("consentAccept")?.addEventListener("click",()=>apply("granted"));
+ document.getElementById("consentAccept")?.addEventListener("click",()=>apply("granted"));\n  document.getElementById("consentDecline")?.addEventListener("click",()=>apply("denied"));
  document.getElementById("consentReject")?.addEventListener("click",()=>apply("denied"));
 }
 setupConsent(); setupAds(); setupContact();
