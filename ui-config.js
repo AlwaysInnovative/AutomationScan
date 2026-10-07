@@ -22,7 +22,7 @@ async function load(){
     if(brand.href)a.href=brand.href.startsWith("/")?brand.href:"/"+brand.href.replace(/^\.\//,"");
     a.innerHTML="";
     const img=document.createElement("img");img.src=(brand.logo||"/automationscan-logo.svg"); if(!/^https?:\/\//i.test(img.src)&&!img.src.startsWith("/"))img.src="/"+img.src;img.alt=brand.alt||"AutomationScan";img.className="brand-logo";a.appendChild(img);
-    {const span=document.createElement("span");span.className="brand-label";const label=brand.label||"AutomationScan";const split=label.indexOf("Scan");span.innerHTML=split>0?label.slice(0,split)+"<b>Scan</b>":label;a.appendChild(span);const sub=document.createElement("span");sub.className="brand-subtitle";sub.textContent="BUSINESS TRANSFORMATION DISCOVERY";a.appendChild(sub);}
+    {const span=document.createElement("span");span.className="brand-label";const label=brand.label||"AutomationScan";const split=label.indexOf("Scan");span.innerHTML=split>0?label.slice(0,split)+"<b>Scan</b>":label;a.appendChild(span);const sub=document.createElement("span");sub.className="brand-subtitle";sub.textContent="BUSINESS TRANSFORMATION DISCOVERY";a.appendChild(sub);const sub=document.createElement("span");sub.className="brand-subtitle";sub.textContent="BUSINESS TRANSFORMATION DISCOVERY";a.appendChild(sub);}
     a.setAttribute("aria-label",brand.alt||"AutomationScan");
   });
   if(cfg.navigation&&Array.isArray(cfg.navigation.workbenchSections)){
