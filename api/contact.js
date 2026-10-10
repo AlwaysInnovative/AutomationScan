@@ -38,13 +38,21 @@ module.exports=async function handler(req,res){
     const rr=await fetch(url+"/rest/v1/rpc/consume_api_rate_limit",{method:"POST",headers:{apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({p_rate_key:"contact:"+ip,p_limit:5,p_window_seconds:300})});
     if(rr.ok && (await rr.json())!==true)return res.status(429).json({error:"Too many messages. Please try again later."});
   }
+  if(!url||!key)return res.status(503).json({error:"contact_storage_not_configured"});
+  const stored=await fetch(url+"/rest/v1/lead_submissions",{method:"POST",headers:{apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify({lead_type:"contact",email,name,report_consent:true,marketing_consent:false,subject,message,source:body.source||{},report_summary:{contact_request:true},email_delivery_status:"pending",crm_sync_status:"not_requested"})});
+  if(!stored.ok)return res.status(502).json({error:"contact_storage_failed"});
+  const storedRows=await stored.json();const leadId=storedRows&&storedRows[0]?storedRows[0].id:null;
   const resendKey=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM,to=process.env.LEAD_NOTIFICATION_TO;
-  if(!resendKey||!from||!to)return res.status(503).json({error:"contact_not_configured"});
+  if(!resendKey||!from||!to){
+    if(leadId)await fetch(url+"/rest/v1/lead_submissions?id=eq."+encodeURIComponent(leadId),{method:"PATCH",headers:{apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({email_delivery_status:"not_configured"})}).catch(()=>{});
+    return res.status(202).json({ok:true,leadStored:true,emailQueued:false,configurationPending:true});
+  }
   const source=body.source||{};
   const safe=`Name: ${name}\nEmail: ${email}\nSubject: ${subject}\nLead source: ${field(source.utm_source,100)||"direct"} / ${field(source.utm_medium,100)||"(none)"}\nLanding page: ${field(source.landing_page,200)||"/"}\nReferrer: ${field(source.referrer,500)||"(none)"}\n\nMessage:\n${message}`;
-  let crm={configured:false};try{crm=await hubspotUpsert({email,name});}catch{}
+  const crm={configured:false}; // Contact-response consent is not marketing consent; do not sync to CRM here.
   const sent=await send({key:resendKey,from,to:[to],subject:`AutomationScan contact: ${subject}`,text:safe,idempotencyKey:`contact:${email}:${subject}:${message.slice(0,40)}`});
-  if(!sent.ok)return res.status(502).json({error:"email_provider_error"});
-  return res.status(200).json({ok:true,crmSynced:!!crm.id});
+  if(leadId)await fetch(url+"/rest/v1/lead_submissions?id=eq."+encodeURIComponent(leadId),{method:"PATCH",headers:{apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({email_delivery_status:sent.ok?"sent":"failed"})}).catch(()=>{});
+  if(!sent.ok)return res.status(502).json({error:"email_provider_error",leadStored:true});
+  return res.status(200).json({ok:true,leadStored:true,crmSynced:false});
  }catch{return res.status(500).json({error:"server_error"});}
 };
