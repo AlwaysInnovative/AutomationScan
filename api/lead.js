@@ -33,7 +33,7 @@ module.exports=async function handler(req,res) {
   const leadId=await saveLead({url:supabaseUrl,key:supabaseKey,email,reportConsent,marketingConsent,source,report,emailStatus:key&&from?"pending":"not_configured",crmStatus:marketingConsent?(process.env.HUBSPOT_ACCESS_TOKEN?"pending":"not_configured"):"not_requested"});
   let crm={configured:false}; if(marketingConsent) { try { crm=await hubspotUpsert(email); } catch (_) { crm={configured:true,error:true}; } await updateLead(supabaseUrl,supabaseKey,leadId,{crm_sync_status:crm.id?"synced":crm.configured?"failed":"not_configured"}); }
   if(!key||!from) return res.status(202).json({ok:true,leadStored:true,emailQueued:false,crmSynced:Boolean(crm.id),configurationPending:true});
-  const idempotencyKey="automationscan:"+email+":"+safeText(report.coverage,20)+":"+safeText(report.industry,100);
+  const idempotencyKey="automationscan:"+String(leadId||Date.now())+":"+email;
   const reportEmail=await resendSend({key,from,to:[email],subject:"Your AutomationScan assessment",text:"Your AutomationScan assessment is ready.\\n\\n"+summary+"\\n\\nOpen AutomationScan: https://automation-scan-neon.vercel.app/",tags:[{name:"source",value:"automationscan"},{name:"coverage",value:safeText(report.coverage,20)||"na"}],idempotencyKey});
   await updateLead(supabaseUrl,supabaseKey,leadId,{email_delivery_status:reportEmail.ok?"sent":"failed"});
   if(owner) await resendSend({key,from,to:[owner],subject:"New AutomationScan lead",text:"New report-consented AutomationScan lead: "+email+"\\n\\n"+summary+"\\n\\nMarketing consent: "+marketingConsent+"\\nHubSpot synced: "+Boolean(crm.id),tags:[{name:"source",value:"automationscan-lead"}],idempotencyKey:"lead-notify:"+idempotencyKey}).catch(function(){});
