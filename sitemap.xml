@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://automation-scan-neon.vercel.app/</loc><lastmod>2026-09-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+<url><loc>https://automation-scan-neon.vercel.app/</loc><lastmod>2026-10-10</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
 <url><loc>https://automation-scan-neon.vercel.app/guides/automation-assessment.html</loc><lastmod>2026-09-26</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 <url><loc>https://automation-scan-neon.vercel.app/guides/invoice-automation.html</loc><lastmod>2026-09-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 <url><loc>https://automation-scan-neon.vercel.app/guides/crm-automation.html</loc><lastmod>2026-09-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -27,4 +27,4 @@
   <url><loc>https://automation-scan-neon.vercel.app/tools/erp-compliance-checker.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://automation-scan-neon.vercel.app/tools/automation-opportunity-scanner.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://automation-scan-neon.vercel.app/transformation-workbench.html</loc></url>
-<url><loc>https://automation-scan-neon.vercel.app/guides/erp-transformation-readiness.html</loc></url><url><loc>https://automation-scan-neon.vercel.app/guides/application-portfolio-rationalization.html</loc></url><url><loc>https://automation-scan-neon.vercel.app/guides/ai-readiness-data-governance.html</loc></url></urlset>
+<url><loc>https://automation-scan-neon.vercel.app/guides/erp-transformation-readiness.html</loc></url><url><loc>https://automation-scan-neon.vercel.app/guides/application-portfolio-rationalization.html</loc></url><url><loc>https://automation-scan-neon.vercel.app/guides/ai-readiness-data-governance.html</loc></url><url><loc>https://automation-scan-neon.vercel.app/about.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url><url><loc>https://automation-scan-neon.vercel.app/sample-report.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url></urlset>
