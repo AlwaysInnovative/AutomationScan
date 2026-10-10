@@ -1,4 +1,4 @@
-const { configured: emailConfigured, sendEmail } = require("./_mailer");
+const { configured: emailConfigured, sendEmail } = require("../lib/mailer");
 
 const ALLOWED_ORIGINS = new Set([
   "https://automation-scan-neon.vercel.app",
