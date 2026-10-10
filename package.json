@@ -1,0 +1,11 @@
+{
+  "name": "automationscan",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "nodemailer": "^10.0.16"
+  }
+}
