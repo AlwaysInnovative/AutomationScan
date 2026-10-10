@@ -1,6 +1,6 @@
 const ALLOWED_ORIGIN = "https://automation-scan-neon.vercel.app";
 function cors(res) { res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN); res.setHeader("Vary", "Origin"); res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS"); res.setHeader("Access-Control-Allow-Headers", "Content-Type"); res.setHeader("Cache-Control", "no-store"); }
-function emailOk(v) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v); }
+function emailOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 function safeText(v, max=300) { return String(v ?? "").trim().slice(0,max); }
 async function resendSend({key,from,to,subject,text,tags,idempotencyKey}) { return fetch("https://api.resend.com/emails",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key,"Idempotency-Key":idempotencyKey},body:JSON.stringify({from,to,subject,text,tags})}); }
 async function saveLead({url,key,email,reportConsent,marketingConsent,source,report,emailStatus,crmStatus}) {
